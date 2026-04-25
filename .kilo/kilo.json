@@ -1,0 +1,11 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "read": {
+      "C:/PersonalDevFiles/KiloCodeFiles/AI-TTRPG-GoAnywhereDoAnything/.kilo/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "C:/PersonalDevFiles/KiloCodeFiles/AI-TTRPG-GoAnywhereDoAnything/.kilo/get-shit-done/*": "allow"
+    }
+  }
+}
