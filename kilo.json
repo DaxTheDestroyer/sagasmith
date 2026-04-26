@@ -1,0 +1,15 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "github_*": "ask",
+    "github_get_file_contents": "allow",
+    "github_list_issues": "allow",
+    "github_get_issue": "allow",
+    "github_search_repositories": "allow",
+    "github_get_pull_request": "allow",
+    "github_list_pull_requests": "allow",
+    "github_create_pull_request": "ask",
+    "github_delete_file": "deny",
+    "github_delete_repository": "deny"
+  }
+}

@@ -5,7 +5,7 @@
 layer. Companion to `GAME_SPEC.md`.
 **Pattern credit:** Karpathy LLM-Wiki pattern
 (https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
-adapted for AI-TTRPG's two-vault, spoiler-safe model.
+adapted for SagaSmith's two-vault, spoiler-safe model.
 
 ---
 
@@ -568,6 +568,9 @@ SORT name ASC
 
 **Location:** `docs/seed_vault/` in the repository root.
 
+**Status:** Planned fixture set. This directory must exist before the first
+release-candidate eval run; it is not required for the initial code scaffold.
+
 A bundled example vault covering three fictional sessions of the sample
 campaign introduced in `GAME_SPEC.md` §12. Purposes:
 
@@ -613,5 +616,5 @@ fan-wiki of the story.
   criteria (refers to this document for storage architecture detail).
 - `docs/WISHLIST.md` §5.1 — Richer graph queries as a future option if
   NetworkX hits limits; Kuzu named as candidate.
-- `AGENTS.md` — Archivist agent prompt guidelines will reference the page
-  types and `CanonStore` interface defined here.
+- `docs/specs/agents/archivist-skills.md` — Archivist capability catalog
+  references the page types and storage contracts defined here.

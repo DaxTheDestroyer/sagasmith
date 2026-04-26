@@ -7,6 +7,23 @@ and this project will adhere to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+### Dev Environment Setup - 2026-04-26
+
+#### Added
+- **Global CLI toolchain installed**
+  - `ruff` 0.15.12 — lint + format (via `uv tool install`)
+  - `pyright` 1.1.409 — static type checking, enforces `Protocol` abstraction boundaries (via `npm install -g`)
+  - `pre-commit` 4.6.0 — git hook runner (via `uv tool install`)
+  - `textual-dev` 1.8.0 / `textual` 8.2.4 — TUI dev console and live CSS reload (via `uv tool install`)
+  - `gitleaks` 8.30.1 — secret scanning pre-commit and CI (via `winget`)
+- **MCP servers configured** (global `~/.config/kilo/kilo.jsonc`)
+  - `context7` (`@upstash/context7-mcp`) — version-aware library docs for Textual, LanceDB, NetworkX, Pydantic, LiteLLM, etc.
+  - `github` (`@modelcontextprotocol/server-github`) — issue/PR management from inside Kilo sessions
+- **Project `kilo.json` created** at repo root
+  - GitHub MCP permissions: read tools auto-approved, `create_pull_request` requires confirmation, `delete_file` / `delete_repository` blocked
+- **`uv`** confirmed as the project's package manager (already installed, 0.9.24)
+- **LiteLLM** deferred to `pyproject.toml` dev deps — will be added during project scaffold phase
+
 ### Planning Direction - 2026-04-23
 
 #### Changed
