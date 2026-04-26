@@ -34,3 +34,4 @@ dev = [
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-ra"
+markers = ["smoke: no-paid-call smoke tests"]

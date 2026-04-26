@@ -8,7 +8,6 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SUBPACKAGES = {
     "app",
