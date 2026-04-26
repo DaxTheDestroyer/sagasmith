@@ -165,7 +165,11 @@ def make_valid_character_sheet(**overrides: Any) -> CharacterSheet:
                 range=None,
             )
         ],
-        inventory=[InventoryItem(id="item-adventurers-pack", name="Adventurer's Pack", quantity=1, bulk=1.0)],
+        inventory=[
+            InventoryItem(
+                id="item-adventurers-pack", name="Adventurer's Pack", quantity=1, bulk=1.0
+            )
+        ],
         conditions=[],
     )
     return _with_overrides(instance, overrides)

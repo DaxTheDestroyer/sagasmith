@@ -45,7 +45,9 @@ def test_valid_fixture_round_trips(valid_state_path):
 
 
 def test_valid_fixture_matches_canonical_factory(valid_state_path):
-    fixture_state = validate_persisted_state(json.loads(valid_state_path.read_text(encoding="utf-8")))
+    fixture_state = validate_persisted_state(
+        json.loads(valid_state_path.read_text(encoding="utf-8"))
+    )
     assert fixture_state == make_valid_saga_state()
 
 
@@ -69,4 +71,6 @@ def test_every_boundary_model_round_trips():
         assert_round_trip(instance)
         round_tripped += 1
 
-    assert round_tripped >= 8, f"expected at least 8 round-trips, got {round_tripped}; skipped={skipped}"
+    assert round_tripped >= 8, (
+        f"expected at least 8 round-trips, got {round_tripped}; skipped={skipped}"
+    )

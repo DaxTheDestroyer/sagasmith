@@ -117,7 +117,9 @@ def run_smoke() -> SmokeResult:
     try:
         state_json = json.dumps(state.model_dump(mode="json"))
         if len(state_json) < 20_000:
-            result.checks.append(SmokeCheck("state.compact_references", True, f"{len(state_json)} bytes"))
+            result.checks.append(
+                SmokeCheck("state.compact_references", True, f"{len(state_json)} bytes")
+            )
         else:
             result.checks.append(
                 SmokeCheck(

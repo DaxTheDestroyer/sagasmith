@@ -22,7 +22,11 @@ class SmokeMode(StrEnum):
 def smoke(
     mode: Annotated[
         SmokeMode,
-        typer.Option("--mode", case_sensitive=False, help="fast = in-process harness; pytest = `pytest -m smoke`."),
+        typer.Option(
+            "--mode",
+            case_sensitive=False,
+            help="fast = in-process harness; pytest = `pytest -m smoke`.",
+        ),
     ] = SmokeMode.FAST,
 ) -> None:
     """Run the no-paid-call smoke suite (FOUND-04)."""
