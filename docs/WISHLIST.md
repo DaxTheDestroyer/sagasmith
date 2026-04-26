@@ -46,7 +46,8 @@ art but renders a placeholder box.
   location should not drift)
 - Model routing (DALL-E, Stable Diffusion API, local diffusion, etc.)
 - Asset storage and deduplication (don't regenerate the same tavern every time)
-- Integration with Archivist so art is linked to graph nodes
+- Integration with Archivist so art is linked to vault pages (NPC portraits
+  embedded in `npcs/*.md`, location art in `locations/*.md`)
 
 **Complexity:** High. The consistency problem alone is a research project.
 
@@ -403,24 +404,43 @@ system and community submission pipeline.
 
 ## 5. Deferred Architecture & Experience Options
 
-### 5.1 Kuzu Graph DB (Alternative to Neo4j)
+### 5.1 Richer Graph Queries (Optional Embedded Graph DB)
 
-**Context:** The MVP uses Neo4j for the knowledge graph. During architecture
-planning, Kuzu was identified as a potential alternative — an embedded,
-MIT-licensed, Cypher-compatible graph database with no server required.
+**Context:** The MVP stores the campaign knowledge graph as an Obsidian-
+compatible markdown vault (see `docs/specs/VAULT_SCHEMA.md`). Topology
+queries (faction membership, NPC relationship paths, travel graphs) are
+served by an in-memory NetworkX graph derived from the vault's wikilinks
+and frontmatter at startup. This covers every query the Archivist needs
+for the MVP's supported campaign scale.
 
-**Why it was deferred:** Neo4j was chosen for maturity and Cypher ecosystem.
-Kuzu is newer and less battle-tested. The swap is a future option if Neo4j
-installation friction hurts adoption.
+**Why richer graph queries are deferred:** At the campaign sizes the MVP
+targets (hundreds of entities, one player), NetworkX + SQLite FTS5 +
+LanceDB is fast and sufficient. A dedicated graph DB adds server or
+library overhead that would cost more in distribution friction than it
+returns in query expressiveness.
 
-**What the swap would improve:**
-- No separate server to install (Neo4j Desktop is a JVM application)
-- Single-file database (like SQLite)
-- Better fit for a `pip install` CLI tool
-- Lower resource footprint
+**When this would become relevant:**
+- Very long campaigns with thousands of deeply interlinked entities where
+  multi-hop constrained queries become slow in NetworkX.
+- Director Mode (§5.2) or Multiplayer (§6.3) where concurrent read/write
+  access to the graph is required.
+- Advanced analytics features (community detection, centrality, narrative
+  arc mapping) beyond what NetworkX handles cleanly.
 
-**Complexity:** Low-Medium. The graph queries are Cypher in both cases, so
-the adapter layer is thin. The risk is Kuzu's feature gaps vs. Neo4j.
+**Preferred candidate if added:** Kuzu — embedded, `pip install`-able,
+MIT-licensed, Cypher-compatible, single-directory storage. The
+`CanonStore` adapter defined in `VAULT_SCHEMA.md` makes the vault the
+source of truth; Kuzu would become a derived index layer rebuilt on
+startup, not a replacement for the vault format.
+
+**What would NOT be used:** Neo4j. Its JVM server, GPLv3 license, and
+per-OS install complexity are incompatible with a `pip install` CLI tool
+targeting non-technical users.
+
+**Complexity:** Low-Medium if added. The vault is the source of truth;
+the graph DB is a derived read layer. The `CanonStore` adapter boundary
+means no other agent changes. Risk is Kuzu's Cypher gaps vs. the query
+set at that time.
 
 ---
 
@@ -534,7 +554,7 @@ maturity of dependencies, and project goals.
 | Other rule systems | `RulesEngine` `Protocol` abstraction (only PF2e impl) |
 | Rich dice UX | Dice overlay modal exists; minimal animation only |
 | Voice I/O | None; text-only input/output |
-| Kuzu graph DB | Neo4j adapter exists; adapter pattern allows swap |
+| Richer graph queries | `CanonStore` adapter boundary; Kuzu named as candidate; vault stays source of truth |
 | Director mode | None; Oracle is always in control |
 
 ---

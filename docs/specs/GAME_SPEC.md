@@ -169,22 +169,42 @@ behavior and acceptance criteria.
 ### 3.5 ArchivistAgent
 
 - **Responsibility:** Memory read/write, entity resolution, canon guarding,
-  summary tiers.
+  summary tiers. Maintains the campaign vault and keeps the player-facing
+  projection synchronized.
 - **Inputs:** Full turn transcript on write; scene context + player input on
   read.
-- **Outputs:** `MemoryPacket` (on read); graph upserts, SQLite transcripts,
-  LanceDB embeddings, summary updates, `CanonConflict` events (on write).
+- **Outputs:** `MemoryPacket` (on read); vault page upserts, SQLite
+  transcripts, LanceDB embeddings, summary updates, `CanonConflict` events,
+  player vault sync (on write).
+- **Storage architecture:** Two-vault model defined in `docs/specs/VAULT_SCHEMA.md`.
+  - **Master vault** (`~/.ttrpg/vault/`) — full canon including GM-only
+    secrets, open callbacks, and unresolved plot threads. Never exposed
+    directly to the player.
+  - **Player vault** (`<campaign_dir>/`) — filtered projection of the master.
+    Contains only player-discovered content with GM-only fields stripped.
+    Safe to open in Obsidian at any time.
+  - A sync step runs after every turn to update the player vault.
+  - On campaign end, the player may unlock the full master vault as a
+    post-campaign "director's cut" artifact.
 - **Observable behavior:**
-  - Every named entity resolves to exactly one graph node (no duplicates).
+  - Every named entity resolves to exactly one vault page (no duplicates).
+    Resolved via slug matching, frontmatter `aliases`, and LanceDB vector
+    similarity in that order.
   - Canon conflicts surface in the next turn's `SceneBrief` rather than
     silently overwriting.
   - Rolling summaries reflect only canonical facts (not player-hypothetical
     musings).
+  - Player vault never reveals GM-only content (`visibility: gm_only` pages,
+    `secrets` frontmatter fields, `<!-- gm: ... -->` inline blocks).
 - **Acceptance criteria:**
   - 10-session recall test: NPC introduced in session 1 is correctly named
     and characterized when reintroduced in session 10.
   - Entity-resolution precision ≥ 0.95 on the fixture suite.
   - `MemoryPacket` never exceeds its configured token cap.
+  - Player vault opened in Obsidian after session 5 of the seed campaign
+    shows zero GM-only spoiler content.
+  - Player vault is valid Obsidian markdown: all `[[wikilinks]]` resolve,
+    all YAML frontmatter parses without error.
 
 ### 3.6 Supporting services (not agents, but player-affecting)
 
