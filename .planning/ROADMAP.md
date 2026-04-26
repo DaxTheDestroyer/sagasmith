@@ -12,7 +12,7 @@ SagaSmith v1 follows a trust-before-breadth path: establish the local Python pac
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Contracts, Scaffold, and Eval Spine** - Developer can run a local package skeleton with typed state contracts and schema/eval guardrails.
+- [ ] **Phase 1: Contracts, Scaffold, and Eval Spine** - Developer can run a local package skeleton with typed state contracts and schema/eval guardrails. (2/3 plans complete)
 - [ ] **Phase 2: Deterministic Trust Services** - Rules math, provider/cost handling, SQLite turn records, and privacy checks exist before paid gameplay.
 - [ ] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls.
 - [ ] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure.
@@ -47,8 +47,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Invalid persisted state is rejected before graph nodes consume it, and compact graph state references avoid unbounded vault or transcript payloads.
 **Plans**: 3 plans
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold the `sagasmith` package with `uv`, subpackage layout, ruff/pyright/pre-commit/gitleaks config, Makefile commands, Typer CLI `version`, and developer run-book (FOUND-01, FOUND-02, FOUND-03, FOUND-05).
-- [ ] 01-02-PLAN.md — Implement Pydantic v2 state contracts, persisted-state validation gate, and `sagasmith schema export` CLI emitting JSON Schema for the 16 LLM-boundary/persisted models (STATE-01, STATE-02, STATE-03, STATE-04, STATE-05).
+- [x] 01-01-PLAN.md — Scaffold the `sagasmith` package with `uv`, subpackage layout, ruff/pyright/pre-commit/gitleaks config, Makefile commands, Typer CLI `version`, and developer run-book (FOUND-01, FOUND-02, FOUND-03, FOUND-05).
+- [x] 01-02-PLAN.md — Implement Pydantic v2 state contracts, persisted-state validation gate, and `sagasmith schema export` CLI emitting JSON Schema for the 16 LLM-boundary/persisted models (STATE-01, STATE-02, STATE-03, STATE-04, STATE-05).
 - [ ] 01-03-PLAN.md — Build the no-paid-call eval/smoke spine: fixtures, redaction canary, round-trip helpers, in-process `run_smoke()` harness, and `sagasmith smoke` CLI (FOUND-04, plus end-to-end wiring for STATE-03/04/05).
 
 ### Phase 2: Deterministic Trust Services
@@ -153,7 +153,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Contracts, Scaffold, and Eval Spine | 0/TBD | Not started | - |
+| 1. Contracts, Scaffold, and Eval Spine | 2/3 | In Progress | - |
 | 2. Deterministic Trust Services | 0/TBD | Not started | - |
 | 3. CLI Setup, Onboarding, and TUI Controls | 0/TBD | Not started | - |
 | 4. Graph Runtime and Agent Skills | 0/TBD | Not started | - |

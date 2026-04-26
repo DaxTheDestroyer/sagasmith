@@ -17,11 +17,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### State and Schemas
 
-- [ ] **STATE-01**: System defines Pydantic models for `PlayerProfile`, `ContentPolicy`, `HouseRules`, `SagaState`, `SessionState`, and `CostState`.
-- [ ] **STATE-02**: System defines Pydantic models for `SceneBrief`, `MemoryPacket`, `CharacterSheet`, `CheckProposal`, `CheckResult`, `RollResult`, `StateDelta`, and `CanonConflict`.
-- [ ] **STATE-03**: System exports JSON Schema for models that cross an LLM boundary or are persisted as structured records.
-- [ ] **STATE-04**: System rejects invalid persisted state before it is consumed by downstream graph nodes.
-- [ ] **STATE-05**: System stores compact graph state references rather than full vault bodies or unbounded transcript history.
+- [x] **STATE-01**: System defines Pydantic models for `PlayerProfile`, `ContentPolicy`, `HouseRules`, `SagaState`, `SessionState`, and `CostState`.
+- [x] **STATE-02**: System defines Pydantic models for `SceneBrief`, `MemoryPacket`, `CharacterSheet`, `CheckProposal`, `CheckResult`, `RollResult`, `StateDelta`, and `CanonConflict`.
+- [x] **STATE-03**: System exports JSON Schema for models that cross an LLM boundary or are persisted as structured records.
+- [x] **STATE-04**: System rejects invalid persisted state before it is consumed by downstream graph nodes.
+- [x] **STATE-05**: System stores compact graph state references rather than full vault bodies or unbounded transcript history.
 
 ### CLI and Local Setup
 
@@ -213,11 +213,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
 | FOUND-05 | Phase 1 | Pending |
-| STATE-01 | Phase 1 | Pending |
-| STATE-02 | Phase 1 | Pending |
-| STATE-03 | Phase 1 | Pending |
-| STATE-04 | Phase 1 | Pending |
-| STATE-05 | Phase 1 | Pending |
+| STATE-01 | Phase 1 | Complete |
+| STATE-02 | Phase 1 | Complete |
+| STATE-03 | Phase 1 | Complete |
+| STATE-04 | Phase 1 | Complete |
+| STATE-05 | Phase 1 | Complete |
 | PROV-01 | Phase 2 | Pending |
 | PROV-02 | Phase 2 | Pending |
 | PROV-03 | Phase 2 | Pending |
