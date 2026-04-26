@@ -65,7 +65,7 @@ def test_player_profile_rejects_nonmvp_combat_style() -> None:
 
 
 def test_player_profile_rejects_pillar_weights_not_summing_to_one() -> None:
-    with pytest.raises(ValidationError, match="sum|1\.0"):
+    with pytest.raises(ValidationError, match=r"sum|1\.0"):
         PlayerProfile(
             **make_player_profile(
                 pillar_weights={
