@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated
 
 import typer
 
@@ -13,7 +14,10 @@ schema_app = typer.Typer(help="Schema management commands.", no_args_is_help=Tru
 
 @schema_app.command("export")
 def export_cmd(
-    out: Path = typer.Option(Path("schemas"), "--out", help="Output directory for .schema.json files."),
+    out: Annotated[
+        Path,
+        typer.Option("--out", help="Output directory for .schema.json files."),
+    ] = Path("schemas"),
 ) -> None:
     """Export JSON Schema for every LLM-boundary or persisted model."""
 

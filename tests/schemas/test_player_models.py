@@ -81,9 +81,7 @@ def test_player_profile_rejects_pillar_weights_not_summing_to_one() -> None:
 def test_player_profile_requires_all_four_pillars() -> None:
     with pytest.raises(ValidationError, match="pillar_weights"):
         PlayerProfile(
-            **make_player_profile(
-                pillar_weights={"combat": 0.4, "exploration": 0.3, "social": 0.3}
-            )
+            **make_player_profile(pillar_weights={"combat": 0.4, "exploration": 0.3, "social": 0.3})
         )
 
 

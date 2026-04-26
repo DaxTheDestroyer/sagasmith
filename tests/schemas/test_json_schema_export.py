@@ -66,7 +66,9 @@ def test_cli_schema_export_writes_files(tmp_path: Path) -> None:
     assert json.loads(schema_path.read_text(encoding="utf-8"))
 
 
-def test_cli_schema_export_defaults_to_schemas_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cli_schema_export_defaults_to_schemas_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
 
     result = CliRunner().invoke(app, ["schema", "export"])

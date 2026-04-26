@@ -61,7 +61,9 @@ class MemoryPacket(SchemaModel):
 
     @model_validator(mode="after")
     def _token_cap_holds(self) -> MemoryPacket:
-        estimated = estimate_tokens(self.summary) + sum(estimate_tokens(turn) for turn in self.recent_turns)
+        estimated = estimate_tokens(self.summary) + sum(
+            estimate_tokens(turn) for turn in self.recent_turns
+        )
         if estimated > self.token_cap:
             raise ValueError(
                 f"MemoryPacket estimated tokens {estimated} exceed token_cap {self.token_cap}"

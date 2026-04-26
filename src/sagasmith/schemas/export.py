@@ -41,7 +41,9 @@ def export_all_schemas(out_dir: Path) -> list[Path]:
 
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
-    for model in sorted(LLM_BOUNDARY_AND_PERSISTED_MODELS, key=lambda model_class: model_class.__name__):
+    for model in sorted(
+        LLM_BOUNDARY_AND_PERSISTED_MODELS, key=lambda model_class: model_class.__name__
+    ):
         schema = model.model_json_schema()
         path = out_dir / f"{model.__name__}.schema.json"
         path.write_text(json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8")
