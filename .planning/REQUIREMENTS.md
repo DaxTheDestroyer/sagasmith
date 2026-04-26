@@ -208,13 +208,121 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| Pending roadmap | Pending | Pending |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| STATE-01 | Phase 1 | Pending |
+| STATE-02 | Phase 1 | Pending |
+| STATE-03 | Phase 1 | Pending |
+| STATE-04 | Phase 1 | Pending |
+| STATE-05 | Phase 1 | Pending |
+| PROV-01 | Phase 2 | Pending |
+| PROV-02 | Phase 2 | Pending |
+| PROV-03 | Phase 2 | Pending |
+| PROV-04 | Phase 2 | Pending |
+| PROV-05 | Phase 2 | Pending |
+| PROV-06 | Phase 2 | Pending |
+| COST-01 | Phase 2 | Pending |
+| COST-02 | Phase 2 | Pending |
+| COST-03 | Phase 2 | Pending |
+| COST-04 | Phase 2 | Pending |
+| COST-05 | Phase 2 | Pending |
+| RULE-01 | Phase 2 | Pending |
+| RULE-02 | Phase 2 | Pending |
+| RULE-03 | Phase 2 | Pending |
+| PERS-01 | Phase 2 | Pending |
+| PERS-02 | Phase 2 | Pending |
+| PERS-04 | Phase 2 | Pending |
+| QA-04 | Phase 2 | Pending |
+| QA-07 | Phase 2 | Pending |
+| CLI-01 | Phase 3 | Pending |
+| CLI-02 | Phase 3 | Pending |
+| CLI-03 | Phase 3 | Pending |
+| CLI-05 | Phase 3 | Pending |
+| ONBD-01 | Phase 3 | Pending |
+| ONBD-02 | Phase 3 | Pending |
+| ONBD-03 | Phase 3 | Pending |
+| ONBD-04 | Phase 3 | Pending |
+| ONBD-05 | Phase 3 | Pending |
+| TUI-01 | Phase 3 | Pending |
+| TUI-02 | Phase 3 | Pending |
+| TUI-03 | Phase 3 | Pending |
+| TUI-04 | Phase 3 | Pending |
+| TUI-05 | Phase 3 | Pending |
+| TUI-06 | Phase 3 | Pending |
+| SAFE-04 | Phase 3 | Pending |
+| SAFE-05 | Phase 3 | Pending |
+| SAFE-06 | Phase 3 | Pending |
+| GRAPH-01 | Phase 4 | Pending |
+| GRAPH-02 | Phase 4 | Pending |
+| GRAPH-03 | Phase 4 | Pending |
+| GRAPH-04 | Phase 4 | Pending |
+| GRAPH-05 | Phase 4 | Pending |
+| AI-12 | Phase 4 | Pending |
+| SKILL-01 | Phase 4 | Pending |
+| SKILL-02 | Phase 4 | Pending |
+| SKILL-03 | Phase 4 | Pending |
+| SKILL-04 | Phase 4 | Pending |
+| SKILL-05 | Phase 4 | Pending |
+| RULE-04 | Phase 5 | Pending |
+| RULE-05 | Phase 5 | Pending |
+| RULE-06 | Phase 5 | Pending |
+| RULE-07 | Phase 5 | Pending |
+| RULE-08 | Phase 5 | Pending |
+| RULE-09 | Phase 5 | Pending |
+| RULE-10 | Phase 5 | Pending |
+| RULE-11 | Phase 5 | Pending |
+| RULE-12 | Phase 5 | Pending |
+| TUI-07 | Phase 5 | Pending |
+| QA-03 | Phase 5 | Pending |
+| AI-01 | Phase 6 | Pending |
+| AI-02 | Phase 6 | Pending |
+| AI-03 | Phase 6 | Pending |
+| AI-04 | Phase 6 | Pending |
+| AI-05 | Phase 6 | Pending |
+| AI-06 | Phase 6 | Pending |
+| AI-07 | Phase 6 | Pending |
+| AI-08 | Phase 6 | Pending |
+| AI-09 | Phase 6 | Pending |
+| AI-10 | Phase 6 | Pending |
+| GRAPH-06 | Phase 6 | Pending |
+| GRAPH-07 | Phase 6 | Pending |
+| SAFE-01 | Phase 6 | Pending |
+| SAFE-02 | Phase 6 | Pending |
+| SAFE-03 | Phase 6 | Pending |
+| QA-05 | Phase 6 | Pending |
+| CLI-04 | Phase 7 | Pending |
+| PERS-03 | Phase 7 | Pending |
+| PERS-05 | Phase 7 | Pending |
+| PERS-06 | Phase 7 | Pending |
+| VAULT-01 | Phase 7 | Pending |
+| VAULT-02 | Phase 7 | Pending |
+| VAULT-03 | Phase 7 | Pending |
+| VAULT-04 | Phase 7 | Pending |
+| VAULT-05 | Phase 7 | Pending |
+| VAULT-06 | Phase 7 | Pending |
+| VAULT-07 | Phase 7 | Pending |
+| VAULT-08 | Phase 7 | Pending |
+| VAULT-09 | Phase 7 | Pending |
+| VAULT-10 | Phase 7 | Pending |
+| AI-11 | Phase 7 | Pending |
+| TUI-08 | Phase 7 | Pending |
+| QA-06 | Phase 7 | Pending |
+| QA-01 | Phase 8 | Pending |
+| QA-02 | Phase 8 | Pending |
+| QA-08 | Phase 8 | Pending |
+| QA-09 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 119 total
-- Mapped to phases: 0
-- Unmapped: 119
+- v1 requirements: 106 total
+- Mapped to phases: 106
+- Unmapped: 0
+- Duplicate mappings: 0
+
+**Count note:** The initial coverage footer listed 119 v1 requirements, but the v1 section contains 106 unique requirement IDs. All 106 discovered v1 IDs are mapped exactly once above.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after initial definition*
+*Last updated: 2026-04-26 after roadmap creation*
