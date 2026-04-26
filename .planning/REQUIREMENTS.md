@@ -1,0 +1,220 @@
+# Requirements: SagaSmith
+
+**Defined:** 2026-04-26
+**Core Value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Project Foundation
+
+- [ ] **FOUND-01**: Developer can install project dependencies with `uv` using a committed `pyproject.toml` and lockfile.
+- [ ] **FOUND-02**: Developer can run linting, formatting, type checking, and tests through documented project commands.
+- [ ] **FOUND-03**: Developer can import the `sagasmith` package and run the CLI entry point from a local checkout.
+- [ ] **FOUND-04**: Developer can run a smoke test suite that exercises the app without making paid LLM calls.
+- [ ] **FOUND-05**: Project source layout separates graph orchestration, agents, deterministic services, storage, UI, provider clients, and skills.
+
+### State and Schemas
+
+- [ ] **STATE-01**: System defines Pydantic models for `PlayerProfile`, `ContentPolicy`, `HouseRules`, `SagaState`, `SessionState`, and `CostState`.
+- [ ] **STATE-02**: System defines Pydantic models for `SceneBrief`, `MemoryPacket`, `CharacterSheet`, `CheckProposal`, `CheckResult`, `RollResult`, `StateDelta`, and `CanonConflict`.
+- [ ] **STATE-03**: System exports JSON Schema for models that cross an LLM boundary or are persisted as structured records.
+- [ ] **STATE-04**: System rejects invalid persisted state before it is consumed by downstream graph nodes.
+- [ ] **STATE-05**: System stores compact graph state references rather than full vault bodies or unbounded transcript history.
+
+### CLI and Local Setup
+
+- [ ] **CLI-01**: User can run a first-time initialization command that creates a local campaign directory, SQLite campaign database, and player vault directory.
+- [ ] **CLI-02**: User can choose or confirm campaign name and local campaign path during initialization.
+- [ ] **CLI-03**: User can start or resume a campaign from the CLI without a hosted server.
+- [ ] **CLI-04**: User can run repair commands for vault validation, player-vault sync, and derived-index rebuild.
+- [ ] **CLI-05**: User can run a demo or smoke mode that uses fixtures/mocks instead of paid provider calls.
+
+### Provider, Secrets, and Cost
+
+- [ ] **PROV-01**: User can configure OpenRouter credentials by keyring reference or environment-variable reference without storing plaintext keys in campaign files.
+- [ ] **PROV-02**: System exposes a model-agnostic `LLMClient` protocol for non-streaming structured calls and streaming text calls.
+- [ ] **PROV-03**: System can make OpenRouter structured JSON calls and validate the returned payload against the requested schema.
+- [ ] **PROV-04**: System can stream narration tokens through the provider abstraction.
+- [ ] **PROV-05**: System logs LLM request/response metadata, failures, token usage, and cost estimates with secrets redacted.
+- [ ] **PROV-06**: User can configure default, narration, and cheap/fallback model names for a campaign.
+- [ ] **COST-01**: User can set a per-session budget during setup or onboarding.
+- [ ] **COST-02**: System updates `CostState` after every provider call using provider-reported or static-table pricing.
+- [ ] **COST-03**: System warns the user exactly once at 70% and 90% of the configured session budget.
+- [ ] **COST-04**: System hard-stops before making a paid LLM call that would exceed the configured session budget.
+- [ ] **COST-05**: User can inspect current cost and token usage with `/budget`.
+
+### Onboarding and Player Contract
+
+- [ ] **ONBD-01**: User can complete onboarding that captures genre, tone, touchstones, pillar weights, pacing, combat style, dice UX, campaign length, character mode, death policy, and budget.
+- [ ] **ONBD-02**: User can define hard limits, soft limits, and content preferences during onboarding.
+- [ ] **ONBD-03**: User can review and edit onboarding outputs before they are committed.
+- [ ] **ONBD-04**: System persists validated `PlayerProfile`, `ContentPolicy`, and `HouseRules` before gameplay starts.
+- [ ] **ONBD-05**: User can re-run onboarding or adjust settings without deleting an existing campaign.
+
+### Textual TUI and Commands
+
+- [ ] **TUI-01**: User sees a Textual interface with narration area, status panel, safety bar, and input line.
+- [ ] **TUI-02**: User can type natural-language actions into the input line during play.
+- [ ] **TUI-03**: User can scroll or review completed transcript entries during a session.
+- [ ] **TUI-04**: User sees HP, conditions, active quest, current location, in-game clock, and last rolls in the status panel.
+- [ ] **TUI-05**: User can open `/help` to view supported slash commands and descriptions.
+- [ ] **TUI-06**: User can use `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`.
+- [ ] **TUI-07**: User sees a dice overlay or equivalent modal for reveal-mode checks that shows DC, modifier, d20 result, total, and degree.
+- [ ] **TUI-08**: User can quit from the TUI and resume later at the last safe prompt.
+
+### Deterministic Rules and Dice
+
+- [ ] **RULE-01**: System computes PF2e degree of success from natural d20 value, total, and DC, including natural 1 and natural 20 adjustment rules.
+- [ ] **RULE-02**: System rolls dice through a seeded deterministic DiceService that records seed, inputs, natural value, modifier, total, DC, and timestamp.
+- [ ] **RULE-03**: System reproduces identical roll results when replaying the same seed and ordered roll inputs.
+- [ ] **RULE-04**: User can inspect one valid level-1 pregenerated martial `CharacterSheet` with `/sheet`.
+- [ ] **RULE-05**: System resolves a skill or Perception check against a fixed DC and emits a validated `CheckResult`.
+- [ ] **RULE-06**: System resolves Perception initiative and persists initiative order through checkpoints.
+- [ ] **RULE-07**: System resolves Strike actions against target AC and applies hit, miss, critical hit, damage, and HP state deltas.
+- [ ] **RULE-08**: System tracks three actions and one reaction per combatant per round in simple combat.
+- [ ] **RULE-09**: System applies theater-of-mind position tags `close`, `near`, `far`, and `behind_cover` for movement and targeting constraints.
+- [ ] **RULE-10**: User can complete one simple combat encounter with no more than two enemies.
+- [ ] **RULE-11**: System logs every mechanical check and roll in an auditable roll log.
+- [ ] **RULE-12**: System prevents LLM agents from directly inventing modifiers, DCs, damage, HP changes, action counts, or degree-of-success outcomes.
+
+### Graph Runtime and Turn Flow
+
+- [ ] **GRAPH-01**: System constructs a LangGraph state graph with nodes or callable boundaries for onboarding, Oracle, RulesLawyer, Orator, Archivist, safety, cost, and persistence.
+- [ ] **GRAPH-02**: System checkpoints graph state after mechanics resolve and before Orator narration streams.
+- [ ] **GRAPH-03**: System checkpoints completed turn state during turn-close persistence.
+- [ ] **GRAPH-04**: System can interrupt the graph for `/pause`, `/line`, `/retcon`, budget hard-stop, and session end.
+- [ ] **GRAPH-05**: System resumes at the next prompt when the last turn has a final checkpoint.
+- [ ] **GRAPH-06**: System can recover from an incomplete narration turn by rerunning narration or discarding the incomplete turn.
+- [ ] **GRAPH-07**: System keeps deterministic rule outcomes stable even when LLM narration is retried.
+
+### AI Agent Loop
+
+- [ ] **AI-01**: Oracle produces a validated `SceneBrief` with intent, beats, success outcomes, failure outcomes, present entities, pacing target, and relevant triggers.
+- [ ] **AI-02**: Oracle never emits direct player-facing narration.
+- [ ] **AI-03**: Oracle can produce 3-5 starting hooks or a curated first-slice hook aligned with onboarding preferences.
+- [ ] **AI-04**: Oracle can re-plan when the player accepts, rejects, bypasses, or reframes a planned beat.
+- [ ] **AI-05**: Oracle can create small-scope NPC drafts for the active scene while preserving future consistency through Archivist records.
+- [ ] **AI-06**: RulesLawyer converts player intent and scene context into mechanical proposals without narrating outcomes.
+- [ ] **AI-07**: Orator is the only player-facing narrative voice and renders scene plans, memory, player input, and resolved mechanics into second-person prose.
+- [ ] **AI-08**: Orator streams at least one complete beat of narration for each completed turn.
+- [ ] **AI-09**: Orator respects configured dice UX modes: auto, reveal, and hidden.
+- [ ] **AI-10**: Orator does not contradict resolved mechanical outcomes in generated narration.
+- [ ] **AI-11**: Archivist assembles a token-bounded `MemoryPacket` for Oracle and Orator before scene planning or narration.
+- [ ] **AI-12**: System records which agent nodes and skills ran during a turn for audit and debugging.
+
+### Agent Skills
+
+- [ ] **SKILL-01**: System can discover Agent Skills packages from configured skill directories.
+- [ ] **SKILL-02**: System can present each agent with a compact skill catalog containing skill name and description.
+- [ ] **SKILL-03**: System exposes a `load_skill` mechanism that returns the selected skill's full instructions/resources to the requesting agent.
+- [ ] **SKILL-04**: System logs skill activations per agent turn.
+- [ ] **SKILL-05**: System keeps first-slice agent behavior functional with only the required first-slice skill set loaded.
+
+### Persistence and Vault Memory
+
+- [ ] **PERS-01**: System stores profiles, settings, transcripts, roll logs, turn records, checkpoints, cost logs, and applied state deltas in SQLite.
+- [ ] **PERS-02**: System performs turn-close SQLite writes in a transaction before writing vault files or derived indices.
+- [ ] **PERS-03**: System writes master-vault pages with atomic file replacement and validates YAML frontmatter after write.
+- [ ] **PERS-04**: System marks a turn complete only after turn-close persistence succeeds.
+- [ ] **PERS-05**: System surfaces a repair warning when player-vault sync or derived-index updates fail after a completed turn.
+- [ ] **PERS-06**: System can rebuild derived indices from SQLite plus master vault after corruption or deletion.
+- [ ] **VAULT-01**: System creates a master vault in app data and a player vault in the campaign directory.
+- [ ] **VAULT-02**: System writes Obsidian-compatible markdown pages with YAML frontmatter and wikilinks for sessions, NPCs, locations, factions, items, quests, callbacks, lore, index, and log.
+- [ ] **VAULT-03**: System enforces `gm_only`, `foreshadowed`, and `player_known` visibility states when projecting the player vault.
+- [ ] **VAULT-04**: System strips GM-only frontmatter fields and `<!-- gm: ... -->` blocks from player-vault projections.
+- [ ] **VAULT-05**: System generates or refreshes player-vault `index.md` and `log.md` after sync.
+- [ ] **VAULT-06**: System resolves incoming named entities by slug and aliases before creating a new vault page.
+- [ ] **VAULT-07**: System can assemble memory from exact search, graph neighborhoods, callbacks, summaries, and semantic retrieval interfaces without exceeding the configured token cap.
+- [ ] **VAULT-08**: System detects canon conflicts and surfaces them rather than silently overwriting canonical facts.
+- [ ] **VAULT-09**: User can run `/recap` to receive a summary based on persisted transcript and canonical memory.
+- [ ] **VAULT-10**: User can resume a campaign after a later process start and see NPCs, quests, and prior events recalled correctly.
+
+### Safety and Control
+
+- [ ] **SAFE-01**: System blocks or reroutes scene intents that violate configured hard limits before generation.
+- [ ] **SAFE-02**: System fades, avoids detail, or asks first for soft-limit content according to `ContentPolicy`.
+- [ ] **SAFE-03**: System scans player-facing generated prose and retries or falls back when generated content violates policy.
+- [ ] **SAFE-04**: User can invoke `/pause` to freeze play and choose to continue, retcon, or adjust lines.
+- [ ] **SAFE-05**: User can invoke `/line` mid-scene and see subsequent narration rerouted or faded away from the redlined content.
+- [ ] **SAFE-06**: System logs safety events without exposing secrets or GM-only spoilers in the player vault.
+
+### Retcon, Repair, and Quality Gates
+
+- [ ] **QA-01**: User can retcon the last completed turn after confirmation for simple state and vault changes.
+- [ ] **QA-02**: System excludes retconned turns from canonical replay, summaries, and vault rebuilds.
+- [ ] **QA-03**: Test suite covers PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
+- [ ] **QA-04**: Test suite verifies API keys and auth headers never appear in logs, vaults, transcripts, checkpoints, or generated artifacts.
+- [ ] **QA-05**: Test suite verifies configured hard-limit content does not appear in player-facing prose across a regression scenario.
+- [ ] **QA-06**: Test suite verifies player-vault projection contains no GM-only fields, comments, or pages.
+- [ ] **QA-07**: Test suite verifies CostGovernor warnings and hard-stop behavior.
+- [ ] **QA-08**: Smoke suite verifies install/init/configure/onboard/play skill challenge/play simple combat/quit/resume without paid LLM calls.
+- [ ] **QA-09**: Release gate requires lint, type check, unit tests, smoke tests, and secret scan to pass.
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Character and Rules Expansion
+
+- **CHAR-01**: User can create a character through a guided PF2e character creation wizard.
+- **CHAR-02**: User can describe a character in prose and receive a legal editable character sheet proposal.
+- **RULEX-01**: System supports PF2e spellcasting with curated spell list, saving throws, durations, and resources.
+- **RULEX-02**: System supports PF2e levels 1-3 beyond the first-slice level-1 martial pregen.
+- **RULEX-03**: System validates encounter XP budgets for levels 1-3.
+- **RULEX-04**: System supports additional PF2e actions: Raise a Shield, Demoralize, Recall Knowledge, Trip, Grapple, and Cast a Spell.
+- **RULEX-05**: System supports conditions: frightened, off-guard, prone, dying, wounded, and drained.
+
+### Campaign and Memory Expansion
+
+- **MEMX-01**: User can unlock the master vault after campaign end as a director's-cut artifact.
+- **MEMX-02**: Archivist can tune LanceDB semantic entity resolution against a labeled fixture suite.
+- **MEMX-03**: Oracle can maintain a callback ledger that proves at least one seed-to-payoff cycle in a 5-session campaign.
+- **MEMX-04**: System can migrate old checkpoints and campaign databases across app versions.
+
+### Experience Expansion
+
+- **EXPX-01**: User can use richer dice animations and themeable dice visuals.
+- **EXPX-02**: User can open a GUI/web frontend backed by the local game runtime.
+- **EXPX-03**: User can use voice input and/or text-to-speech narration.
+- **EXPX-04**: User can use Director Mode to override Oracle scene plans.
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Multiplayer or LAN/shared campaigns | Requires network synchronization, multi-PC mechanics, conflict resolution, and cost allocation beyond MVP. |
+| Party companions / multi-PC support | Adds multi-character state, combat balance, companion agency, and relationship systems before solo loop is proven. |
+| Tactical grid or map-based combat | High-complexity VTT problem; MVP validates theater-of-mind combat only. |
+| AI-generated art pipeline | Cost, latency, consistency, storage, and safety concerns do not support first terminal MVP. |
+| Standalone CartographerAgent | Textual spatial notes and abstract position tags are sufficient for MVP. |
+| Standalone PuppeteerAgent | Oracle can generate small-scope NPCs inline for a small MVP world. |
+| Standalone VillainAgent | Persistent adversary planning needs separate memory, evals, and authority negotiation after core loop works. |
+| PF2e levels 4+ | Data volume and progression complexity are unnecessary for initial validation. |
+| Multiple rules systems | Each system requires its own data, engine behavior, tests, and UX. |
+| Custom/homebrew rule-system builder | Requires a rules DSL/interpreter and is a long-term platform feature. |
+| Hosted account system or cloud sync | Contradicts local-first MVP and introduces operational burden. |
+| Public campaign sharing, marketplace, or scripting platform | Requires hosting, moderation, security sandboxing, and authoring tools. |
+| Dedicated graph database as source of truth | Vault remains canonical; graph stores are derived and rebuildable only. |
+| Player edits to vault as canonical state | Creates source-of-truth ambiguity; canon changes go through game commands. |
+| Exposing master vault during active campaign | Spoils GM-only planning and undermines solo-GM illusion. |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| Pending roadmap | Pending | Pending |
+
+**Coverage:**
+- v1 requirements: 119 total
+- Mapped to phases: 0
+- Unmapped: 119
+
+---
+*Requirements defined: 2026-04-26*
+*Last updated: 2026-04-26 after initial definition*
