@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 1 — Contracts, Scaffold, and Eval Spine
+**Current focus:** Phase 2 — Deterministic Trust Services
 
 ## Current Position
 
-Phase: 1 of 8 (Contracts, Scaffold, and Eval Spine)
-Plan: 2 of 3 in current phase
-Status: In progress — ready for Phase 1 Plan 03
-Last activity: 2026-04-26 — Completed Phase 1 Plan 02 typed state contracts, validation gate, and schema export CLI
+Phase: 2 of 8 (Deterministic Trust Services)
+Plan: 0 of TBD in current phase
+Status: Ready to discuss or plan
+Last activity: 2026-04-26 — Completed and verified Phase 1 with 3/3 plans, 50 tests, 15 smoke tests, and schema/eval guardrails
 
-Progress: [███████░░░] 67%
+Progress: [█░░░░░░░░░] 13%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 28 min
-- Total execution time: 0.9 hours
+- Total plans completed: 3
+- Average duration: 22 min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Contracts, Scaffold, and Eval Spine | 2 | 3 | 28 min |
+| 1. Contracts, Scaffold, and Eval Spine | 3 | 3 | 22 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (48 min), 01-02 (8 min)
-- Trend: Establishing baseline
+- Last 5 plans: 01-01 (48 min), 01-02 (8 min), 01-03 (10 min)
+- Trend: Phase 1 complete; scaffold and contract work established
 
 *Updated after each plan completion*
 
@@ -48,6 +48,8 @@ Recent decisions affecting current work:
 - [01-02]: Schema model fields use JSON-compatible Literal values under strict Pydantic mode while StrEnum classes provide shared vocabulary.
 - [01-02]: Generated JSON Schema files are ignored build artifacts; `schemas/.gitkeep` tracks the output directory.
 - [01-02]: Persisted-state validation translates Pydantic failures into SagaSmith-owned `PersistedStateError`.
+- [01-03]: No-paid-call smoke checks are offline and provider-free; future critical invariants should add one smoke-marked test and, where useful, one `run_smoke()` check.
+- [Verification]: Phase 1 passed 13/13 must-haves; code review warnings are advisory residual risks, not phase-blocking gaps.
 
 ### Pending Todos
 
@@ -57,6 +59,7 @@ None yet.
 
 - Requirements footer previously listed 119 v1 requirements, but the v1 section contains 106 unique requirement IDs. ROADMAP.md and traceability map all 106 discovered IDs.
 - `gsd-sdk query` handlers are unavailable in this environment; sequential plan metadata was updated manually from SUMMARY files.
+- Advisory review items to consider before or during Phase 2: HP current/max invariant, `sk-proj-` redaction coverage, fixture override validation, and scoped pyright diagnostic strictness.
 
 ## Deferred Items
 
@@ -68,6 +71,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-26 17:15
-Stopped at: Completed 01-02-PLAN.md; ready for 01-03-PLAN.md
+Last session: 2026-04-26 17:40
+Stopped at: Phase 1 complete and verified; ready for Phase 2 discussion/planning
 Resume file: None

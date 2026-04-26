@@ -14,7 +14,9 @@ A solo player can start, play, quit, and resume an AI-run PF2e campaign where th
 
 ### Validated
 
-(None yet - ship to validate)
+- [x] Phase 1 validated a local `uv` Python package scaffold, importable `sagasmith` package, Typer CLI entry point, and documented lint/format/type/test/smoke commands.
+- [x] Phase 1 validated Pydantic v2 state contracts, persisted-state validation, JSON Schema export for 16 boundary/persisted models, and compact `SagaState` references.
+- [x] Phase 1 validated a no-paid-call smoke spine with committed fixtures, schema round-trip checks, invalid-state rejection, compact-state invariants, and redaction canary coverage.
 
 ### Active
 
@@ -53,7 +55,7 @@ A solo player can start, play, quit, and resume an AI-run PF2e campaign where th
 
 ## Context
 
-The repository currently contains specification documents but no application source scaffold. Existing planning decisions name the GitHub repository `sagasmith`, PyPI/project package `ai-sagasmith`, and Python import package `sagasmith`.
+The repository contains the Phase 1 application scaffold: a `uv`-managed Python package named `ai-sagasmith`, import package `sagasmith`, Typer CLI entry point, strict quality tooling, Pydantic state contracts, JSON Schema export, and no-paid-call smoke/eval spine. Existing planning decisions name the GitHub repository `sagasmith`, PyPI/project package `ai-sagasmith`, and Python import package `sagasmith`.
 
 The primary product specification lives in `docs/specs/GAME_SPEC.md`. Supporting implementation contracts live in `docs/specs/STATE_SCHEMA.md`, `docs/specs/PF2E_MVP_SUBSET.md`, `docs/specs/PERSISTENCE_SPEC.md`, `docs/specs/LLM_PROVIDER_SPEC.md`, and `docs/specs/VAULT_SCHEMA.md`. Agent capability catalogs live under `docs/specs/agents/`. Deferred ideas and post-MVP expansion paths live in `docs/WISHLIST.md`.
 
@@ -116,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-26 after initialization*
+*Last updated: 2026-04-26 after Phase 1 completion*
