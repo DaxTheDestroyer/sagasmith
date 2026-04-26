@@ -1,0 +1,142 @@
+{
+  "campaign_id": "camp-test-0001",
+  "character_sheet": {
+    "abilities": {
+      "cha": 10,
+      "con": 14,
+      "dex": 14,
+      "int": 10,
+      "str": 18,
+      "wis": 12
+    },
+    "ancestry": "Human",
+    "armor_class": 18,
+    "attacks": [
+      {
+        "damage": "1d8+4 slashing",
+        "id": "atk-longsword",
+        "modifier": 9,
+        "name": "Longsword",
+        "range": null,
+        "traits": [
+          "versatile_p"
+        ]
+      }
+    ],
+    "background": "Scout",
+    "class_name": "Fighter",
+    "conditions": [],
+    "current_hp": 20,
+    "id": "pc-test-hero",
+    "inventory": [
+      {
+        "bulk": 1.0,
+        "id": "item-adventurers-pack",
+        "name": "Adventurer's Pack",
+        "quantity": 1
+      }
+    ],
+    "level": 1,
+    "max_hp": 20,
+    "name": "Aric Vale",
+    "perception_modifier": 5,
+    "proficiencies": {
+      "fortitude": "expert",
+      "perception": "trained",
+      "reflex": "trained",
+      "will": "trained"
+    },
+    "saving_throws": {
+      "fortitude": 7,
+      "reflex": 5,
+      "will": 4
+    },
+    "skills": {
+      "athletics": 7,
+      "diplomacy": 3,
+      "stealth": 4,
+      "survival": 4
+    }
+  },
+  "check_results": [],
+  "combat_state": null,
+  "content_policy": {
+    "hard_limits": [
+      "graphic_sexual_content",
+      "harm_to_children"
+    ],
+    "preferences": [
+      "moral_ambiguity_ok",
+      "hopeful_endings_preferred"
+    ],
+    "soft_limits": {
+      "graphic_violence": "fade_to_black"
+    }
+  },
+  "cost_state": {
+    "hard_stopped": false,
+    "session_budget_usd": 2.5,
+    "spent_usd_estimate": 0.0,
+    "tokens_completion": 0,
+    "tokens_prompt": 0,
+    "warnings_sent": []
+  },
+  "house_rules": {
+    "allow_retcon": true,
+    "auto_save_every_turn": true,
+    "dice_ux": "reveal",
+    "initiative_visible": true,
+    "session_end_trigger": "player_command_or_budget"
+  },
+  "memory_packet": null,
+  "pending_conflicts": [],
+  "pending_player_input": null,
+  "phase": "unknown_phase",
+  "player_profile": {
+    "budget": {
+      "hard_stop": true,
+      "per_session_usd": 2.5
+    },
+    "campaign_length": "arc",
+    "character_mode": "pregenerated",
+    "combat_style": "theater_of_mind",
+    "death_policy": "heroic_recovery",
+    "dice_ux": "reveal",
+    "genre": [
+      "high_fantasy"
+    ],
+    "pacing": "medium",
+    "pillar_weights": {
+      "combat": 0.3,
+      "exploration": 0.3,
+      "puzzle": 0.1,
+      "social": 0.3
+    },
+    "tone": [
+      "heroic",
+      "hopeful"
+    ],
+    "touchstones": [
+      "Earthsea",
+      "Dragon Age: Origins"
+    ]
+  },
+  "safety_events": [],
+  "scene_brief": null,
+  "session_id": "sess-test-0001",
+  "session_state": {
+    "active_quest_ids": [],
+    "current_location_id": null,
+    "current_scene_id": null,
+    "in_game_clock": {
+      "day": 1,
+      "hour": 9,
+      "minute": 0
+    },
+    "last_checkpoint_id": null,
+    "transcript_cursor": null,
+    "turn_count": 0
+  },
+  "state_deltas": [],
+  "turn_id": "turn-0000"
+}
