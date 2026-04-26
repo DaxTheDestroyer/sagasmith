@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
 import pydantic
+import pytest
 
 from sagasmith.schemas import SagaState
 from sagasmith.schemas.validation import PersistedStateError, validate_persisted_state

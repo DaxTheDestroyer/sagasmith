@@ -48,6 +48,10 @@ logs/
 .coverage
 htmlcov/
 
+# Generated JSON Schema exports
+/schemas/*.schema.json
+!/schemas/.gitkeep
+
 # Distribution / packaging
 *.whl
 *.tar.gz

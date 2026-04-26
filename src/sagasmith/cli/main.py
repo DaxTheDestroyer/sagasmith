@@ -3,8 +3,10 @@
 import typer
 
 import sagasmith
+from sagasmith.cli.schema_cmd import schema_app
 
 app = typer.Typer(help="SagaSmith — local-first AI-run solo TTRPG.", no_args_is_help=True)
+app.add_typer(schema_app, name="schema")
 
 
 @app.callback()
