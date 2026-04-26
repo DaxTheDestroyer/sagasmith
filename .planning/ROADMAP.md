@@ -45,7 +45,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Developer can run linting, formatting, type checking, tests, and a no-paid-call smoke suite through documented commands.
   3. Developer can validate and export JSON Schema for all first-slice persisted or LLM-bound Pydantic models.
   4. Invalid persisted state is rejected before graph nodes consume it, and compact graph state references avoid unbounded vault or transcript payloads.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Scaffold the `sagasmith` package with `uv`, subpackage layout, ruff/pyright/pre-commit/gitleaks config, Makefile commands, Typer CLI `version`, and developer run-book (FOUND-01, FOUND-02, FOUND-03, FOUND-05).
+- [ ] 01-02-PLAN.md — Implement Pydantic v2 state contracts, persisted-state validation gate, and `sagasmith schema export` CLI emitting JSON Schema for the 16 LLM-boundary/persisted models (STATE-01, STATE-02, STATE-03, STATE-04, STATE-05).
+- [ ] 01-03-PLAN.md — Build the no-paid-call eval/smoke spine: fixtures, redaction canary, round-trip helpers, in-process `run_smoke()` harness, and `sagasmith smoke` CLI (FOUND-04, plus end-to-end wiring for STATE-03/04/05).
 
 ### Phase 2: Deterministic Trust Services
 **Goal**: Provider, cost, rules primitives, persistence records, and privacy gates are deterministic and testable before gameplay
