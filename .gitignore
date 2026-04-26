@@ -14,8 +14,18 @@ build/
 .venv/
 venv/
 env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Secrets and local environment
 .env
+.env.*
 *.env
+
+# Local databases
+*.sqlite
+*.sqlite-journal
 
 # Node (for .kilo tooling — inner .gitignore handles node_modules there)
 node_modules/
@@ -35,7 +45,6 @@ Thumbs.db
 logs/
 
 # Test / coverage
-.pytest_cache/
 .coverage
 htmlcov/
 

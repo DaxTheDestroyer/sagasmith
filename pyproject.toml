@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-sagasmith"
+version = "0.0.1"
+description = "Local-first single-player AI-run tabletop RPG (PF2e MVP)."
+requires-python = ">=3.12,<3.14"
+readme = "README.md"
+authors = [{ name = "SagaSmith" }]
+dependencies = [
+    "typer>=0.25,<1",
+    "pydantic>=2.6,<3",
+    "pydantic-settings>=2.2,<3",
+]
+
+[project.scripts]
+sagasmith = "sagasmith.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sagasmith"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.5,<1",
+    "pyright>=1.1.360,<2",
+    "pytest>=8,<9",
+    "pytest-asyncio>=0.23,<1",
+    "pre-commit>=3.7,<5",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra"
