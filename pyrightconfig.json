@@ -7,6 +7,8 @@
   "reportUnknownVariableType": "warning",
   "reportUnknownParameterType": "warning",
   "reportUnknownArgumentType": "warning",
+  "reportArgumentType": "warning",
+  "reportMissingParameterType": "warning",
   "venvPath": ".",
   "venv": ".venv"
 }
