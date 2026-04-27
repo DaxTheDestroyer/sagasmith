@@ -28,7 +28,7 @@ from sagasmith.tui.commands.settings import SettingsCommand
 SCROLLBACK_LIMIT = 50  # last N transcript entries loaded on resume (TUI-03)
 
 
-def build_app(campaign_root: Path) -> SagaSmithApp:
+def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaSmithApp:
     """Open a campaign and return a ready-to-run SagaSmithApp.
 
     Caller is responsible for ``.run()`` (blocking TUI) or ``.run_test()``
@@ -56,6 +56,26 @@ def build_app(campaign_root: Path) -> SagaSmithApp:
     if triple is not None:
         session_budget = triple.player_profile.budget.per_session_usd
     app.cost_governor = CostGovernor(session_budget_usd=session_budget)
+
+    # Phase 4: wire GraphRuntime into the TUI app.
+    if build_graph_runtime:
+        from sagasmith.graph.bootstrap import GraphBootstrap
+        from sagasmith.graph.runtime import build_persistent_graph
+        from sagasmith.services.dice import DiceService
+
+        dice_service = DiceService(
+            campaign_seed=manifest.campaign_id,
+            session_seed="session_001",
+        )
+        bootstrap = GraphBootstrap.from_services(
+            dice=dice_service,
+            cost=app.cost_governor,
+            safety=app.safety_events,
+            llm=None,
+        )
+        app.graph_runtime = build_persistent_graph(
+            bootstrap, service_conn, campaign_id=manifest.campaign_id
+        )
 
     registry = CommandRegistry()
     registry.register(HelpCommand(registry=registry))

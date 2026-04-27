@@ -22,6 +22,7 @@ class PauseCommand:
     description: str = "Pause play — captured as a persisted safety event (SAFE-04)."
 
     def handle(self, app: SagaSmithApp, args: tuple[str, ...]) -> None:
+        # Preserve Phase 3 SafetyEvent write
         service = app.safety_events
         if service is None:
             _write(app, "[SAFETY] Paused. (No campaign bound — event not persisted.)")
@@ -31,6 +32,13 @@ class PauseCommand:
         except TrustServiceError as exc:
             _write(app, f"[SAFETY] /pause failed: {exc}")
             return
+        # Phase 4: post graph interrupt if runtime bound
+        if app.graph_runtime is not None:
+            from sagasmith.graph.interrupts import InterruptKind
+            app.graph_runtime.post_interrupt(
+                kind=InterruptKind.PAUSE,
+                payload={"reason": "player typed /pause"},
+            )
         _write(app, f"[SAFETY] Paused. (event {record.event_id})")
 
 
@@ -56,6 +64,13 @@ class LineCommand:
         except TrustServiceError as exc:
             _write(app, f"[SAFETY] /line rejected: {exc}")
             return
+        # Phase 4: post graph interrupt if runtime bound
+        if app.graph_runtime is not None:
+            from sagasmith.graph.interrupts import InterruptKind
+            app.graph_runtime.post_interrupt(
+                kind=InterruptKind.LINE,
+                payload={"topic": topic},
+            )
         _write(
             app,
             f"[SAFETY] Line drawn: {topic}. Orator will route around this topic. (event {record.event_id})",

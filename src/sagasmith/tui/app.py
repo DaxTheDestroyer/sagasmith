@@ -18,6 +18,7 @@ from sagasmith.tui.widgets.safety_bar import SafetyBar
 from sagasmith.tui.widgets.status_panel import StatusPanel
 
 if TYPE_CHECKING:
+    from sagasmith.graph.runtime import GraphRuntime
     from sagasmith.onboarding.store import OnboardingStore
     from sagasmith.services.cost import CostGovernor
     from sagasmith.services.safety import SafetyEventService
@@ -67,6 +68,9 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         self.onboarding_store: OnboardingStore | None = None
         self.safety_events: SafetyEventService | None = None
         self.cost_governor: CostGovernor | None = None
+        # Phase 4: graph runtime bound by build_app when graph is compiled.
+        # None in headless CLI tests or when build_graph_runtime=False.
+        self.graph_runtime: GraphRuntime | None = None
         # Service connection owned by the app for deterministic lifecycle close.
         # Set by runtime.build_app(); None in unit tests that bypass build_app().
         self._service_conn: sqlite3.Connection | None = None
