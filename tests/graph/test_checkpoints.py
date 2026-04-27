@@ -174,7 +174,7 @@ def test_resume_and_close_writes_final_checkpoint_and_completes_turn():
 
 
 def test_activation_logging_counts():
-    """Full play-turn cycle writes exactly 4 agent_skill_log rows with skill_name NULL."""
+    """Full play-turn cycle writes exactly 4 agent_skill_log rows with skill_names populated."""
     conn = _make_conn()
     apply_migrations(conn)
     _insert_campaign_and_turn(conn)
@@ -200,7 +200,11 @@ def test_activation_logging_counts():
     assert names == ["oracle", "rules_lawyer", "orator", "archivist"]
     for r in rows:
         assert r.outcome == "success"
-        assert r.skill_name is None
+    skill_by_agent = {r.agent_name: r.skill_name for r in rows}
+    assert skill_by_agent["oracle"] == "scene-brief-composition"
+    assert skill_by_agent["rules_lawyer"] == "skill-check-resolution"
+    assert skill_by_agent["orator"] == "scene-rendering"
+    assert skill_by_agent["archivist"] == "turn-close-persistence"
 
 
 def test_resume_at_next_prompt():
