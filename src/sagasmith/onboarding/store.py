@@ -10,6 +10,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from sagasmith.evals.redaction import RedactionCanary
 from sagasmith.schemas.player import ContentPolicy, HouseRules, PlayerProfile
 from sagasmith.services.errors import TrustServiceError
 
@@ -49,7 +50,25 @@ class OnboardingStore:
         Uses ``INSERT OR REPLACE`` so calling commit() twice with different
         triples overwrites cleanly without raising a UNIQUE constraint error
         (ONBD-05 re-run support).
+
+        Raises:
+            TrustServiceError: If any field in the triple contains a
+                secret-shaped string (RedactionCanary hit). This enforces the
+                project-wide invariant that all free-form text is scanned before
+                being persisted.
         """
+        _canary = RedactionCanary()
+        for label, payload in [
+            ("player_profile", triple.player_profile.model_dump_json()),
+            ("content_policy", triple.content_policy.model_dump_json()),
+            ("house_rules", triple.house_rules.model_dump_json()),
+        ]:
+            hits = _canary.scan(payload)
+            if hits:
+                raise TrustServiceError(
+                    f"onboarding commit rejected by redaction canary: "
+                    f"record={label} label={hits[0].label}"
+                )
         now = datetime.now(UTC).isoformat()
         with self.conn:
             self.conn.execute(
