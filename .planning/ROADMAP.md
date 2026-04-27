@@ -97,7 +97,11 @@ Plans:
   2. The graph checkpoints after mechanics resolution, checkpoints completed turns during turn-close, and resumes at the next prompt after a final checkpoint.
   3. `/pause`, `/line`, `/retcon`, budget hard-stop, and session end are represented as graph interrupts or routing states rather than ad hoc UI behavior.
   4. Developer can discover skills, present compact catalogs, load full skill instructions on demand, and inspect per-turn agent/skill activation logs.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — LangGraph runtime foundation: add langgraph + langgraph-checkpoint-sqlite deps, typed StateGraph over SagaState, five thin agent node stubs (onboarding/oracle/rules_lawyer/orator/archivist), phase-driven routing (GRAPH-01).
+- [ ] 04-02-PLAN.md — Persistent graph with SqliteSaver checkpoints, first-class interrupts (InterruptKind: pause/line/retcon/budget_stop/session_end), pre-narration + final checkpoint ordering, resume-at-next-prompt, agent_skill_log migration 0005 + AgentActivationLogger (GRAPH-02, GRAPH-03, GRAPH-04, GRAPH-05, AI-12).
+- [ ] 04-03-PLAN.md — Agent Skills adapter (SkillStore, SkillCatalog, load_skill) + 14 first-slice SKILL.md files across 5 agents + 3 cross-cutting skills; deterministic skill handlers wired; contextvar handoff for per-skill activation logging (SKILL-01, SKILL-02, SKILL-03, SKILL-04, SKILL-05).
 
 ### Phase 5: Rules-First PF2e Vertical Slice
 **Goal**: User can complete first-slice PF2e mechanics with a visible character sheet, dice overlay, replayable rolls, and no LLM-authored math
@@ -168,7 +172,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Contracts, Scaffold, and Eval Spine | 3/3 | Complete | 2026-04-26 |
 | 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
-| 4. Graph Runtime and Agent Skills | 0/TBD | Not started | - |
+| 4. Graph Runtime and Agent Skills | 0/3 | Not started | - |
 | 5. Rules-First PF2e Vertical Slice | 0/TBD | Not started | - |
 | 6. AI GM Story Loop | 0/TBD | Not started | - |
 | 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
