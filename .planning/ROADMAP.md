@@ -82,7 +82,7 @@ Plans:
   5. User can invoke `/pause` or `/line` during play setup/control states and see a persisted, player-visible safety event without exposing secrets or GM-only spoilers.
 **Plans**: 4 plans
 Plans:
-- [ ] 03-01-PLAN.md — Campaign lifecycle + CLI shell: v2 migration (campaigns, settings), `sagasmith.app` subpackage, four Typer commands (init/play/configure/demo), CampaignManifest on disk (CLI-01, CLI-02, CLI-03, CLI-05).
+- [x] 03-01-PLAN.md — Campaign lifecycle + CLI shell: v2 migration (campaigns, settings), `sagasmith.app` subpackage, four Typer commands (init/play/configure/demo), CampaignManifest on disk (CLI-01, CLI-02, CLI-03, CLI-05).
 - [ ] 03-02-PLAN.md — Onboarding wizard domain + SQLite store: 9-phase state machine producing validated PlayerProfile/ContentPolicy/HouseRules, migration 0003 with three onboarding tables, atomic commit + re-run support (ONBD-01, ONBD-02, ONBD-03, ONBD-04, ONBD-05).
 - [ ] 03-03-PLAN.md — Textual TUI shell + CommandRegistry + `/help`: four named widgets (narration, status, safety bar, input), pilot-tested mount, SQLite-backed scrollback, `sagasmith play` upgraded to launch Textual (TUI-01, TUI-02, TUI-03, TUI-04, TUI-05).
 - [ ] 03-04-PLAN.md — Eleven control/safety/settings commands + `safety_events` migration: `/pause`, `/line`, `/budget`, `/settings` wired; `/save`/`/recap`/`/sheet`/`/inventory`/`/map`/`/retcon` stubs named for their owning future phase (TUI-06, SAFE-04, SAFE-05, SAFE-06).
@@ -167,7 +167,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Contracts, Scaffold, and Eval Spine | 3/3 | Complete | 2026-04-26 |
 | 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
-| 3. CLI Setup, Onboarding, and TUI Controls | 0/4 | Ready to execute | - |
+| 3. CLI Setup, Onboarding, and TUI Controls | 1/4 | In Progress | - |
 | 4. Graph Runtime and Agent Skills | 0/TBD | Not started | - |
 | 5. Rules-First PF2e Vertical Slice | 0/TBD | Not started | - |
 | 6. AI GM Story Loop | 0/TBD | Not started | - |

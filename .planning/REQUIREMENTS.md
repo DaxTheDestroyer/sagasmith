@@ -25,11 +25,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### CLI and Local Setup
 
-- [ ] **CLI-01**: User can run a first-time initialization command that creates a local campaign directory, SQLite campaign database, and player vault directory.
-- [ ] **CLI-02**: User can choose or confirm campaign name and local campaign path during initialization.
-- [ ] **CLI-03**: User can start or resume a campaign from the CLI without a hosted server.
+- [x] **CLI-01**: User can run a first-time initialization command that creates a local campaign directory, SQLite campaign database, and player vault directory.
+- [x] **CLI-02**: User can choose or confirm campaign name and local campaign path during initialization.
+- [x] **CLI-03**: User can start or resume a campaign from the CLI without a hosted server.
 - [ ] **CLI-04**: User can run repair commands for vault validation, player-vault sync, and derived-index rebuild.
-- [ ] **CLI-05**: User can run a demo or smoke mode that uses fixtures/mocks instead of paid provider calls.
+- [x] **CLI-05**: User can run a demo or smoke mode that uses fixtures/mocks instead of paid provider calls.
 
 ### Provider, Secrets, and Cost
 
@@ -237,10 +237,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERS-04 | Phase 2 | Complete |
 | QA-04 | Phase 2 | Complete |
 | QA-07 | Phase 2 | Complete |
-| CLI-01 | Phase 3 | Pending |
-| CLI-02 | Phase 3 | Pending |
-| CLI-03 | Phase 3 | Pending |
-| CLI-05 | Phase 3 | Pending |
+| CLI-01 | Phase 3 | Complete |
+| CLI-02 | Phase 3 | Complete |
+| CLI-03 | Phase 3 | Complete |
+| CLI-05 | Phase 3 | Complete |
 | ONBD-01 | Phase 3 | Pending |
 | ONBD-02 | Phase 3 | Pending |
 | ONBD-03 | Phase 3 | Pending |

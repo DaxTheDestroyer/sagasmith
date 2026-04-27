@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 planned (4 plans, 3 waves), ready to execute
-last_updated: "2026-04-27T07:51:00-06:00"
-last_activity: 2026-04-27 -- Phase 3 planning complete
+stopped_at: Completed 03-01-PLAN.md (campaign lifecycle + CLI shell)
+last_updated: "2026-04-27T14:40:12Z"
+last_activity: 2026-04-27 -- Phase 3 Plan 01 complete
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 13
-  completed_plans: 9
-  percent: 25
+  completed_plans: 10
+  percent: 27
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 3 — CLI Setup, Onboarding, and TUI Controls (PLANNED, ready to execute)
+**Current focus:** Phase 3 — CLI Setup, Onboarding, and TUI Controls (executing plan 1 of 4)
 
 ## Current Position
 
 Phase: 3 of 8 (CLI Setup, Onboarding, and TUI Controls)
-Plan: 0 of 4 in current phase (Ready to execute)
-Status: Ready to execute
-Last activity: 2026-04-27 -- Phase 3 planning complete (4 plans, 3 waves)
+Plan: 1 of 4 in current phase (Plan 03-01 complete)
+Status: Executing
+Last activity: 2026-04-27 -- Phase 3 Plan 01 complete (campaign lifecycle + CLI shell)
 
-Progress: [██░░░░░░░░] 25%
+Progress: [██░░░░░░░░] 27%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
-- Average duration: 22 min
-- Total execution time: 1.1 hours
+- Total plans completed: 10
+- Average duration: 21 min
+- Total execution time: 1.4 hours
 
 **By Phase:**
 
@@ -46,12 +46,12 @@ Progress: [██░░░░░░░░] 25%
 |-------|-------|-------|----------|
 | 1. Contracts, Scaffold, and Eval Spine | 3 | 3 | 22 min |
 | 2. Deterministic Trust Services | 6 | 6 | -- |
-| 3. CLI Setup, Onboarding, and TUI Controls | 0 | 4 (planned) | -- |
+| 3. CLI Setup, Onboarding, and TUI Controls | 1 | 4 (planned) | -- |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (48 min), 01-02 (8 min), 01-03 (10 min)
-- Trend: Phase 2 complete with all verification passing; Phase 3 planning complete with 4 plans across 3 waves.
+- Last 5 plans: 01-01 (48 min), 01-02 (8 min), 01-03 (10 min), 03-01 (16 min)
+- Trend: Phase 3 Plan 01 complete; campaigns + CLI shell, v2 schema, smoke 12/12.
 
 *Updated after each plan completion*
 
@@ -70,10 +70,14 @@ Recent decisions affecting current work:
 - [03-plan]: Phase 3 split into 4 plans across 3 waves: 03-01 (campaign+CLI, Wave 1) and 03-02 (onboarding, Wave 1) run parallel, 03-03 (TUI shell, Wave 2) depends on 03-01, 03-04 (commands+safety, Wave 3) depends on 03-02 + 03-03.
 - [03-plan]: `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/retcon` ship as narration-emitting stubs in Plan 03-04; each stub names its owning future phase (Phase 4/5/7/8) so later plans can locate the replacement site without code archaeology.
 - [03-plan]: CampaignManifest uses TOML (stdlib `tomllib` + hand-rolled writer) rather than adding `tomli_w` dep — six scalar fields don't justify a new dependency.
+- [03-01]: Hand-rolled TOML writer in campaign.py to avoid tomli_w dependency.
+- [03-01]: SettingsRepository.put always runs RedactionCanary scan before INSERT/UPDATE, mirroring turn_close.py invariant.
+- [03-01]: Smoke check count is 12 (not 11 as plan said) — persistence.turn_close was already check #11 from Phase 2.
+- [03-01]: Annotated[Type, typer.Option(...)] used for all CLI args to satisfy ruff B008 rule.
 
 ### Pending Todos
 
-- Execute Phase 3 plans in wave order (03-01 + 03-02 in Wave 1, then 03-03, then 03-04).
+- Execute Phase 3 Plans 02-04 in wave order (03-02 in Wave 1, then 03-03, then 03-04).
 
 ### Blockers/Concerns
 
@@ -89,6 +93,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-27T07:51:00-06:00
-Stopped at: Phase 3 planned (4 plans, 3 waves), ready to execute
-Resume file: N/A
+Last session: 2026-04-27T14:40:12Z
+Stopped at: Completed 03-01-PLAN.md (campaign lifecycle + CLI shell)
+Resume file: None
