@@ -16,7 +16,9 @@ runner = CliRunner()
 def test_play_on_fresh_campaign_prints_status_line(tmp_path: Path) -> None:
     root = tmp_path / "rivermouth"
     init_campaign(name="Rivermouth", root=root, provider="fake")
-    result = runner.invoke(app, ["play", "--campaign", str(root)])
+    # --headless-status preserves the Plan 03-01 test contract after Plan 03-03
+    # upgraded `sagasmith play` to launch a Textual TUI by default.
+    result = runner.invoke(app, ["play", "--campaign", str(root), "--headless-status"])
     assert result.exit_code == 0, result.output
     assert re.search(r"Campaign: Rivermouth · Session: 1 · Last turn: none", result.output)
 

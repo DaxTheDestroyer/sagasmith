@@ -45,16 +45,13 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         ("ctrl+q", "quit", "Quit"),
     ]
 
-    # Set by runtime.build_app() BEFORE mount. Empty list if fresh campaign.
-    initial_scrollback: ClassVar[list[str]] = []
-
     def __init__(self, paths: CampaignPaths, manifest: CampaignManifest) -> None:
         super().__init__()
         self.paths = paths
         self.manifest = manifest
         self.state = TUIState()
-        # Instance-level scrollback; overrides the class-level default.
-        self.initial_scrollback: list[str] = []  # type: ignore[misc]
+        # Set by runtime.build_app() BEFORE mount. Empty list if fresh campaign.
+        self.initial_scrollback: list[str] = []
         # registry is assigned by runtime.build_app BEFORE mount (Plan 03-03).
         # Plan 03-04 replaces None-guard with full registry dispatch.
         self.commands = None  # type: ignore[assignment]
