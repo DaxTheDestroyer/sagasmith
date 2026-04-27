@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-04-PLAN.md (all 12 slash commands + safety events + Phase 3 complete)
-last_updated: "2026-04-27T09:43:02Z"
-last_activity: 2026-04-27 -- Phase 3 Plan 04 complete (12 commands, safety events, Phase 3 done)
+stopped_at: Phase 4 replanned via --reviews (3 → 5 plans) after cross-AI review feedback
+last_updated: "2026-04-27T19:16:00Z"
+last_activity: 2026-04-27 -- Phase 4 replanned: 5 plans in 4 waves incorporating Gemini/Claude/Codex/OpenCode review feedback
 progress:
   total_phases: 8
   completed_phases: 3
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 ## Current Position
 
-Phase: 3 of 8 (CLI Setup, Onboarding, and TUI Controls) — COMPLETE
-Plan: 4 of 4 in current phase (Plan 03-04 complete)
+Phase: 4 of 8 (Graph Runtime and Agent Skills) — READY TO EXECUTE (5 plans in 4 waves)
+Plan: 0 of 5 in current phase (planning complete after --reviews replanning)
 Status: Executing
-Last activity: 2026-04-27 -- Phase 3 complete (all 12 slash commands + safety events, 295/1 tests)
+Last activity: 2026-04-27 -- Phase 4 replanned via --reviews (3 → 5 plans, waves 1→4)
 
 Progress: [████░░░░░░] 38%
 
@@ -82,11 +82,22 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Plan Phase 4 (Graph Runtime and Agent Skills): `/gsd-plan-phase 4`
+- Execute Phase 4 (Graph Runtime and Agent Skills): `/gsd-execute-phase 4`
+  - Wave 1: 04-01 (runtime foundation)
+  - Wave 2: 04-02 (persistent graph + activation log) ∥ 04-04 (skills adapter package)
+  - Wave 3: 04-03 (native interrupts + TUI wiring + E2E smoke)
+  - Wave 4: 04-05 (first-slice SKILL.md catalog + node wiring)
 
 ### Blockers/Concerns
 
-- None currently.
+- None currently. Phase 4 revision addressed all HIGH/MEDIUM concerns from 04-REVIEWS.md consensus:
+  - LangGraph native interrupt primitives (Claude, Codex, OpenCode HIGH)
+  - Pre-narration checkpoint ownership at runtime boundary (OpenCode, Claude HIGH)
+  - Task splits (Claude, Codex HIGH)
+  - Thread-id convention locked to `campaign:<id>` (Codex HIGH)
+  - Skill packaging via pyproject.toml (Codex HIGH)
+  - first_slice as first-class field (Claude, OpenCode)
+  - Required-set assertions instead of exact counts (Codex)
 
 ## Deferred Items
 
