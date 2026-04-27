@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sqlite3
 from typing import TYPE_CHECKING, ClassVar
 
 from textual.app import App, ComposeResult
@@ -65,6 +66,9 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         self.onboarding_store: OnboardingStore | None = None
         self.safety_events: SafetyEventService | None = None
         self.cost_governor: CostGovernor | None = None
+        # Service connection owned by the app for deterministic lifecycle close.
+        # Set by runtime.build_app(); None in unit tests that bypass build_app().
+        self._service_conn: sqlite3.Connection | None = None
 
     def compose(self) -> ComposeResult:
         yield SafetyBar()
@@ -109,4 +113,15 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             # Plan 03-04 replaces this guard with full registry dispatch.
             return
         self.commands.dispatch(self, event.name, event.args)
+
+    def on_unmount(self) -> None:
+        """Close the long-lived service connection deterministically on TUI exit.
+
+        Without an explicit close, the WAL file is not checkpointed until Python's
+        GC finalizes the connection — which is non-deterministic and leaks file
+        handles inside test harnesses (run_test()).
+        """
+        if self._service_conn is not None:
+            self._service_conn.close()
+            self._service_conn = None
 

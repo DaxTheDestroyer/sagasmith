@@ -46,6 +46,7 @@ def build_app(campaign_root: Path) -> SagaSmithApp:
 
     # Long-lived connection for service bindings (TUI owns its lifetime).
     service_conn = open_campaign_db(paths.db, read_only=False)
+    app._service_conn = service_conn  # owned by app; closed in on_unmount()
     app.onboarding_store = OnboardingStore(conn=service_conn)
     app.safety_events = SafetyEventService(conn=service_conn)
 
