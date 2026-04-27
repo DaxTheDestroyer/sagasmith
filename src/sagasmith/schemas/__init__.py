@@ -1,5 +1,6 @@
 """Pydantic domain, runtime, provider, and agent schemas."""
 
+from .campaign import CampaignManifest, ProviderSettings, generate_campaign_id
 from .common import (
     AttackProfile,
     BudgetPolicy,
@@ -60,6 +61,9 @@ from .safety_cost import CostState, SafetyEvent
 from .saga_state import SagaState
 
 __all__ = [
+    "CampaignManifest",
+    "ProviderSettings",
+    "generate_campaign_id",
     "AttackProfile",
     "AttackProfile",
     "BudgetPolicy",

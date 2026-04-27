@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from .campaign import CampaignManifest, ProviderSettings
 from .deltas import CanonConflict, StateDelta
 from .mechanics import CharacterSheet, CheckProposal, CheckResult, CombatState, RollResult
 from .narrative import MemoryPacket, SceneBrief, SessionState
@@ -30,6 +31,8 @@ from .saga_state import SagaState
 type SchemaModelClass = type[BaseModel]
 
 LLM_BOUNDARY_AND_PERSISTED_MODELS: list[SchemaModelClass] = [
+    CampaignManifest,
+    ProviderSettings,
     SagaState,
     PlayerProfile,
     ContentPolicy,

@@ -1,5 +1,6 @@
 """SQLite persistence package for trust-records, migrations, and turn-close."""
 
+from sagasmith.app.config import SettingsRepository
 from sagasmith.persistence.db import campaign_db, current_schema_version, open_campaign_db
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import (
@@ -18,6 +19,7 @@ __all__ = [
     "CostLogRepository",
     "ProviderLogRepository",
     "RollLogRepository",
+    "SettingsRepository",
     "StateDeltaRepository",
     "TranscriptRepository",
     "TurnCloseBundle",
