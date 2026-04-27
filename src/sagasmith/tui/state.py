@@ -34,4 +34,4 @@ class TUIState:
     """Mutable UI state \u2014 NOT the graph SagaState. Plan 04 will bridge."""
 
     status: StatusSnapshot = field(default_factory=StatusSnapshot)
-    scrollback: list[str] = field(default_factory=list)  # rendered transcript lines
+    scrollback: list[str] = field(default_factory=lambda: [])  # rendered transcript lines

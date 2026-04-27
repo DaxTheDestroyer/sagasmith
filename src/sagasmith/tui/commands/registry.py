@@ -16,8 +16,11 @@ class TUICommand(Protocol):
     CommandRegistry is the ONLY extension point — app.py needs zero changes.
     """
 
-    name: str
-    description: str
+    @property
+    def name(self) -> str: ...
+
+    @property
+    def description(self) -> str: ...
 
     def handle(self, app: SagaSmithApp, args: tuple[str, ...]) -> None: ...
 

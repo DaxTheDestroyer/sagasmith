@@ -38,6 +38,11 @@ def _with_overrides[T: BaseModel](instance: T, overrides: dict[str, Any]) -> T:
     return type(instance).model_validate(merged)
 
 
+def with_overrides[T: BaseModel](instance: T, overrides: dict[str, Any]) -> T:
+    """Public test helper wrapper around fixture override revalidation."""
+    return _with_overrides(instance, overrides)
+
+
 def make_valid_budget_policy(**overrides: Any) -> BudgetPolicy:
     """Return a deterministic valid per-session budget policy."""
 

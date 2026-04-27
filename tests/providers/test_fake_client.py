@@ -9,6 +9,7 @@ import pytest
 from sagasmith.providers import DeterministicFakeClient, invoke_with_retry
 from sagasmith.providers.fake import __file__ as fake_file
 from sagasmith.schemas import LLMRequest, Message
+from sagasmith.schemas.provider import ProviderLogRecord
 
 
 def test_fake_client_complete_returns_scripted_response() -> None:
@@ -69,7 +70,7 @@ def test_fake_client_cost_estimate_present() -> None:
         temperature=0.0,
         timeout_seconds=10,
     )
-    logs: list[object] = []
+    logs: list[ProviderLogRecord] = []
     response = invoke_with_retry(
         client,
         request,
@@ -109,7 +110,7 @@ def test_invoke_with_retry_cheap_model_fallback_uses_fake_cheap() -> None:
         temperature=0.0,
         timeout_seconds=10,
     )
-    logs: list[object] = []
+    logs: list[ProviderLogRecord] = []
     response = invoke_with_retry(
         _ModelSwitchingFake(),  # type: ignore[arg-type]
         req,

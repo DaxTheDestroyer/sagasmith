@@ -38,9 +38,10 @@ def test_resolve_secret_env_missing_raises(monkeypatch: pytest.MonkeyPatch) -> N
 def test_resolve_secret_keyring_success(monkeypatch: pytest.MonkeyPatch) -> None:
     import sagasmith.services.secrets as secrets_mod
 
-    monkeypatch.setattr(
-        secrets_mod.keyring, "get_password", lambda svc, acct: "synthetic-keyring-value"
-    )
+    def fake_get_password(service: str, account: str) -> str:
+        return "synthetic-keyring-value"
+
+    monkeypatch.setattr(secrets_mod.keyring, "get_password", fake_get_password)
     ref = SecretRef(kind="keyring", name="service", account="user")
     assert resolve_secret(ref) == "synthetic-keyring-value"
 
@@ -48,7 +49,10 @@ def test_resolve_secret_keyring_success(monkeypatch: pytest.MonkeyPatch) -> None
 def test_resolve_secret_keyring_missing_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     import sagasmith.services.secrets as secrets_mod
 
-    monkeypatch.setattr(secrets_mod.keyring, "get_password", lambda svc, acct: None)
+    def fake_get_password(service: str, account: str) -> None:
+        return None
+
+    monkeypatch.setattr(secrets_mod.keyring, "get_password", fake_get_password)
     ref = SecretRef(kind="keyring", name="service", account="user")
     with pytest.raises(SecretRefError) as exc_info:
         resolve_secret(ref)

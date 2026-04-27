@@ -49,6 +49,17 @@ def test_put_provider_settings_round_trips() -> None:
     assert loaded == settings
 
 
+def test_provider_settings_rejects_openrouter_without_key_ref() -> None:
+    with pytest.raises(ValueError, match="api_key_ref"):
+        ProviderSettings(
+            provider="openrouter",
+            api_key_ref=None,
+            default_model="openrouter/nousresearch/hermes-2-pro-llama-3-8b",
+            narration_model="openrouter/meta-llama/llama-3.1-8b-instruct",
+            cheap_model="openrouter/mistralai/mistral-7b-instruct",
+        )
+
+
 def test_put_rejects_raw_secret_payload() -> None:
     conn = _make_conn()
     _seed_campaign(conn)

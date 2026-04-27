@@ -99,6 +99,20 @@ def test_parse_answer_pillar_budget_negative_value() -> None:
     assert any(">= 0" in e for e in errors)
 
 
+def test_parse_answer_pillar_budget_rejects_fractional_points() -> None:
+    """Pillar points are integer budget points; floats must not be truncated."""
+    fld = PromptField(
+        id="pillar_budget",
+        label="Pillars",
+        kind=PromptFieldKind.PILLAR_BUDGET,
+    )
+    raw = {"combat": 1.5, "exploration": 2.5, "social": 3, "puzzle": 4}
+    _, errors = parse_answer(fld, raw)
+
+    assert errors
+    assert any("integer" in e for e in errors)
+
+
 def test_parse_answer_pillar_budget_missing_key() -> None:
     """A pillar budget missing required keys returns an error."""
     fld = PromptField(

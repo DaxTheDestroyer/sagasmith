@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from sagasmith.providers.openrouter import OpenRouterClient, _OpenRouterError
+from sagasmith.providers.openrouter import OpenRouterClient, OpenRouterError
 from sagasmith.providers.transport import HttpResponse
 from sagasmith.schemas.provider import (
     LLMRequest,
@@ -167,7 +167,7 @@ def test_openrouter_complete_429_maps_rate_limit(monkeypatch: pytest.MonkeyPatch
         temperature=0.0,
         timeout_seconds=10,
     )
-    with pytest.raises(_OpenRouterError) as exc_info:
+    with pytest.raises(OpenRouterError) as exc_info:
         client.complete(request)
     assert exc_info.value.failure_kind == "rate_limit"
 
@@ -197,7 +197,7 @@ def test_openrouter_complete_error_message_does_not_contain_api_key(
         temperature=0.0,
         timeout_seconds=10,
     )
-    with pytest.raises(_OpenRouterError) as exc_info:
+    with pytest.raises(OpenRouterError) as exc_info:
         client.complete(request)
     msg = str(exc_info.value)
     assert leak_marker not in msg

@@ -120,8 +120,9 @@ def test_close_turn_commits_all_records_in_order(tmp_path: Path) -> None:
         assert result.status == "complete"
 
         tr = TurnRecordRepository(conn)
-        assert tr.get("t1") is not None
-        assert tr.get("t1").status == "complete"
+        turn = tr.get("t1")
+        assert turn is not None
+        assert turn.status == "complete"
 
         # Verify transcript sequence order
         from sagasmith.persistence.repositories import TranscriptRepository

@@ -74,6 +74,17 @@ def test_configure_rejects_malformed_ref(tmp_path: Path) -> None:
     assert "must be 'env:VAR' or 'keyring:service:account'" in combined
 
 
+def test_configure_rejects_openrouter_without_key_ref(tmp_path: Path) -> None:
+    root = _init_campaign(tmp_path)
+    result = runner.invoke(
+        app,
+        ["configure", "--campaign", str(root), "--provider", "openrouter"],
+    )
+    assert result.exit_code == 2
+    combined = (result.output or "") + (result.stderr if hasattr(result, "stderr") else "")
+    assert "--api-key-ref is required" in combined
+
+
 def test_configure_never_echoes_secret(tmp_path: Path) -> None:
     root = _init_campaign(tmp_path)
     # Set the env var to a secret value — configure should only store the reference name,

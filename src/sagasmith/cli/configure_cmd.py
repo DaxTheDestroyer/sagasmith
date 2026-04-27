@@ -77,6 +77,13 @@ def configure_command(
         if new_api_key_ref != current.api_key_ref:
             changed.append("api_key_ref")
 
+        if new_provider == "openrouter" and new_api_key_ref is None:
+            typer.echo(
+                "--api-key-ref is required when provider=openrouter",
+                err=True,
+            )
+            raise typer.Exit(code=2)
+
         new_default_model = current.default_model if default_model is None else default_model
         if new_default_model != current.default_model:
             changed.append("default_model")

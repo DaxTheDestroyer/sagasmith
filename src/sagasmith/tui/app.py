@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from sagasmith.onboarding.store import OnboardingStore
     from sagasmith.services.cost import CostGovernor
     from sagasmith.services.safety import SafetyEventService
+    from sagasmith.tui.commands.registry import CommandRegistry
 
 
 class PlayerInputSubmitted(Message):
@@ -60,7 +61,7 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         self.initial_scrollback: list[str] = []
         # registry is assigned by runtime.build_app BEFORE mount (Plan 03-03).
         # Plan 03-04 replaces None-guard with full registry dispatch.
-        self.commands = None  # type: ignore[assignment]
+        self.commands: CommandRegistry | None = None
         # Runtime-scoped services set by build_app (Plan 03-04).
         # Explicitly typed | None so unit tests can construct apps without services.
         self.onboarding_store: OnboardingStore | None = None
@@ -69,6 +70,10 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         # Service connection owned by the app for deterministic lifecycle close.
         # Set by runtime.build_app(); None in unit tests that bypass build_app().
         self._service_conn: sqlite3.Connection | None = None
+
+    def bind_service_connection(self, conn: sqlite3.Connection) -> None:
+        """Bind the runtime-owned SQLite service connection to the app lifecycle."""
+        self._service_conn = conn
 
     def compose(self) -> ComposeResult:
         yield SafetyBar()
@@ -124,4 +129,3 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         if self._service_conn is not None:
             self._service_conn.close()
             self._service_conn = None
-

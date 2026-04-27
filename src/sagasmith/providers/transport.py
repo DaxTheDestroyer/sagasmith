@@ -43,8 +43,18 @@ class HttpTransport(Protocol):
 class HttpxTransport:
     """Httpx-based HttpTransport implementation."""
 
-    def __init__(self, *, user_agent: str = "SagaSmith/0.0.1") -> None:
-        self._client = httpx.Client(http2=False, headers={"User-Agent": user_agent})
+    def __init__(
+        self,
+        *,
+        user_agent: str = "SagaSmith/0.0.1",
+        client: httpx.Client | None = None,
+    ) -> None:
+        self._client = client or httpx.Client(http2=False, headers={"User-Agent": user_agent})
+
+    @property
+    def headers(self) -> httpx.Headers:
+        """Expose default client headers for verification without touching internals."""
+        return self._client.headers
 
     def close(self) -> None:
         self._client.close()

@@ -6,9 +6,9 @@ import pytest
 from pydantic import ValidationError
 
 from sagasmith.evals.fixtures import (
-    _with_overrides,
     make_valid_character_sheet,
     make_valid_player_profile,
+    with_overrides,
 )
 
 pytestmark = pytest.mark.smoke
@@ -35,5 +35,5 @@ def test_fixture_override_accepts_valid_changes() -> None:
 
 def test_fixture_override_empty_returns_original_instance() -> None:
     cs = make_valid_character_sheet()
-    result = _with_overrides(cs, {})
+    result = with_overrides(cs, {})
     assert result is cs

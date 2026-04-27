@@ -6,6 +6,8 @@ import re
 import secrets
 from typing import Literal
 
+from pydantic import model_validator
+
 from sagasmith.schemas.common import SchemaModel
 from sagasmith.services.secrets import SecretRef
 
@@ -43,6 +45,12 @@ class ProviderSettings(SchemaModel):
     narration_model: str
     cheap_model: str
     pricing_mode: Literal["provider_reported", "static_table"] = "static_table"
+
+    @model_validator(mode="after")
+    def _openrouter_requires_key_ref(self) -> ProviderSettings:
+        if self.provider == "openrouter" and self.api_key_ref is None:
+            raise ValueError("api_key_ref is required when provider is openrouter")
+        return self
 
 
 def generate_campaign_id(slug: str) -> str:

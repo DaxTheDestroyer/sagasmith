@@ -46,7 +46,7 @@ def build_app(campaign_root: Path) -> SagaSmithApp:
 
     # Long-lived connection for service bindings (TUI owns its lifetime).
     service_conn = open_campaign_db(paths.db, read_only=False)
-    app._service_conn = service_conn  # owned by app; closed in on_unmount()
+    app.bind_service_connection(service_conn)
     app.onboarding_store = OnboardingStore(conn=service_conn)
     app.safety_events = SafetyEventService(conn=service_conn)
 
@@ -73,7 +73,7 @@ def build_app(campaign_root: Path) -> SagaSmithApp:
         SettingsCommand(),
     ]:
         registry.register(cmd)
-    app.commands = registry  # type: ignore[assignment]
+    app.commands = registry
 
     # Load recent transcript for scrollback (TUI-03).
     app.initial_scrollback = _load_scrollback(paths.db)

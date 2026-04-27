@@ -12,9 +12,7 @@ def test_httpx_post_json_returns_status_and_body() -> None:
         return httpx.Response(200, json={"ok": True})
 
     transport = httpx.MockTransport(handler)
-    client = HttpxTransport()
-    # Replace the internal client with our mock transport client
-    client._client = httpx.Client(transport=transport)
+    client = HttpxTransport(client=httpx.Client(transport=transport))
 
     response = client.post_json(
         url="https://example.com/api",
@@ -31,8 +29,7 @@ def test_httpx_post_json_non_2xx_does_not_raise() -> None:
         return httpx.Response(429, text="Rate limited")
 
     transport = httpx.MockTransport(handler)
-    client = HttpxTransport()
-    client._client = httpx.Client(transport=transport)
+    client = HttpxTransport(client=httpx.Client(transport=transport))
 
     response = client.post_json(
         url="https://example.com/api",
@@ -52,8 +49,7 @@ def test_httpx_post_stream_yields_data_lines_only() -> None:
         )
 
     transport = httpx.MockTransport(handler)
-    client = HttpxTransport()
-    client._client = httpx.Client(transport=transport)
+    client = HttpxTransport(client=httpx.Client(transport=transport))
 
     lines = list(
         client.post_stream(
@@ -68,4 +64,4 @@ def test_httpx_post_stream_yields_data_lines_only() -> None:
 
 def test_httpx_transport_sets_user_agent() -> None:
     client = HttpxTransport()
-    assert client._client.headers["User-Agent"] == "SagaSmith/0.0.1"
+    assert client.headers["User-Agent"] == "SagaSmith/0.0.1"

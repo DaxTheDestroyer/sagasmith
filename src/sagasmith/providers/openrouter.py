@@ -34,6 +34,9 @@ class _OpenRouterError(Exception):
         return f"OpenRouter error: status={self.status_code} kind={self.failure_kind}"
 
 
+OpenRouterError = _OpenRouterError
+
+
 def _map_status_to_failure_kind(status_code: int) -> str:
     if status_code in (408, 504):
         return "network_timeout"

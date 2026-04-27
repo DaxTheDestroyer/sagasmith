@@ -398,10 +398,10 @@ def _parse_pillar_budget(field: PromptField, raw: object) -> tuple[object, list[
     int_values: dict[str, int] = {}
     for key in _PILLAR_KEYS:
         raw_val = raw[key]
-        if not isinstance(raw_val, (int, float)) or isinstance(raw_val, bool):
+        if not isinstance(raw_val, int) or isinstance(raw_val, bool):
             errors.append(f"pillar_budget[{key!r}] must be a non-negative integer, got {raw_val!r}")
             continue
-        int_val = int(raw_val)
+        int_val = raw_val
         if int_val < 0:
             errors.append(f"pillar_budget[{key!r}] must be >= 0, got {int_val}")
         else:
