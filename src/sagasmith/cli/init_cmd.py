@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Annotated
 
+import pydantic
 import typer
 
 from sagasmith.app.campaign import init_campaign, slugify
@@ -67,6 +68,9 @@ def init_command(
     except FileExistsError:
         typer.echo(f"Campaign already exists at {resolved_path}", err=True)
         raise typer.Exit(code=1) from None
+    except (pydantic.ValidationError, ValueError) as exc:
+        typer.echo(f"error: invalid provider value: {exc}", err=True)
+        raise typer.Exit(code=2) from None
 
     typer.echo(f"Initialized campaign '{resolved_name}' at {resolved_path}")
     typer.echo(f"  campaign_id: {manifest.campaign_id}")

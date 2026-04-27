@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Annotated
 
+import pydantic
 import typer
 
 from sagasmith.app.campaign import open_campaign
@@ -88,14 +89,18 @@ def configure_command(
         if new_cheap_model != current.cheap_model:
             changed.append("cheap_model")
 
-        updated = ProviderSettings(
-            provider=new_provider,  # type: ignore[arg-type]
-            api_key_ref=new_api_key_ref,
-            default_model=new_default_model,
-            narration_model=new_narration_model,
-            cheap_model=new_cheap_model,
-            pricing_mode=current.pricing_mode,
-        )
+        try:
+            updated = ProviderSettings(
+                provider=new_provider,  # type: ignore[arg-type]
+                api_key_ref=new_api_key_ref,
+                default_model=new_default_model,
+                narration_model=new_narration_model,
+                cheap_model=new_cheap_model,
+                pricing_mode=current.pricing_mode,
+            )
+        except (pydantic.ValidationError, ValueError) as exc:
+            typer.echo(f"error: invalid settings value: {exc}", err=True)
+            raise typer.Exit(code=2) from None
         with conn:
             repo.put_provider_settings(manifest.campaign_id, updated)
     finally:
