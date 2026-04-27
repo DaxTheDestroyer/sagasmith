@@ -1,0 +1,11 @@
+# Gitleaks configuration — SagaSmith
+# Pre-commit hook uses gitleaks v8.18.4 default rules plus these allowlists.
+
+title = "SagaSmith gitleaks config"
+
+[allowlist]
+paths = [
+    # Test fixtures contain intentionally synthetic secret-shaped strings
+    # for RedactionCanary coverage. These are not real credentials.
+    '''tests/skills_adapter/fixtures/''',
+]
