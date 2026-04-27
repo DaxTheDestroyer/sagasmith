@@ -6,8 +6,6 @@ from __future__ import annotations
 
 import sqlite3
 
-import pytest
-
 from sagasmith.graph.bootstrap import GraphBootstrap
 from sagasmith.graph.checkpoints import (
     CheckpointKind,
@@ -91,6 +89,7 @@ def _play_state():
             "warnings_sent": [],
             "hard_stopped": False,
         },
+        "last_interrupt": None,
     }
 
 
@@ -299,5 +298,6 @@ def test_extract_checkpoint_id():
 
     # Snapshot with no config returns None
     class FakeSnapshot:
-        config = {}
+        def __init__(self) -> None:
+            self.config = {}
     assert extract_checkpoint_id(FakeSnapshot()) is None

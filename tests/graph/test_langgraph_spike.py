@@ -15,7 +15,6 @@ this test as regression coverage for LangGraph version upgrades.
 import sqlite3
 from typing import TypedDict
 
-import pytest
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 
@@ -118,7 +117,6 @@ def test_sqlitesaver_shares_connection_no_collision():
     graph.invoke({"value": 1}, config)
     cur = conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
     tables = {row[0] for row in cur.fetchall()}
-    sagasmith_present = SAGASMITH_TABLES & tables
     # All SagaSmith tables present:
     missing = SAGASMITH_TABLES - tables
     assert not missing, f"Missing SagaSmith tables after migration+SqliteSaver: {missing}"

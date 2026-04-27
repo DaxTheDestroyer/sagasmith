@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import UTC, datetime
 
 import pytest
 
 from sagasmith.evals.redaction import RedactionCanary, RedactionHit
 from sagasmith.graph.activation_log import (
     AgentActivationLogger,
-    _default_canary,
     get_current_activation,
 )
 from sagasmith.persistence.migrations import apply_migrations
@@ -39,7 +37,7 @@ def test_activation_logger_writes_success_row() -> None:
     apply_migrations(conn)
     _insert_turn_record(conn, "turn_001")
 
-    with AgentActivationLogger(conn, turn_id="turn_001", agent_name="oracle") as log:
+    with AgentActivationLogger(conn, turn_id="turn_001", agent_name="oracle"):
         pass
 
     rows = AgentSkillLogRepository(conn).list_for_turn("turn_001")

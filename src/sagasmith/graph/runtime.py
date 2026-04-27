@@ -22,6 +22,7 @@ from sagasmith.graph.checkpoints import (
     build_checkpointer,
     extract_checkpoint_id,
 )
+from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind
 from sagasmith.persistence.repositories import CheckpointRefRepository
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
 from sagasmith.schemas.persistence import CheckpointRef, TurnRecord
@@ -54,16 +55,62 @@ class GraphRuntime:
         Idempotent: if the thread is already at the orator interrupt or has
         already completed (next == () with values), returns immediately
         without re-running prior nodes.
+
+        BudgetStopError raised inside any node is caught at the runtime
+        boundary and translated to InterruptKind.BUDGET_STOP — nodes never
+        see interrupt types.
         """
+        from sagasmith.services.errors import BudgetStopError
+
         turn_id = initial_state["turn_id"]
         snapshot = self.graph.get_state(self.thread_config)
         if snapshot.next == ("orator",) or (snapshot.next == () and snapshot.values):
             return snapshot.values
-        _ = self.graph.invoke(initial_state, self.thread_config)
+        try:
+            _ = self.graph.invoke(initial_state, self.thread_config)
+        except BudgetStopError as e:
+            _ = self.post_interrupt(kind=InterruptKind.BUDGET_STOP, payload={"reason": str(e)})
+            return self.graph.get_state(self.thread_config).values
         snapshot = self.graph.get_state(self.thread_config)
         if snapshot.next == ("orator",):
             self._record_pre_narration_checkpoint(turn_id, snapshot)
         return snapshot.values
+
+    def post_interrupt(
+        self, *, kind: InterruptKind, payload: dict[str, Any] | None = None
+    ) -> InterruptEnvelope:
+        """Write an interrupt envelope to the graph thread state.
+
+        Uses LangGraph's native ``graph.update_state`` API. Single-slot
+        semantics: a second call overwrites the first.
+        """
+        envelope = InterruptEnvelope.build(
+            kind=kind,
+            payload=payload,
+            thread_id=self.thread_config["configurable"]["thread_id"],
+        )
+        self.graph.update_state(
+            self.thread_config,
+            {"last_interrupt": envelope.model_dump()},
+            as_node="archivist",
+        )
+        return envelope
+
+    def resume_after_interrupt(self, *, resume_payload: Any = None) -> dict[str, Any]:
+        """Clear ``last_interrupt`` and resume the graph thread.
+
+        Note: LangGraph 1.1.10 has a bug with Command(resume=None).
+        Using None input directly is the working resume pattern proven in Task 1.
+        """
+        self.graph.update_state(
+            self.thread_config,
+            {"last_interrupt": None},
+            as_node="archivist",
+        )
+        # resume_payload is accepted for API compatibility but not used
+        # until LangGraph bug is fixed or we upgrade past 1.1.10.
+        _ = resume_payload
+        return self.graph.invoke(None, self.thread_config)
 
     def resume_and_close(
         self,

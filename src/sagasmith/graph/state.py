@@ -8,7 +8,7 @@ node transition. Import-time field-drift guard prevents silent regressions.
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Any, TypedDict
 
 from sagasmith.schemas.saga_state import SagaState
 
@@ -33,6 +33,7 @@ class SagaGraphState(TypedDict):
     pending_narration: list[str]
     safety_events: list[object]
     cost_state: object
+    last_interrupt: dict[str, Any] | None
 
 
 # Import-time field-drift guard
