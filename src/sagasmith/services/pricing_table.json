@@ -1,0 +1,7 @@
+{
+  "fake/fake-default":   { "prompt_usd_per_1k": 0.001, "completion_usd_per_1k": 0.002 },
+  "fake/fake-narration": { "prompt_usd_per_1k": 0.001, "completion_usd_per_1k": 0.002 },
+  "fake/fake-cheap":     { "prompt_usd_per_1k": 0.0005, "completion_usd_per_1k": 0.001 },
+  "openrouter/openai/gpt-4o-mini":       { "prompt_usd_per_1k": 0.00015, "completion_usd_per_1k": 0.0006 },
+  "openrouter/anthropic/claude-3-5-haiku": { "prompt_usd_per_1k": 0.0008, "completion_usd_per_1k": 0.004 }
+}

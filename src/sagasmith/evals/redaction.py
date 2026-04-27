@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 DEFAULT_SECRET_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("openrouter_key", re.compile(r"sk-or-v1-[A-Za-z0-9]{16,}")),
+    ("openai_project_key", re.compile(r"sk-proj-[A-Za-z0-9_\-]{20,}")),
     ("openai_key", re.compile(r"sk-[A-Za-z0-9]{20,}")),
     ("anthropic_key", re.compile(r"sk-ant-[A-Za-z0-9\-_]{20,}")),
     ("bearer_header", re.compile(r"(?i)authorization:\s*bearer\s+[A-Za-z0-9._\-]{16,}")),

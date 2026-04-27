@@ -14,6 +14,7 @@ pytestmark = pytest.mark.smoke
 
 EXPECTED_LABELS = {
     "openrouter_key",
+    "openai_project_key",
     "openai_key",
     "anthropic_key",
     "bearer_header",
@@ -41,3 +42,17 @@ def test_exported_schemas_have_no_secret_shaped_strings(tmp_path: Path):
 
 def test_default_pattern_labels_exact():
     assert {label for label, _ in DEFAULT_SECRET_PATTERNS} == EXPECTED_LABELS
+
+
+def test_openai_project_key_labeled() -> None:
+    hits = RedactionCanary().scan("sk-proj-abcdefghijklmnopqrstu")
+    labels = [h.label for h in hits]
+    assert "openai_project_key" in labels
+    assert "openai_key" not in labels
+
+
+def test_openrouter_key_not_mislabeled_as_project() -> None:
+    hits = RedactionCanary().scan("sk-or-v1-aaaaaaaaaaaaaaaa")
+    labels = [h.label for h in hits]
+    assert "openrouter_key" in labels
+    assert "openai_project_key" not in labels

@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from pydantic import BaseModel
+
 from sagasmith.schemas import (
     AttackProfile,
     BudgetPolicy,
@@ -15,20 +17,25 @@ from sagasmith.schemas import (
     GameClock,
     HouseRules,
     InventoryItem,
+    LLMResponse,
     MemoryEntityRef,
     MemoryPacket,
     PlayerProfile,
+    ProviderConfig,
     SagaState,
     SessionState,
+    TokenUsage,
 )
 
 FIXTURE_DIR = Path(__file__).resolve().parents[3] / "tests" / "fixtures"
 
 
-def _with_overrides[T](instance: T, overrides: dict[str, Any]) -> T:
+def _with_overrides[T: BaseModel](instance: T, overrides: dict[str, Any]) -> T:
     if not overrides:
         return instance
-    return instance.model_copy(update=overrides)  # type: ignore[attr-defined]
+    merged = instance.model_dump()
+    merged.update(overrides)
+    return type(instance).model_validate(merged)
 
 
 def make_valid_budget_policy(**overrides: Any) -> BudgetPolicy:
@@ -199,6 +206,36 @@ def make_valid_saga_state(**overrides: Any) -> SagaState:
         cost_state=make_valid_cost_state(),
     )
     return _with_overrides(instance, overrides)
+
+
+def make_fake_provider_config(**overrides: Any) -> ProviderConfig:
+    """Return a deterministic fake provider config."""
+
+    instance = ProviderConfig(
+        provider="fake",
+        api_key_ref=None,
+        default_model="fake-default",
+        narration_model="fake-narration",
+        cheap_model="fake-cheap",
+        pricing_mode="static_table",
+    )
+    return _with_overrides(instance, overrides)
+
+
+def make_fake_llm_response(
+    agent_name: str = "default",
+    text: str = "synthetic reply",
+    parsed_json: dict[str, object] | None = None,
+) -> LLMResponse:
+    """Return a deterministic fake LLMResponse."""
+
+    return LLMResponse(
+        text=text,
+        parsed_json=parsed_json,
+        usage=TokenUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+        finish_reason="stop",
+        cost_estimate_usd=0.0,
+    )
 
 
 def regenerate_fixtures(fixture_dir: Path = FIXTURE_DIR) -> None:

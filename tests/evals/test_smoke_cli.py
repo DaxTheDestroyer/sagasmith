@@ -22,6 +22,12 @@ def test_smoke_fast_mode_prints_every_check():
         "schema.export.full_coverage",
         "redaction.exported_schemas_clean",
         "state.compact_references",
+        "schema.hp_invariant.rejects_over_max",
+        "redaction.openai_project_key.labeled",
+        "provider.fake.round_trip",
+        "cost.warning.fires_once_per_threshold",
+        "cost.hard_stop.before_call",
+        "persistence.turn_close.transaction_ordering",
     ):
         assert name in result.stdout, f"missing check name {name!r} in output:\n{result.stdout}"
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from sagasmith.schemas import CharacterSheet, CheckProposal, CheckResult, RollResult
+from sagasmith.schemas import CharacterSheet, CheckProposal, CheckResult, CombatantState, RollResult
 
 
 def make_roll_result(**overrides: object) -> dict[str, object]:
@@ -132,3 +132,42 @@ def test_character_sheet_level_positive() -> None:
         CharacterSheet(**make_character_sheet(level=0))
 
     assert CharacterSheet(**make_character_sheet(level=1)).level == 1
+
+
+@pytest.mark.smoke
+def test_character_sheet_rejects_current_hp_above_max() -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        CharacterSheet(**make_character_sheet(current_hp=999))
+    msg = str(exc_info.value)
+    assert "current_hp" in msg
+    assert "max_hp" in msg
+
+
+def test_character_sheet_accepts_current_hp_equal_to_max() -> None:
+    cs = CharacterSheet(**make_character_sheet(current_hp=20))
+    assert cs.current_hp == 20
+
+
+def test_combatant_state_rejects_current_hp_above_max() -> None:
+    with pytest.raises(ValidationError) as exc_info:
+        CombatantState(
+            id="c1",
+            name="Goblin",
+            current_hp=11,
+            max_hp=10,
+            armor_class=15,
+        )
+    msg = str(exc_info.value)
+    assert "current_hp" in msg
+    assert "max_hp" in msg
+
+
+def test_combatant_state_accepts_current_hp_equal_to_max() -> None:
+    cs = CombatantState(
+        id="c1",
+        name="Goblin",
+        current_hp=10,
+        max_hp=10,
+        armor_class=15,
+    )
+    assert cs.current_hp == 10

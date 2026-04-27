@@ -28,6 +28,15 @@ EXPECTED_SCHEMA_NAMES = {
     "CanonConflict",
     "SafetyEvent",
     "CostState",
+    "LLMRequest",
+    "LLMResponse",
+    "ProviderConfig",
+    "ProviderLogRecord",
+    "CostLogRecord",
+    "TurnRecord",
+    "CheckpointRef",
+    "TranscriptEntry",
+    "StateDeltaRecord",
 }
 
 
@@ -38,7 +47,7 @@ def schema_name(path: Path) -> str:
 def test_exported_schema_set_matches_contract(tmp_path: Path) -> None:
     paths = export_all_schemas(tmp_path)
 
-    assert paths == sorted(paths)
+    assert paths == sorted(paths, key=lambda p: p.name)
     assert {schema_name(path) for path in paths} == EXPECTED_SCHEMA_NAMES
 
 

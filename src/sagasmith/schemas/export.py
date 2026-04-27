@@ -10,7 +10,20 @@ from pydantic import BaseModel
 from .deltas import CanonConflict, StateDelta
 from .mechanics import CharacterSheet, CheckProposal, CheckResult, CombatState, RollResult
 from .narrative import MemoryPacket, SceneBrief, SessionState
+from .persistence import (
+    CheckpointRef,
+    CostLogRecord,
+    StateDeltaRecord,
+    TranscriptEntry,
+    TurnRecord,
+)
 from .player import ContentPolicy, HouseRules, PlayerProfile
+from .provider import (
+    LLMRequest,
+    LLMResponse,
+    ProviderConfig,
+    ProviderLogRecord,
+)
 from .safety_cost import CostState, SafetyEvent
 from .saga_state import SagaState
 
@@ -33,6 +46,15 @@ LLM_BOUNDARY_AND_PERSISTED_MODELS: list[SchemaModelClass] = [
     CanonConflict,
     SafetyEvent,
     CostState,
+    LLMRequest,
+    LLMResponse,
+    ProviderConfig,
+    ProviderLogRecord,
+    CostLogRecord,
+    TurnRecord,
+    CheckpointRef,
+    TranscriptEntry,
+    StateDeltaRecord,
 ]
 
 
@@ -48,4 +70,4 @@ def export_all_schemas(out_dir: Path) -> list[Path]:
         path = out_dir / f"{model.__name__}.schema.json"
         path.write_text(json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         written.append(path)
-    return written
+    return sorted(written, key=lambda p: p.name)

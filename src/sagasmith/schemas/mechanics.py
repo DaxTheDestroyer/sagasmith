@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .common import (
     AttackProfile,
@@ -39,6 +39,12 @@ class CharacterSheet(SchemaModel):
     attacks: list[AttackProfile]
     inventory: list[InventoryItem]
     conditions: list[ConditionInstance]
+
+    @model_validator(mode="after")
+    def _validate_hp_bounds(self) -> CharacterSheet:
+        if self.current_hp > self.max_hp:
+            raise ValueError(f"current_hp ({self.current_hp}) cannot exceed max_hp ({self.max_hp})")
+        return self
 
 
 class CombatState(SchemaModel):

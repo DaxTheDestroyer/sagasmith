@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 PositionTagValue = Literal["close", "near", "far", "behind_cover"]
 
@@ -115,6 +115,12 @@ class CombatantState(SchemaModel):
     max_hp: int = Field(gt=0)
     armor_class: int = Field(gt=0)
     conditions: list[ConditionInstance] = Field(default_factory=list[ConditionInstance])
+
+    @model_validator(mode="after")
+    def _validate_hp_bounds(self) -> CombatantState:
+        if self.current_hp > self.max_hp:
+            raise ValueError(f"current_hp ({self.current_hp}) cannot exceed max_hp ({self.max_hp})")
+        return self
 
 
 class Effect(SchemaModel):
