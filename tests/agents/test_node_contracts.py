@@ -203,7 +203,8 @@ class TestArchivistNode:
         assert isinstance(session_state, dict)
         assert session_state["turn_count"] == 4
         assert result["pending_player_input"] is None
-        assert result["pending_narration"] == []
+        # Phase 4: pending_narration preserved for TUI sync (Phase 7 will clear after persist)
+        assert result["pending_narration"] == ["line one"]
 
 
 class TestOnboardingNode:

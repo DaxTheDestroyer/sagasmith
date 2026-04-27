@@ -71,9 +71,16 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         # Phase 4: graph runtime bound by build_app when graph is compiled.
         # None in headless CLI tests or when build_graph_runtime=False.
         self.graph_runtime: GraphRuntime | None = None
+        # Turn/session tracking (set by runtime or tests before input).
+        self.current_turn_id: str | None = None
+        self.current_session_id: str = "session_001"
         # Service connection owned by the app for deterministic lifecycle close.
         # Set by runtime.build_app(); None in unit tests that bypass build_app().
         self._service_conn: sqlite3.Connection | None = None
+
+    @property
+    def narration(self) -> NarrationArea:
+        return self.query_one(NarrationArea)
 
     def bind_service_connection(self, conn: sqlite3.Connection) -> None:
         """Bind the runtime-owned SQLite service connection to the app lifecycle."""
@@ -115,6 +122,54 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         narration = self.query_one(NarrationArea)
         narration.append_line(f"> {event.text}")
         self.state.scrollback.append(f"> {event.text}")
+        # Phase 4: drive graph turn when runtime is bound
+        if self.graph_runtime is not None:
+            state = self._build_play_state(event.text)
+            self.graph_runtime.invoke_turn(state)
+
+    def _build_play_state(self, player_input: str) -> dict[str, object]:
+        """Minimal play-phase state for stub graph nodes."""
+        budget = 0.0
+        if self.cost_governor is not None:
+            budget = self.cost_governor.state.session_budget_usd
+        return {
+            "campaign_id": self.manifest.campaign_id,
+            "session_id": self.current_session_id,
+            "turn_id": self.current_turn_id or "turn_000001",
+            "phase": "play",
+            "player_profile": None,
+            "content_policy": None,
+            "house_rules": None,
+            "character_sheet": None,
+            "session_state": {
+                "current_scene_id": None,
+                "current_location_id": None,
+                "active_quest_ids": [],
+                "in_game_clock": {"day": 1, "hour": 12, "minute": 0},
+                "turn_count": 0,
+                "transcript_cursor": None,
+                "last_checkpoint_id": None,
+            },
+            "combat_state": None,
+            "pending_player_input": player_input,
+            "memory_packet": None,
+            "scene_brief": None,
+            "check_results": [],
+            "state_deltas": [],
+            "pending_conflicts": [],
+            "pending_narration": [],
+            "safety_events": [],
+            "cost_state": {
+                "session_budget_usd": budget,
+                "spent_usd_estimate": 0.0,
+                "tokens_prompt": 0,
+                "tokens_completion": 0,
+                "unknown_cost_call_count": 0,
+                "warnings_sent": [],
+                "hard_stopped": False,
+            },
+            "last_interrupt": None,
+        }
 
     def on_command_invoked(self, event: CommandInvoked) -> None:
         if self.commands is None:
@@ -122,6 +177,18 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             # Plan 03-04 replaces this guard with full registry dispatch.
             return
         self.commands.dispatch(self, event.name, event.args)
+
+    def _sync_narration_from_graph(self) -> None:
+        """Append any new pending_narration lines from graph state to the TUI."""
+        if self.graph_runtime is None:
+            return
+        snapshot = self.graph_runtime.graph.get_state(self.graph_runtime.thread_config)
+        values = getattr(snapshot, "values", {}) or {}
+        pending = values.get("pending_narration", [])
+        if pending:
+            narration = self.query_one(NarrationArea)
+            for line in pending:
+                narration.append_line(line)
 
     def on_unmount(self) -> None:
         """Close the long-lived service connection deterministically on TUI exit.

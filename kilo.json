@@ -1,6 +1,7 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
   "permission": {
+    "bash": "allow",
     "github_*": "ask",
     "github_get_file_contents": "allow",
     "github_list_issues": "allow",
