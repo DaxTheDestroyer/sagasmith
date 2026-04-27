@@ -21,10 +21,10 @@ def test_init_campaign_writes_manifest_and_db(tmp_path: Path) -> None:
     assert (root / "campaign.sqlite").is_file()
     assert (root / "player_vault").is_dir()
 
-    # Verify the DB has schema_version == 4 (all migrations applied) and a campaign row.
+    # Verify the DB has schema_version == 5 (all migrations applied) and a campaign row.
     conn = open_campaign_db(root / "campaign.sqlite", read_only=True)
     try:
-        assert current_schema_version(conn) == 4
+        assert current_schema_version(conn) == 5
         row = conn.execute(
             "SELECT campaign_name FROM campaigns WHERE campaign_id = ?",
             (manifest.campaign_id,),
