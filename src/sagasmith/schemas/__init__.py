@@ -36,6 +36,7 @@ from .enums import (
 from .mechanics import CharacterSheet, CheckProposal, CheckResult, CombatState, RollResult
 from .narrative import MemoryPacket, SceneBrief, SessionState
 from .persistence import (
+    AgentSkillLogRecord,
     CheckpointRef,
     CostLogRecord,
     SafetyEventRecord,
@@ -62,6 +63,7 @@ from .safety_cost import CostState, SafetyEvent
 from .saga_state import SagaState
 
 __all__ = [
+    "AgentSkillLogRecord",
     "AttackProfile",
     "AttackProfile",
     "BudgetPolicy",

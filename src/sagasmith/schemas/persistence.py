@@ -80,3 +80,14 @@ class SafetyEventRecord(SchemaModel):
     action_taken: str
     timestamp: str  # ISO 8601 UTC
     visibility: Literal["player_visible"] = "player_visible"  # SAFE-06: Phase 3 events are ALL player-visible
+
+
+class AgentSkillLogRecord(SchemaModel):
+    """Per-node activation log written by AgentActivationLogger."""
+
+    turn_id: str = Field(min_length=1)
+    agent_name: Literal["onboarding", "oracle", "rules_lawyer", "orator", "archivist"]
+    skill_name: str | None = None
+    started_at: str
+    completed_at: str | None = None
+    outcome: Literal["success", "interrupted", "error"]

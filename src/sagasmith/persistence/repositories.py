@@ -9,6 +9,7 @@ from typing import Any
 
 from sagasmith.schemas.mechanics import RollResult
 from sagasmith.schemas.persistence import (
+    AgentSkillLogRecord,
     CheckpointRef,
     CostLogRecord,
     SafetyEventRecord,
@@ -332,6 +333,75 @@ class TurnRecordRepository:
             completed_at=row[5],
             schema_version=row[6],
         )
+
+
+@dataclass(frozen=True)
+class AgentSkillLogRepository:
+    conn: sqlite3.Connection
+
+    def append(self, record: AgentSkillLogRecord) -> int:
+        cursor = self.conn.execute(
+            """
+            INSERT INTO agent_skill_log
+                (turn_id, agent_name, skill_name, started_at, completed_at, outcome)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                record.turn_id,
+                record.agent_name,
+                record.skill_name,
+                record.started_at,
+                record.completed_at,
+                record.outcome,
+            ),
+        )
+        assert cursor.lastrowid is not None
+        return cursor.lastrowid
+
+    def list_for_turn(self, turn_id: str) -> list[AgentSkillLogRecord]:
+        rows = self.conn.execute(
+            """
+            SELECT turn_id, agent_name, skill_name, started_at, completed_at, outcome
+            FROM agent_skill_log
+            WHERE turn_id = ?
+            ORDER BY id
+            """,
+            (turn_id,),
+        ).fetchall()
+        return [
+            AgentSkillLogRecord(
+                turn_id=row[0],
+                agent_name=row[1],
+                skill_name=row[2],
+                started_at=row[3],
+                completed_at=row[4],
+                outcome=row[5],
+            )
+            for row in rows
+        ]
+
+    def list_for_agent(self, agent_name: str, *, limit: int = 50) -> list[AgentSkillLogRecord]:
+        rows = self.conn.execute(
+            """
+            SELECT turn_id, agent_name, skill_name, started_at, completed_at, outcome
+            FROM agent_skill_log
+            WHERE agent_name = ?
+            ORDER BY started_at DESC
+            LIMIT ?
+            """,
+            (agent_name, limit),
+        ).fetchall()
+        return [
+            AgentSkillLogRecord(
+                turn_id=row[0],
+                agent_name=row[1],
+                skill_name=row[2],
+                started_at=row[3],
+                completed_at=row[4],
+                outcome=row[5],
+            )
+            for row in rows
+        ]
 
 
 @dataclass(frozen=True)

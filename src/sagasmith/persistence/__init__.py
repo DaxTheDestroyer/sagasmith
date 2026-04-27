@@ -4,6 +4,7 @@ from sagasmith.app.config import SettingsRepository
 from sagasmith.persistence.db import campaign_db, current_schema_version, open_campaign_db
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import (
+    AgentSkillLogRepository,
     CheckpointRefRepository,
     CostLogRepository,
     ProviderLogRepository,
@@ -16,6 +17,7 @@ from sagasmith.persistence.repositories import (
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
 
 __all__ = [
+    "AgentSkillLogRepository",
     "CheckpointRefRepository",
     "CostLogRepository",
     "ProviderLogRepository",

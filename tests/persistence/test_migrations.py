@@ -24,9 +24,9 @@ def test_apply_migrations_creates_tables(tmp_path: Path) -> None:
     with campaign_db(path) as conn:
             applied = apply_migrations(conn)
             # 0001_initial.sql (v1), 0002_campaign_and_settings.sql (v2),
-            # 0003_onboarding_records.sql (v3), and 0004_safety_events.sql (v4)
-            # are all applied on a fresh DB.
-            assert applied == [1, 2, 3, 4]
+            # 0003_onboarding_records.sql (v3), 0004_safety_events.sql (v4),
+            # and 0005_agent_skill_log.sql (v5) are all applied on a fresh DB.
+            assert applied == [1, 2, 3, 4, 5]
             tables = {
                 row[0]
                 for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
@@ -64,18 +64,18 @@ def test_current_schema_version_one_after_migration(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     with campaign_db(path) as conn:
         apply_migrations(conn)
-        # All migrations applied: v1 (initial), v2 (campaign_and_settings), v3 (onboarding), v4 (safety_events).
-        assert current_schema_version(conn) == 4
+        # All migrations applied: v1 (initial), v2 (campaign_and_settings), v3 (onboarding), v4 (safety_events), v5 (agent_skill_log).
+        assert current_schema_version(conn) == 5
 
 
 def test_apply_migrations_persists_schema_version_after_reopen(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     with campaign_db(path) as conn:
-        # v1, v2, v3, and v4 are applied on a fresh DB.
-        assert apply_migrations(conn) == [1, 2, 3, 4]
+        # v1, v2, v3, v4, and v5 are applied on a fresh DB.
+        assert apply_migrations(conn) == [1, 2, 3, 4, 5]
 
     with campaign_db(path) as conn:
-        assert current_schema_version(conn) == 4
+        assert current_schema_version(conn) == 5
         assert apply_migrations(conn) == []
 
 
