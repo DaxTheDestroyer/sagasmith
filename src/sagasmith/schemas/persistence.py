@@ -67,3 +67,16 @@ class StateDeltaRecord(SchemaModel):
     value_json: str
     reason: str
     applied_at: str
+
+
+class SafetyEventRecord(SchemaModel):
+    """SQLite-backed version of SafetyEvent, adds campaign_id + timestamp."""
+
+    event_id: str
+    campaign_id: str
+    turn_id: str | None  # None when event is pre-gameplay (/pause during onboarding)
+    kind: Literal["pause", "line", "soft_limit_fade", "post_gate_rewrite", "fallback"]
+    policy_ref: str | None
+    action_taken: str
+    timestamp: str  # ISO 8601 UTC
+    visibility: Literal["player_visible"] = "player_visible"  # SAFE-06: Phase 3 events are ALL player-visible

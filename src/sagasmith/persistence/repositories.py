@@ -11,6 +11,7 @@ from sagasmith.schemas.mechanics import RollResult
 from sagasmith.schemas.persistence import (
     CheckpointRef,
     CostLogRecord,
+    SafetyEventRecord,
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
@@ -331,3 +332,43 @@ class TurnRecordRepository:
             completed_at=row[5],
             schema_version=row[6],
         )
+
+
+@dataclass(frozen=True)
+class SafetyEventRepository:
+    conn: sqlite3.Connection
+
+    def append(self, record: SafetyEventRecord) -> str:
+        self.conn.execute(
+            """
+            INSERT INTO safety_events
+              (event_id, campaign_id, turn_id, kind, policy_ref, action_taken, timestamp, visibility)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                record.event_id, record.campaign_id, record.turn_id,
+                record.kind, record.policy_ref, record.action_taken,
+                record.timestamp, record.visibility,
+            ),
+        )
+        return record.event_id
+
+    def list_for_campaign(self, campaign_id: str, *, limit: int = 20) -> list[SafetyEventRecord]:
+        rows = self.conn.execute(
+            """
+            SELECT event_id, campaign_id, turn_id, kind, policy_ref, action_taken, timestamp, visibility
+              FROM safety_events
+             WHERE campaign_id = ?
+             ORDER BY timestamp DESC
+             LIMIT ?
+            """,
+            (campaign_id, limit),
+        ).fetchall()
+        return [
+            SafetyEventRecord(
+                event_id=row[0], campaign_id=row[1], turn_id=row[2],
+                kind=row[3], policy_ref=row[4], action_taken=row[5],
+                timestamp=row[6], visibility=row[7],
+            )
+            for row in rows
+        ]

@@ -38,6 +38,7 @@ from .narrative import MemoryPacket, SceneBrief, SessionState
 from .persistence import (
     CheckpointRef,
     CostLogRecord,
+    SafetyEventRecord,
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
@@ -117,6 +118,7 @@ __all__ = [
     "RollResult",
     "SafetyEvent",
     "SafetyEventKind",
+    "SafetyEventRecord",
     "SagaState",
     "SceneBrief",
     "SessionState",
