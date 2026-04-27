@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md (campaign lifecycle + CLI shell)
-last_updated: "2026-04-27T14:40:12Z"
-last_activity: 2026-04-27 -- Phase 3 Plan 01 complete
+stopped_at: Completed 03-02-PLAN.md (onboarding wizard domain + SQLite store)
+last_updated: "2026-04-27T14:57:26Z"
+last_activity: 2026-04-27 -- Phase 3 Plan 02 complete
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
-  percent: 27
+  completed_plans: 11
+  percent: 29
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 3 — CLI Setup, Onboarding, and TUI Controls (executing plan 1 of 4)
+**Current focus:** Phase 3 — CLI Setup, Onboarding, and TUI Controls (executing plan 3 of 4)
 
 ## Current Position
 
 Phase: 3 of 8 (CLI Setup, Onboarding, and TUI Controls)
-Plan: 1 of 4 in current phase (Plan 03-01 complete)
+Plan: 2 of 4 in current phase (Plan 03-02 complete)
 Status: Executing
-Last activity: 2026-04-27 -- Phase 3 Plan 01 complete (campaign lifecycle + CLI shell)
+Last activity: 2026-04-27 -- Phase 3 Plan 02 complete (onboarding wizard domain + SQLite store)
 
-Progress: [██░░░░░░░░] 27%
+Progress: [███░░░░░░░] 29%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 10
-- Average duration: 21 min
-- Total execution time: 1.4 hours
+- Total plans completed: 11
+- Average duration: 20 min
+- Total execution time: 1.6 hours
 
 **By Phase:**
 
@@ -46,12 +46,12 @@ Progress: [██░░░░░░░░] 27%
 |-------|-------|-------|----------|
 | 1. Contracts, Scaffold, and Eval Spine | 3 | 3 | 22 min |
 | 2. Deterministic Trust Services | 6 | 6 | -- |
-| 3. CLI Setup, Onboarding, and TUI Controls | 1 | 4 (planned) | -- |
+| 3. CLI Setup, Onboarding, and TUI Controls | 2 | 4 (planned) | -- |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (48 min), 01-02 (8 min), 01-03 (10 min), 03-01 (16 min)
-- Trend: Phase 3 Plan 01 complete; campaigns + CLI shell, v2 schema, smoke 12/12.
+- Last 5 plans: 01-02 (8 min), 01-03 (10 min), 03-01 (16 min), 03-02 (12 min)
+- Trend: Phase 3 Plan 02 complete; onboarding wizard + store, 240/1 tests, schema v3.
 
 *Updated after each plan completion*
 
@@ -74,10 +74,13 @@ Recent decisions affecting current work:
 - [03-01]: SettingsRepository.put always runs RedactionCanary scan before INSERT/UPDATE, mirroring turn_close.py invariant.
 - [03-01]: Smoke check count is 12 (not 11 as plan said) — persistence.turn_close was already check #11 from Phase 2.
 - [03-01]: Annotated[Type, typer.Option(...)] used for all CLI args to satisfy ruff B008 rule.
+- [03-02]: StrEnum used for OnboardingPhase/PromptFieldKind (ruff UP042 fix, Python 3.11+ StrEnum).
+- [03-02]: BrokenContentPolicy subclass used for atomicity test — sqlite3.Connection.execute is read-only in CPython, cannot be patched via unittest.mock.patch.object.
+- [03-02]: Three separate onboarding tables (not one JSON blob) per plan spec — each maps to a distinct Pydantic model lifecycle.
 
 ### Pending Todos
 
-- Execute Phase 3 Plans 02-04 in wave order (03-02 in Wave 1, then 03-03, then 03-04).
+- Execute Phase 3 Plans 03-04 in wave order (03-03 in Wave 2, then 03-04 in Wave 3).
 
 ### Blockers/Concerns
 
@@ -93,6 +96,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-27T14:40:12Z
-Stopped at: Completed 03-01-PLAN.md (campaign lifecycle + CLI shell)
+Last session: 2026-04-27T14:57:26Z
+Stopped at: Completed 03-02-PLAN.md (onboarding wizard domain + SQLite store)
 Resume file: None

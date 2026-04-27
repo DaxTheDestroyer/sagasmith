@@ -47,11 +47,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Onboarding and Player Contract
 
-- [ ] **ONBD-01**: User can complete onboarding that captures genre, tone, touchstones, pillar weights, pacing, combat style, dice UX, campaign length, character mode, death policy, and budget.
-- [ ] **ONBD-02**: User can define hard limits, soft limits, and content preferences during onboarding.
-- [ ] **ONBD-03**: User can review and edit onboarding outputs before they are committed.
-- [ ] **ONBD-04**: System persists validated `PlayerProfile`, `ContentPolicy`, and `HouseRules` before gameplay starts.
-- [ ] **ONBD-05**: User can re-run onboarding or adjust settings without deleting an existing campaign.
+- [x] **ONBD-01**: User can complete onboarding that captures genre, tone, touchstones, pillar weights, pacing, combat style, dice UX, campaign length, character mode, death policy, and budget.
+- [x] **ONBD-02**: User can define hard limits, soft limits, and content preferences during onboarding.
+- [x] **ONBD-03**: User can review and edit onboarding outputs before they are committed.
+- [x] **ONBD-04**: System persists validated `PlayerProfile`, `ContentPolicy`, and `HouseRules` before gameplay starts.
+- [x] **ONBD-05**: User can re-run onboarding or adjust settings without deleting an existing campaign.
 
 ### Textual TUI and Commands
 
