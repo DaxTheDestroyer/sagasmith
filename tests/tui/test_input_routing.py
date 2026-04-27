@@ -31,7 +31,7 @@ def _init_campaign_root(tmp_path: Path, name: str = "Route Test") -> Path:
 async def test_slash_help_dispatches_and_appends_help(tmp_path: Path) -> None:
     """End-to-end: typing /help appends help listing to narration."""
     root = _init_campaign_root(tmp_path)
-    app = build_app(root)
+    app = build_app(root, build_graph_runtime=False)
 
     async with app.run_test() as pilot:
         await pilot.click("#player-input")
@@ -57,7 +57,7 @@ async def test_slash_help_dispatches_and_appends_help(tmp_path: Path) -> None:
 async def test_freeform_input_echoes_to_narration(tmp_path: Path) -> None:
     """TUI-02: player text without / appears in narration and scrollback."""
     root = _init_campaign_root(tmp_path)
-    app = build_app(root)
+    app = build_app(root, build_graph_runtime=False)
 
     async with app.run_test() as pilot:
         await pilot.click("#player-input")
