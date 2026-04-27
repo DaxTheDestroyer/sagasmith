@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 import tomllib
 from datetime import UTC, datetime
 from pathlib import Path
@@ -79,53 +80,60 @@ def init_campaign(
     # 1. Create root directory — raises FileExistsError if already exists.
     root.mkdir(parents=True, exist_ok=False)
 
-    # 2. Create player_vault directory.
-    (root / "player_vault").mkdir()
-
-    # 3. Open DB, run migrations, record schema version.
-    conn = open_campaign_db(root / "campaign.sqlite")
     try:
-        apply_migrations(conn)
-        schema_version_value = current_schema_version(conn)
+        # 2. Create player_vault directory.
+        (root / "player_vault").mkdir()
 
-        slug = slugify(name)
-        campaign_id = generate_campaign_id(slug)
-        created_at = datetime.now(UTC).isoformat()
+        # 3. Open DB, run migrations, record schema version.
+        conn = open_campaign_db(root / "campaign.sqlite")
+        try:
+            apply_migrations(conn)
+            schema_version_value = current_schema_version(conn)
 
-        # 4. Seed campaigns + settings rows inside ONE transaction.
-        with conn:
-            conn.execute(
-                """
-                INSERT INTO campaigns (
-                    campaign_id, campaign_name, campaign_slug,
-                    created_at, sagasmith_version, manifest_version
-                ) VALUES (?, ?, ?, ?, ?, 1)
-                """,
-                (campaign_id, name, slug, created_at, sagasmith.__version__),
-            )
-            provider_settings = ProviderSettings(
-                provider=provider,
-                api_key_ref=api_key_ref,
-                default_model=default_model,
-                narration_model=narration_model,
-                cheap_model=cheap_model,
-            )
-            # 5. Write ProviderSettings through SettingsRepository (runs RedactionCanary).
-            SettingsRepository(conn).put_provider_settings(campaign_id, provider_settings)
-    finally:
-        conn.close()
+            slug = slugify(name)
+            campaign_id = generate_campaign_id(slug)
+            created_at = datetime.now(UTC).isoformat()
 
-    # 6. Serialize CampaignManifest to TOML.
-    manifest = CampaignManifest(
-        manifest_version=1,
-        campaign_id=campaign_id,
-        campaign_name=name,
-        campaign_slug=slug,
-        created_at=created_at,
-        sagasmith_version=sagasmith.__version__,
-        schema_version=schema_version_value,
-    )
-    _write_toml(manifest, root / "campaign.toml")
+            # 4. Seed campaigns + settings rows inside ONE transaction.
+            with conn:
+                conn.execute(
+                    """
+                    INSERT INTO campaigns (
+                        campaign_id, campaign_name, campaign_slug,
+                        created_at, sagasmith_version, manifest_version
+                    ) VALUES (?, ?, ?, ?, ?, 1)
+                    """,
+                    (campaign_id, name, slug, created_at, sagasmith.__version__),
+                )
+                provider_settings = ProviderSettings(
+                    provider=provider,
+                    api_key_ref=api_key_ref,
+                    default_model=default_model,
+                    narration_model=narration_model,
+                    cheap_model=cheap_model,
+                )
+                # 5. Write ProviderSettings through SettingsRepository (runs RedactionCanary).
+                SettingsRepository(conn).put_provider_settings(campaign_id, provider_settings)
+        finally:
+            conn.close()
+
+        # 6. Serialize CampaignManifest to TOML.
+        manifest = CampaignManifest(
+            manifest_version=1,
+            campaign_id=campaign_id,
+            campaign_name=name,
+            campaign_slug=slug,
+            created_at=created_at,
+            sagasmith_version=sagasmith.__version__,
+            schema_version=schema_version_value,
+        )
+        _write_toml(manifest, root / "campaign.toml")
+
+    except BaseException:
+        # Clean up the partially-created campaign directory so the user can
+        # retry with the same path without hitting a misleading FileExistsError.
+        shutil.rmtree(root, ignore_errors=True)
+        raise
 
     # 7. Return the manifest.
     return manifest
