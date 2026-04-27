@@ -207,6 +207,7 @@ def make_valid_saga_state(**overrides: Any) -> SagaState:
         check_results=[],
         state_deltas=[],
         pending_conflicts=[],
+        pending_narration=[],
         safety_events=[],
         cost_state=make_valid_cost_state(),
     )

@@ -1,4 +1,9 @@
-"""Compact LangGraph SagaState schema."""
+"""Compact LangGraph SagaState schema.
+
+Added in Plan 04-01:
+- pending_narration: list[str] — narration lines queued by the Orator node
+  awaiting persistence at turn close.
+"""
 
 from __future__ import annotations
 
@@ -33,5 +38,9 @@ class SagaState(SchemaModel):
     check_results: list[CheckResult] = Field(default_factory=list[CheckResult])
     state_deltas: list[StateDelta] = Field(default_factory=list[StateDelta])
     pending_conflicts: list[CanonConflict] = Field(default_factory=list[CanonConflict])
+    pending_narration: list[str] = Field(
+        default_factory=list[str],
+        description="Narration lines queued by the Orator node awaiting persistence at turn close.",
+    )
     safety_events: list[SafetyEvent] = Field(default_factory=list[SafetyEvent])
     cost_state: CostState
