@@ -412,4 +412,19 @@ def run_smoke() -> SmokeResult:
             SmokeCheck("persistence.turn_close.transaction_ordering", False, str(exc)[:200])
         )
 
+    # Check #11: CLI init produces a valid campaign layout (CLI-01).
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            from sagasmith.app.campaign import init_campaign, open_campaign
+
+            root = Path(td) / "smoke-campaign"
+            init_campaign(name="Smoke Test", root=root, provider="fake")
+            paths, manifest = open_campaign(root)
+            assert manifest.campaign_name == "Smoke Test"
+            assert paths.db.is_file()
+            assert paths.player_vault.is_dir()
+        result.checks.append(SmokeCheck("cli.init.creates_storage", True))
+    except Exception as exc:
+        result.checks.append(SmokeCheck("cli.init.creates_storage", False, str(exc)[:200]))
+
     return result

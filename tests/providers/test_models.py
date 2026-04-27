@@ -174,7 +174,8 @@ def test_schema_export_count_is_25(tmp_path: Path) -> None:
 
     out = Path(tmp_path) / "schemas"
     paths = export_all_schemas(out)
-    assert len(paths) == 25
+    # Phase 3 Plan 01 added CampaignManifest and ProviderSettings (total: 27).
+    assert len(paths) == 27
     names = {p.name.removesuffix(".schema.json") for p in paths}
     assert "LLMRequest" in names
     assert "LLMResponse" in names

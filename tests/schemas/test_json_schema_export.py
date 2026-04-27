@@ -12,6 +12,8 @@ from sagasmith.cli.main import app
 from sagasmith.schemas.export import export_all_schemas
 
 EXPECTED_SCHEMA_NAMES = {
+    "CampaignManifest",
+    "ProviderSettings",
     "SagaState",
     "PlayerProfile",
     "ContentPolicy",

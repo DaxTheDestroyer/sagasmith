@@ -23,7 +23,8 @@ def test_apply_migrations_creates_tables(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     with campaign_db(path) as conn:
         applied = apply_migrations(conn)
-        assert applied == [1]
+        # 0001_initial.sql (v1) and 0002_campaign_and_settings.sql (v2) are applied.
+        assert applied == [1, 2]
         tables = {
             row[0]
             for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
@@ -37,6 +38,8 @@ def test_apply_migrations_creates_tables(tmp_path: Path) -> None:
             "cost_logs",
             "state_deltas",
             "checkpoint_refs",
+            "campaigns",
+            "settings",
         } <= tables
 
 
@@ -59,16 +62,18 @@ def test_current_schema_version_one_after_migration(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     with campaign_db(path) as conn:
         apply_migrations(conn)
-        assert current_schema_version(conn) == 1
+        # All migrations applied: v1 (initial) and v2 (campaign_and_settings).
+        assert current_schema_version(conn) == 2
 
 
 def test_apply_migrations_persists_schema_version_after_reopen(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     with campaign_db(path) as conn:
-        assert apply_migrations(conn) == [1]
+        # Both v1 and v2 are applied on a fresh DB.
+        assert apply_migrations(conn) == [1, 2]
 
     with campaign_db(path) as conn:
-        assert current_schema_version(conn) == 1
+        assert current_schema_version(conn) == 2
         assert apply_migrations(conn) == []
 
 
@@ -142,7 +147,8 @@ def test_persistence_schemas_round_trip() -> None:
 def test_schema_export_count_is_25(tmp_path: Path) -> None:
     out = tmp_path / "schemas"
     paths = export_all_schemas(out)
-    assert len(paths) == 25
+    # Phase 3 Plan 01 added CampaignManifest and ProviderSettings (total: 27).
+    assert len(paths) == 27
     names = {p.name.removesuffix(".schema.json") for p in paths}
     assert {
         "CostLogRecord",
@@ -150,4 +156,6 @@ def test_schema_export_count_is_25(tmp_path: Path) -> None:
         "CheckpointRef",
         "TranscriptEntry",
         "StateDeltaRecord",
+        "CampaignManifest",
+        "ProviderSettings",
     } <= names

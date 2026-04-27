@@ -12,6 +12,7 @@ def test_smoke_fast_mode_exits_zero():
     result = CliRunner().invoke(app, ["smoke", "--mode", "fast"])
     assert result.exit_code == 0, result.stdout
     assert "checks passed" in result.stdout
+    assert "12/12" in result.stdout
 
 
 def test_smoke_fast_mode_prints_every_check():
@@ -28,6 +29,7 @@ def test_smoke_fast_mode_prints_every_check():
         "cost.warning.fires_once_per_threshold",
         "cost.hard_stop.before_call",
         "persistence.turn_close.transaction_ordering",
+        "cli.init.creates_storage",
     ):
         assert name in result.stdout, f"missing check name {name!r} in output:\n{result.stdout}"
 
