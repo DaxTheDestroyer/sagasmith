@@ -71,13 +71,16 @@ class TestRouteByPhase:
 
 
 class TestLightweightImports:
-    def test_graph_package_does_not_import_heavy_modules(self) -> None:
-        """Test 7: Importing sagasmith.graph does NOT pull textual or sqlite3."""
+    def test_graph_package_does_not_import_textual(self) -> None:
+        """Test 7: Importing sagasmith.graph does NOT pull textual.
+
+        sqlite3 is now legitimately imported via activation_log, checkpoints,
+        and runtime modules (Plan 04-02). Only textual remains deferred.
+        """
         code = (
             "import sys; "
             "import sagasmith.graph; "
             "assert 'textual' not in sys.modules, 'textual was imported'; "
-            "assert 'sqlite3' not in sys.modules, 'sqlite3 was imported'; "
             "print('ok')"
         )
         result = subprocess.run(
