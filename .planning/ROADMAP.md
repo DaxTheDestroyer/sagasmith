@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Contracts, Scaffold, and Eval Spine** - Developer can run a local package skeleton with typed state contracts and schema/eval guardrails. (completed 2026-04-26)
 - [x] **Phase 2: Deterministic Trust Services** - Rules math, provider/cost handling, SQLite turn records, and privacy checks exist before paid gameplay. (completed 2026-04-26)
-- [ ] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls.
+- [x] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls. (completed 2026-04-27)
 - [ ] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure.
 - [ ] **Phase 5: Rules-First PF2e Vertical Slice** - User can inspect a pregen PC and complete deterministic skill/combat mechanics with auditable rolls.
 - [ ] **Phase 6: AI GM Story Loop** - User can play AI-planned, AI-narrated turns while rules, safety, cost, and narration boundaries hold.
@@ -85,7 +85,7 @@ Plans:
 - [x] 03-01-PLAN.md — Campaign lifecycle + CLI shell: v2 migration (campaigns, settings), `sagasmith.app` subpackage, four Typer commands (init/play/configure/demo), CampaignManifest on disk (CLI-01, CLI-02, CLI-03, CLI-05).
 - [x] 03-02-PLAN.md — Onboarding wizard domain + SQLite store: 9-phase state machine producing validated PlayerProfile/ContentPolicy/HouseRules, migration 0003 with three onboarding tables, atomic commit + re-run support (ONBD-01, ONBD-02, ONBD-03, ONBD-04, ONBD-05).
 - [x] 03-03-PLAN.md — Textual TUI shell + CommandRegistry + `/help`: four named widgets (narration, status, safety bar, input), pilot-tested mount, SQLite-backed scrollback, `sagasmith play` upgraded to launch Textual (TUI-01, TUI-02, TUI-03, TUI-04, TUI-05).
-- [ ] 03-04-PLAN.md — Eleven control/safety/settings commands + `safety_events` migration: `/pause`, `/line`, `/budget`, `/settings` wired; `/save`/`/recap`/`/sheet`/`/inventory`/`/map`/`/retcon` stubs named for their owning future phase (TUI-06, SAFE-04, SAFE-05, SAFE-06).
+- [x] 03-04-PLAN.md — Eleven control/safety/settings commands + `safety_events` migration: `/pause`, `/line`, `/budget`, `/settings` wired; `/save`/`/recap`/`/sheet`/`/inventory`/`/map`/`/retcon` stubs named for their owning future phase (TUI-06, SAFE-04, SAFE-05, SAFE-06).
 **UI hint**: yes
 
 ### Phase 4: Graph Runtime and Agent Skills
@@ -167,7 +167,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Contracts, Scaffold, and Eval Spine | 3/3 | Complete | 2026-04-26 |
 | 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
-| 3. CLI Setup, Onboarding, and TUI Controls | 3/4 | In Progress | - |
+| 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
 | 4. Graph Runtime and Agent Skills | 0/TBD | Not started | - |
 | 5. Rules-First PF2e Vertical Slice | 0/TBD | Not started | - |
 | 6. AI GM Story Loop | 0/TBD | Not started | - |

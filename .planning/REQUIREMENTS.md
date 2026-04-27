@@ -60,7 +60,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TUI-03**: User can scroll or review completed transcript entries during a session.
 - [x] **TUI-04**: User sees HP, conditions, active quest, current location, in-game clock, and last rolls in the status panel.
 - [x] **TUI-05**: User can open `/help` to view supported slash commands and descriptions.
-- [ ] **TUI-06**: User can use `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`.
+- [x] **TUI-06**: User can use `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`.
 - [ ] **TUI-07**: User sees a dice overlay or equivalent modal for reveal-mode checks that shows DC, modifier, d20 result, total, and degree.
 - [ ] **TUI-08**: User can quit from the TUI and resume later at the last safe prompt.
 
@@ -136,9 +136,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SAFE-01**: System blocks or reroutes scene intents that violate configured hard limits before generation.
 - [ ] **SAFE-02**: System fades, avoids detail, or asks first for soft-limit content according to `ContentPolicy`.
 - [ ] **SAFE-03**: System scans player-facing generated prose and retries or falls back when generated content violates policy.
-- [ ] **SAFE-04**: User can invoke `/pause` to freeze play and choose to continue, retcon, or adjust lines.
-- [ ] **SAFE-05**: User can invoke `/line` mid-scene and see subsequent narration rerouted or faded away from the redlined content.
-- [ ] **SAFE-06**: System logs safety events without exposing secrets or GM-only spoilers in the player vault.
+- [x] **SAFE-04**: User can invoke `/pause` to freeze play and choose to continue, retcon, or adjust lines.
+- [x] **SAFE-05**: User can invoke `/line` mid-scene and see subsequent narration rerouted or faded away from the redlined content.
+- [x] **SAFE-06**: System logs safety events without exposing secrets or GM-only spoilers in the player vault.
 
 ### Retcon, Repair, and Quality Gates
 
@@ -251,10 +251,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TUI-03 | Phase 3 | Complete |
 | TUI-04 | Phase 3 | Complete |
 | TUI-05 | Phase 3 | Complete |
-| TUI-06 | Phase 3 | Pending |
-| SAFE-04 | Phase 3 | Pending |
-| SAFE-05 | Phase 3 | Pending |
-| SAFE-06 | Phase 3 | Pending |
+| TUI-06 | Phase 3 | Complete |
+| SAFE-04 | Phase 3 | Complete |
+| SAFE-05 | Phase 3 | Complete |
+| SAFE-06 | Phase 3 | Complete |
 | GRAPH-01 | Phase 4 | Pending |
 | GRAPH-02 | Phase 4 | Pending |
 | GRAPH-03 | Phase 4 | Pending |
