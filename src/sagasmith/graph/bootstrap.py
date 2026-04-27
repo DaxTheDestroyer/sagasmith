@@ -98,6 +98,11 @@ def _default_skill_store(*, first_slice_only: bool = False) -> SkillStore:
     return store
 
 
+def default_skill_store(*, first_slice_only: bool = False) -> SkillStore:
+    """Public wrapper for the production skill store scan."""
+    return _default_skill_store(first_slice_only=first_slice_only)
+
+
 def build_default_graph(bootstrap: GraphBootstrap) -> Any:
     """Return a compiled StateGraph from a bootstrap bundle."""
     from sagasmith.graph.graph import build_saga_graph

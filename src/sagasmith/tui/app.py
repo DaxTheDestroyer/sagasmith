@@ -74,6 +74,8 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         # Turn/session tracking (set by runtime or tests before input).
         self.current_turn_id: str | None = None
         self.current_session_id: str = "session_001"
+        self._last_synced_graph_turn_id: str | None = None
+        self._synced_graph_narration_count = 0
         # Service connection owned by the app for deterministic lifecycle close.
         # Set by runtime.build_app(); None in unit tests that bypass build_app().
         self._service_conn: sqlite3.Connection | None = None
@@ -178,17 +180,33 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             return
         self.commands.dispatch(self, event.name, event.args)
 
+    async def action_quit(self) -> None:
+        """Record session-end intent before Textual exits."""
+        if self.graph_runtime is not None:
+            from sagasmith.graph.interrupts import InterruptKind
+
+            self.graph_runtime.post_interrupt(
+                kind=InterruptKind.SESSION_END,
+                payload={"reason": "player quit"},
+            )
+        self.exit()
+
     def _sync_narration_from_graph(self) -> None:
         """Append any new pending_narration lines from graph state to the TUI."""
         if self.graph_runtime is None:
             return
         snapshot = self.graph_runtime.graph.get_state(self.graph_runtime.thread_config)
         values = getattr(snapshot, "values", {}) or {}
+        turn_id = values.get("turn_id")
+        if turn_id != self._last_synced_graph_turn_id:
+            self._last_synced_graph_turn_id = turn_id
+            self._synced_graph_narration_count = 0
         pending = values.get("pending_narration", [])
-        if pending:
+        if pending and len(pending) > self._synced_graph_narration_count:
             narration = self.query_one(NarrationArea)
-            for line in pending:
+            for line in pending[self._synced_graph_narration_count:]:
                 narration.append_line(line)
+            self._synced_graph_narration_count = len(pending)
 
     def on_unmount(self) -> None:
         """Close the long-lived service connection deterministically on TUI exit.

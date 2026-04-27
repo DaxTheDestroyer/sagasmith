@@ -5,6 +5,7 @@ Phase 3 SafetyEvent writes.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -39,13 +40,15 @@ class FakeRuntime:
     """Records post_interrupt calls for testing."""
 
     def __init__(self) -> None:
-        self.calls: list[tuple[InterruptKind, dict | None]] = []
+        self.calls: list[tuple[InterruptKind, dict[str, Any] | None]] = []
 
     @property
-    def thread_config(self) -> dict:
+    def thread_config(self) -> dict[str, dict[str, str]]:
         return {"configurable": {"thread_id": "campaign:test"}}
 
-    def post_interrupt(self, *, kind: InterruptKind, payload: dict | None = None) -> None:
+    def post_interrupt(
+        self, *, kind: InterruptKind, payload: dict[str, Any] | None = None
+    ) -> None:
         self.calls.append((kind, payload))
 
 
@@ -173,13 +176,13 @@ async def test_line_posts_interrupt_when_graph_bound(tmp_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Test 5: RetconCommand does NOT post interrupt
+# Test 5: RetconCommand posts RETCON interrupt
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_retcon_does_not_post_interrupt(tmp_path: Path) -> None:
-    """Phase 8 scope: RetconCommand is acknowledge-only, no interrupt."""
+async def test_retcon_posts_interrupt_when_graph_bound(tmp_path: Path) -> None:
+    """Phase 4: /retcon is represented as an interrupt; Phase 8 owns rollback."""
     app, _campaign_id = _make_app_with_safety(tmp_path)
     fake = FakeRuntime()
     app.graph_runtime = fake  # type: ignore[assignment]
@@ -191,4 +194,22 @@ async def test_retcon_does_not_post_interrupt(tmp_path: Path) -> None:
         await pilot.press("enter")
         await pilot.pause()
 
-    assert len(fake.calls) == 0
+    assert len(fake.calls) == 1
+    kind, payload = fake.calls[0]
+    assert kind == InterruptKind.RETCON
+    assert payload == {"reason": "player typed /retcon"}
+
+
+@pytest.mark.asyncio
+async def test_quit_posts_session_end_interrupt(tmp_path: Path) -> None:
+    """Phase 4: session end is represented as a graph interrupt before exit."""
+    app, _campaign_id = _make_app_with_safety(tmp_path)
+    fake = FakeRuntime()
+    app.graph_runtime = fake  # type: ignore[assignment]
+
+    await app.action_quit()
+
+    assert len(fake.calls) == 1
+    kind, payload = fake.calls[0]
+    assert kind == InterruptKind.SESSION_END
+    assert payload == {"reason": "player quit"}

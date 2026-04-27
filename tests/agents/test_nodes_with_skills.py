@@ -22,11 +22,10 @@ from sagasmith.evals.fixtures import (
     make_valid_character_sheet,
     make_valid_content_policy,
     make_valid_house_rules,
-    make_valid_player_profile,
     make_valid_saga_state,
     make_valid_session_state,
 )
-from sagasmith.graph.bootstrap import AgentServices, GraphBootstrap, _default_skill_store
+from sagasmith.graph.bootstrap import AgentServices, GraphBootstrap, default_skill_store
 from sagasmith.graph.runtime import build_persistent_graph
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import AgentSkillLogRepository
@@ -38,7 +37,7 @@ from sagasmith.skills_adapter import SkillStore
 
 @pytest.fixture
 def production_skill_store():
-    return _default_skill_store()
+    return default_skill_store()
 
 
 @pytest.fixture
@@ -331,7 +330,9 @@ class TestGracefulOutsideActivation:
             pending_narration=["line"],
         ).model_dump()
         result = archivist_node(state, services)
-        assert result["session_state"]["turn_count"] == 1
+        session_state = result["session_state"]
+        assert isinstance(session_state, dict)
+        assert session_state["turn_count"] == 1
 
     def test_onboarding_node_no_activation_no_crash(self, empty_skill_store):
         services = AgentServices(
@@ -355,7 +356,7 @@ class TestEndToEndFirstSliceOnly:
         apply_migrations(conn)
         _insert_campaign_and_turn(conn)
 
-        store = _default_skill_store(first_slice_only=True)
+        store = default_skill_store(first_slice_only=True)
         dice = DiceService(campaign_seed="t", session_seed="s")
         cost = CostGovernor(session_budget_usd=1.0)
         bootstrap = GraphBootstrap.from_services(dice=dice, cost=cost, skill_store=store)

@@ -7,7 +7,7 @@ Added in Plan 04-01:
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -44,4 +44,4 @@ class SagaState(SchemaModel):
     )
     safety_events: list[SafetyEvent] = Field(default_factory=list[SafetyEvent])
     cost_state: CostState
-    last_interrupt: dict | None = None
+    last_interrupt: dict[str, Any] | None = None

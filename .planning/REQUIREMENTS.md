@@ -81,11 +81,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Graph Runtime and Turn Flow
 
-- [ ] **GRAPH-01**: System constructs a LangGraph state graph with nodes or callable boundaries for onboarding, Oracle, RulesLawyer, Orator, Archivist, safety, cost, and persistence.
-- [ ] **GRAPH-02**: System checkpoints graph state after mechanics resolve and before Orator narration streams.
-- [ ] **GRAPH-03**: System checkpoints completed turn state during turn-close persistence.
-- [ ] **GRAPH-04**: System can interrupt the graph for `/pause`, `/line`, `/retcon`, budget hard-stop, and session end.
-- [ ] **GRAPH-05**: System resumes at the next prompt when the last turn has a final checkpoint.
+- [x] **GRAPH-01**: System constructs a LangGraph state graph with nodes or callable boundaries for onboarding, Oracle, RulesLawyer, Orator, Archivist, safety, cost, and persistence.
+- [x] **GRAPH-02**: System checkpoints graph state after mechanics resolve and before Orator narration streams.
+- [x] **GRAPH-03**: System checkpoints completed turn state during turn-close persistence.
+- [x] **GRAPH-04**: System can interrupt the graph for `/pause`, `/line`, `/retcon`, budget hard-stop, and session end.
+- [x] **GRAPH-05**: System resumes at the next prompt when the last turn has a final checkpoint.
 - [ ] **GRAPH-06**: System can recover from an incomplete narration turn by rerunning narration or discarding the incomplete turn.
 - [ ] **GRAPH-07**: System keeps deterministic rule outcomes stable even when LLM narration is retried.
 
@@ -102,15 +102,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AI-09**: Orator respects configured dice UX modes: auto, reveal, and hidden.
 - [ ] **AI-10**: Orator does not contradict resolved mechanical outcomes in generated narration.
 - [ ] **AI-11**: Archivist assembles a token-bounded `MemoryPacket` for Oracle and Orator before scene planning or narration.
-- [ ] **AI-12**: System records which agent nodes and skills ran during a turn for audit and debugging.
+- [x] **AI-12**: System records which agent nodes and skills ran during a turn for audit and debugging.
 
 ### Agent Skills
 
-- [ ] **SKILL-01**: System can discover Agent Skills packages from configured skill directories.
-- [ ] **SKILL-02**: System can present each agent with a compact skill catalog containing skill name and description.
-- [ ] **SKILL-03**: System exposes a `load_skill` mechanism that returns the selected skill's full instructions/resources to the requesting agent.
-- [ ] **SKILL-04**: System logs skill activations per agent turn.
-- [ ] **SKILL-05**: System keeps first-slice agent behavior functional with only the required first-slice skill set loaded.
+- [x] **SKILL-01**: System can discover Agent Skills packages from configured skill directories.
+- [x] **SKILL-02**: System can present each agent with a compact skill catalog containing skill name and description.
+- [x] **SKILL-03**: System exposes a `load_skill` mechanism that returns the selected skill's full instructions/resources to the requesting agent.
+- [x] **SKILL-04**: System logs skill activations per agent turn.
+- [x] **SKILL-05**: System keeps first-slice agent behavior functional with only the required first-slice skill set loaded.
 
 ### Persistence and Vault Memory
 
@@ -255,17 +255,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-04 | Phase 3 | Complete |
 | SAFE-05 | Phase 3 | Complete |
 | SAFE-06 | Phase 3 | Complete |
-| GRAPH-01 | Phase 4 | Pending |
-| GRAPH-02 | Phase 4 | Pending |
-| GRAPH-03 | Phase 4 | Pending |
-| GRAPH-04 | Phase 4 | Pending |
-| GRAPH-05 | Phase 4 | Pending |
-| AI-12 | Phase 4 | Pending |
-| SKILL-01 | Phase 4 | Pending |
-| SKILL-02 | Phase 4 | Pending |
-| SKILL-03 | Phase 4 | Pending |
-| SKILL-04 | Phase 4 | Pending |
-| SKILL-05 | Phase 4 | Pending |
+| GRAPH-01 | Phase 4 | Complete |
+| GRAPH-02 | Phase 4 | Complete |
+| GRAPH-03 | Phase 4 | Complete |
+| GRAPH-04 | Phase 4 | Complete |
+| GRAPH-05 | Phase 4 | Complete |
+| AI-12 | Phase 4 | Complete |
+| SKILL-01 | Phase 4 | Complete |
+| SKILL-02 | Phase 4 | Complete |
+| SKILL-03 | Phase 4 | Complete |
+| SKILL-04 | Phase 4 | Complete |
+| SKILL-05 | Phase 4 | Complete |
 | RULE-04 | Phase 5 | Pending |
 | RULE-05 | Phase 5 | Pending |
 | RULE-06 | Phase 5 | Pending |

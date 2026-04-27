@@ -23,7 +23,7 @@ from sagasmith.graph.checkpoints import (
     extract_checkpoint_id,
 )
 from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind
-from sagasmith.persistence.repositories import CheckpointRefRepository
+from sagasmith.persistence.repositories import CheckpointRefRepository, TurnRecordRepository
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
 from sagasmith.schemas.persistence import CheckpointRef, TurnRecord
 
@@ -63,8 +63,12 @@ class GraphRuntime:
         from sagasmith.services.errors import BudgetStopError
 
         turn_id = initial_state["turn_id"]
+        self._ensure_turn_record(initial_state)
         snapshot = self.graph.get_state(self.thread_config)
-        if snapshot.next == ("orator",) or (snapshot.next == () and snapshot.values):
+        snapshot_turn_id = (snapshot.values or {}).get("turn_id")
+        if snapshot.next == ("orator",) and snapshot_turn_id == turn_id:
+            return snapshot.values
+        if snapshot.next == () and snapshot.values and snapshot_turn_id == turn_id:
             return snapshot.values
         try:
             _ = self.graph.invoke(initial_state, self.thread_config)
@@ -163,6 +167,26 @@ class GraphRuntime:
             created_at=datetime.now(UTC).isoformat(),
         )
         CheckpointRefRepository(self.db_conn).append(ref)
+        self.db_conn.commit()
+
+    def _ensure_turn_record(self, initial_state: dict[str, Any]) -> None:
+        """Create the FK parent row needed before graph-side audit rows write."""
+        turn_id = initial_state["turn_id"]
+        if TurnRecordRepository(self.db_conn).get(turn_id) is not None:
+            return
+
+        now = datetime.now(UTC).isoformat()
+        TurnRecordRepository(self.db_conn).upsert(
+            TurnRecord(
+                turn_id=turn_id,
+                campaign_id=initial_state["campaign_id"],
+                session_id=initial_state["session_id"],
+                status="needs_vault_repair",
+                started_at=now,
+                completed_at=now,
+                schema_version=1,
+            )
+        )
         self.db_conn.commit()
 
 

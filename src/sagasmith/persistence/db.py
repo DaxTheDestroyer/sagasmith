@@ -21,7 +21,12 @@ def campaign_db(path: Path) -> Generator[sqlite3.Connection]:
 def open_campaign_db(path: Path, *, read_only: bool = False) -> sqlite3.Connection:
     """Open a campaign SQLite DB connection with WAL and foreign keys enabled."""
     uri = f"file:{path}?mode=ro" if read_only else f"file:{path}"
-    conn = sqlite3.connect(uri, uri=True, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn = sqlite3.connect(
+        uri,
+        uri=True,
+        detect_types=sqlite3.PARSE_DECLTYPES,
+        check_same_thread=False,
+    )
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     conn.execute("PRAGMA synchronous = NORMAL")

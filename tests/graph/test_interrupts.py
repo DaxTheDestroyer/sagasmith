@@ -8,6 +8,7 @@ BudgetStopError → BUDGET_STOP translation at the runtime boundary.
 from __future__ import annotations
 
 import sqlite3
+from typing import Any, cast
 
 import pytest
 
@@ -227,7 +228,10 @@ def test_invoke_turn_translates_budget_stop_error():
 
     # Verify the original oracle node code does NOT reference BudgetStopError
     import inspect
-    oracle_source = inspect.getsource(original_oracle.func if hasattr(original_oracle, "func") else original_oracle)
+    oracle_obj = cast(Any, original_oracle)
+    oracle_source = inspect.getsource(
+        oracle_obj.func if hasattr(oracle_obj, "func") else oracle_obj
+    )
     assert "BudgetStopError" not in oracle_source
     assert "InterruptKind" not in oracle_source
 
@@ -247,6 +251,7 @@ def test_post_interrupt_overwrites_single_slot():
     runtime.post_interrupt(kind=InterruptKind.LINE, payload={"topic": "second"})
 
     pending = extract_pending_interrupt(runtime)
+    assert pending is not None
     assert pending["kind"] == "line"
     assert pending["payload"]["topic"] == "second"
 
@@ -264,6 +269,7 @@ def test_session_end_interrupt_round_trip():
 
     runtime.post_interrupt(kind=InterruptKind.SESSION_END, payload={"reason": "player quit"})
     pending = extract_pending_interrupt(runtime)
+    assert pending is not None
     assert pending["kind"] == "session_end"
 
     runtime.resume_after_interrupt()

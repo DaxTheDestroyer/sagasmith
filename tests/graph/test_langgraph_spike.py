@@ -13,7 +13,7 @@ this test as regression coverage for LangGraph version upgrades.
 """
 
 import sqlite3
-from typing import TypedDict
+from typing import Any, TypedDict, cast
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
@@ -25,11 +25,23 @@ class _SpikeState(TypedDict):
     value: int
 
 
+def _node_a(state: _SpikeState) -> _SpikeState:
+    return {"value": state["value"] + 1}
+
+
+def _node_b(state: _SpikeState) -> _SpikeState:
+    return {"value": state["value"] * 10}
+
+
+def _node_c(state: _SpikeState) -> _SpikeState:
+    return {"value": state["value"] - 5}
+
+
 def _build_spike(conn: sqlite3.Connection):
     g = StateGraph(_SpikeState)
-    g.add_node("a", lambda s: {"value": s["value"] + 1})
-    g.add_node("b", lambda s: {"value": s["value"] * 10})
-    g.add_node("c", lambda s: {"value": s["value"] - 5})
+    g.add_node("a", _node_a)
+    g.add_node("b", _node_b)
+    g.add_node("c", _node_c)
     g.add_edge(START, "a")
     g.add_edge("a", "b")
     g.add_edge("b", "c")
@@ -58,7 +70,8 @@ def test_checkpoint_id_accessible():
     config = {"configurable": {"thread_id": "spike-2"}}
     graph.invoke({"value": 1}, config)
     snapshot = graph.get_state(config)
-    cp_id = snapshot.config["configurable"].get("checkpoint_id")
+    snapshot_config = cast(dict[str, Any], snapshot.config)
+    cp_id = snapshot_config["configurable"].get("checkpoint_id")
     assert cp_id is not None and isinstance(cp_id, str) and len(cp_id) > 0, (
         f"LangGraph snapshot.config missing checkpoint_id: {snapshot.config!r}"
     )
@@ -73,7 +86,8 @@ def test_none_resume_advances():
     graph.invoke(None, config)
     final = graph.get_state(config)
     assert final.next == ()
-    assert final.values["value"] == (1 + 1) * 10 - 5
+    values = cast(_SpikeState, final.values)
+    assert values["value"] == (1 + 1) * 10 - 5
 
 
 def test_thread_isolation():
@@ -85,8 +99,8 @@ def test_thread_isolation():
     graph.invoke({"value": 20}, c2)
     graph.invoke(None, c1)
     graph.invoke(None, c2)
-    v1 = graph.get_state(c1).values["value"]
-    v2 = graph.get_state(c2).values["value"]
+    v1 = cast(_SpikeState, graph.get_state(c1).values)["value"]
+    v2 = cast(_SpikeState, graph.get_state(c2).values)["value"]
     assert v1 == (10 + 1) * 10 - 5
     assert v2 == (20 + 1) * 10 - 5
 

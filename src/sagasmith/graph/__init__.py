@@ -13,8 +13,8 @@ from sagasmith.graph.activation_log import (
 from sagasmith.graph.bootstrap import (
     AgentServices,
     GraphBootstrap,
-    _default_skill_store,
     build_default_graph,
+    default_skill_store,
 )
 from sagasmith.graph.checkpoints import (
     CheckpointKind,
@@ -42,11 +42,11 @@ __all__ = [
     "InterruptEnvelope",
     "InterruptKind",
     "SagaGraphState",
-    "_default_skill_store",
     "build_checkpointer",
     "build_default_graph",
     "build_persistent_graph",
     "build_saga_graph",
+    "default_skill_store",
     "extract_checkpoint_id",
     "extract_pending_interrupt",
     "from_saga_state",

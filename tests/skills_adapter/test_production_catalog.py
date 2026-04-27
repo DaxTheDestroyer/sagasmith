@@ -13,14 +13,12 @@ Covers:
 
 from __future__ import annotations
 
-import sqlite3
 from pathlib import Path
 
 import pytest
 
 from sagasmith.skills_adapter import SkillStore
 from sagasmith.skills_adapter.errors import SkillValidationError
-
 
 _PRODUCTION_ROOTS = [Path("src/sagasmith/agents"), Path("src/sagasmith/skills")]
 
@@ -82,7 +80,7 @@ class TestProductionScan:
         """Test 4: every shipped skill's surface matches the spec catalog."""
         store = SkillStore(roots=_PRODUCTION_ROOTS)
         store.scan()
-        for scope, records in store.skills.items():
+        for _scope, records in store.skills.items():
             for rec in records:
                 expected = _EXPECTED_SURFACE.get(rec.name)
                 assert expected is not None, f"no spec entry for {rec.name}"
@@ -90,23 +88,13 @@ class TestProductionScan:
                     f"{rec.name}: expected {expected}, got {rec.implementation_surface}"
                 )
 
-    def test_bootstrap_loud_on_error(self, monkeypatch, tmp_path: Path):
+    def test_bootstrap_loud_on_error(self, tmp_path: Path):
         """Test 5: _default_skill_store raises on production scan errors."""
-        from sagasmith.graph.bootstrap import _default_skill_store
 
         # Create a temporary invalid skill to trigger an error
         bad_skill_dir = tmp_path / "agents" / "oracle" / "skills" / "bad-skill"
         bad_skill_dir.mkdir(parents=True)
         bad_skill_dir.joinpath("SKILL.md").write_text("---\nname: bad skill\n---\n")
-
-        # Monkeypatch the roots to point at our temp dir
-        monkeypatch.setattr(
-            "sagasmith.graph.bootstrap._default_skill_store",
-            lambda *, first_slice_only=False: _default_skill_store_impl(
-                roots=[tmp_path / "agents", tmp_path / "skills"],
-                first_slice_only=first_slice_only,
-            ),
-        )
 
         with pytest.raises(SkillValidationError) as exc_info:
             _default_skill_store_impl(roots=[tmp_path / "agents", tmp_path / "skills"])
@@ -116,7 +104,7 @@ class TestProductionScan:
         """Test 6: every skill's name matches its directory name."""
         store = SkillStore(roots=_PRODUCTION_ROOTS)
         store.scan()
-        for scope, records in store.skills.items():
+        for _scope, records in store.skills.items():
             for rec in records:
                 dir_name = rec.path.parent.name
                 assert rec.name == dir_name, (
@@ -127,7 +115,7 @@ class TestProductionScan:
         """Test 7: every description is <= 256 chars."""
         store = SkillStore(roots=_PRODUCTION_ROOTS)
         store.scan()
-        for scope, records in store.skills.items():
+        for _scope, records in store.skills.items():
             for rec in records:
                 assert len(rec.description) <= 256, (
                     f"{rec.name} description is {len(rec.description)} chars"

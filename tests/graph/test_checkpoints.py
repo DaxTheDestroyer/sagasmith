@@ -29,19 +29,27 @@ from sagasmith.services.dice import DiceService
 
 
 def _make_conn() -> sqlite3.Connection:
-    return sqlite3.connect(":memory:", check_same_thread=False)
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
 
 
-def _insert_campaign_and_turn(conn: sqlite3.Connection, *, status: str = "complete") -> None:
+def _insert_campaign(conn: sqlite3.Connection) -> None:
     conn.execute(
         "INSERT INTO campaigns (campaign_id, campaign_name, campaign_slug, created_at, sagasmith_version, manifest_version) "
         "VALUES (?, ?, ?, ?, ?, ?)",
         ("cmp_001", "Test", "test", "2026-01-01T00:00:00Z", "0.0.1", 1),
     )
+
+
+def _insert_campaign_and_turn(
+    conn: sqlite3.Connection, *, turn_id: str = "turn_000001", status: str = "complete"
+) -> None:
+    _insert_campaign(conn)
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) "
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_000001", "cmp_001", "sess_001", status, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 1),
+        (turn_id, "cmp_001", "sess_001", status, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 1),
     )
     conn.commit()
 
@@ -52,11 +60,11 @@ def _make_bootstrap():
     return GraphBootstrap.from_services(dice=dice, cost=cost)
 
 
-def _play_state():
+def _play_state(*, turn_id: str = "turn_000001"):
     return {
         "campaign_id": "cmp_001",
         "session_id": "sess_001",
-        "turn_id": "turn_000001",
+        "turn_id": turn_id,
         "phase": "play",
         "player_profile": None,
         "content_policy": None,
@@ -138,6 +146,24 @@ def test_invoke_turn_writes_pre_narration_checkpoint():
     assert refs[0].kind == CheckpointKind.PRE_NARRATION.value
     assert refs[0].checkpoint_id is not None
     assert len(refs[0].checkpoint_id) > 0
+
+
+def test_invoke_turn_creates_missing_turn_record_before_audit_rows():
+    """Fresh TUI turns have a turn_records parent before agent_skill_log writes."""
+    conn = _make_conn()
+    apply_migrations(conn)
+    _insert_campaign(conn)
+    conn.commit()
+    bootstrap = _make_bootstrap()
+    runtime = build_persistent_graph(bootstrap, conn, campaign_id="cmp_001")
+
+    runtime.invoke_turn(_play_state())
+
+    turn = TurnRecordRepository(conn).get("turn_000001")
+    assert turn is not None
+    assert turn.status == "needs_vault_repair"
+    rows = AgentSkillLogRepository(conn).list_for_turn("turn_000001")
+    assert [row.agent_name for row in rows] == ["oracle", "rules_lawyer"]
 
 
 def test_resume_and_close_writes_final_checkpoint_and_completes_turn():
@@ -236,6 +262,35 @@ def test_resume_at_next_prompt():
     # No new activation rows should have been written
     rows = AgentSkillLogRepository(conn).list_for_turn("turn_000001")
     assert len(rows) == 4
+
+
+def test_new_turn_after_completed_thread_runs_on_same_campaign_thread():
+    """A campaign-scoped LangGraph thread can start turn N+1 after turn N reaches END."""
+    conn = _make_conn()
+    apply_migrations(conn)
+    _insert_campaign_and_turn(conn)
+    bootstrap = _make_bootstrap()
+    runtime = build_persistent_graph(bootstrap, conn, campaign_id="cmp_001")
+
+    runtime.invoke_turn(_play_state())
+    turn_record = TurnRecord(
+        turn_id="turn_000001",
+        campaign_id="cmp_001",
+        session_id="sess_001",
+        status="needs_vault_repair",
+        started_at="2026-01-01T00:00:00Z",
+        completed_at="2026-01-01T00:00:00Z",
+        schema_version=1,
+    )
+    runtime.resume_and_close(turn_record)
+
+    runtime.invoke_turn(_play_state(turn_id="turn_000002"))
+
+    snapshot = runtime.graph.get_state(runtime.thread_config)
+    assert snapshot.next == ("orator",)
+    assert snapshot.values["turn_id"] == "turn_000002"
+    rows = AgentSkillLogRepository(conn).list_for_turn("turn_000002")
+    assert [row.agent_name for row in rows] == ["oracle", "rules_lawyer"]
 
 
 def test_crash_simulation_and_recovery():

@@ -114,10 +114,14 @@ class RetconCommand:
     description: str = "Retcon the last completed turn (confirmation required)."
 
     def handle(self, app: SagaSmithApp, args: tuple[str, ...]) -> None:
-        # Phase 4 acknowledge-only: 04-REVIEWS.md Claude review suggests RETCON
-        # should not interrupt today. Phase 8 will wire the full confirmation +
-        # rollback flow. No InterruptKind.RETCON posted here.
+        if app.graph_runtime is not None:
+            from sagasmith.graph.interrupts import InterruptKind
+
+            app.graph_runtime.post_interrupt(
+                kind=InterruptKind.RETCON,
+                payload={"reason": "player typed /retcon"},
+            )
         _write(
             app,
-            "[system] /retcon (stub — Phase 8 release-hardening wires the retcon pipeline; confirmation flow will be added there).",
+            "[system] /retcon requested. Phase 8 release-hardening wires confirmation and rollback.",
         )

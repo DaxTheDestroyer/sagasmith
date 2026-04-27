@@ -14,7 +14,7 @@ import pytest
 from sagasmith.app.campaign import CampaignManifest
 from sagasmith.app.paths import CampaignPaths
 from sagasmith.graph.bootstrap import GraphBootstrap
-from sagasmith.graph.interrupts import InterruptKind, extract_pending_interrupt
+from sagasmith.graph.interrupts import extract_pending_interrupt
 from sagasmith.graph.runtime import build_persistent_graph
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.schemas.persistence import TurnRecord
@@ -101,7 +101,7 @@ def wired_app(tmp_path):
 
 
 async def test_tui_input_drives_graph_to_pre_narration(wired_app):
-    app, conn, manifest = wired_app
+    app, conn, _manifest = wired_app
     async with app.run_test() as pilot:
         await pilot.click("#player-input")
         for ch in "roll perception":
@@ -151,9 +151,11 @@ async def test_resume_completes_turn_with_stub_narration(wired_app):
         )
         app.graph_runtime.resume_and_close(tr)
         app._sync_narration_from_graph()
+        app._sync_narration_from_graph()
 
         # Narration area received stub
         assert any("take a moment to assess" in line for line in app.narration.logged_lines)
+        assert sum("take a moment to assess" in line for line in app.narration.logged_lines) == 1
 
         # Both checkpoints written
         cur = conn.execute(
