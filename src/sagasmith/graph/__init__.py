@@ -5,12 +5,18 @@ bootstrap modules. Later plans (04-02, 04-03) add checkpointing, interrupts,
 and activation logging.
 """
 
+from sagasmith.graph.bootstrap import AgentServices, GraphBootstrap, build_default_graph
+from sagasmith.graph.graph import build_saga_graph
 from sagasmith.graph.routing import PHASE_TO_ENTRY, route_by_phase
 from sagasmith.graph.state import SagaGraphState, from_saga_state, to_saga_state
 
 __all__ = [
     "PHASE_TO_ENTRY",
+    "AgentServices",
+    "GraphBootstrap",
     "SagaGraphState",
+    "build_default_graph",
+    "build_saga_graph",
     "from_saga_state",
     "route_by_phase",
     "to_saga_state",
