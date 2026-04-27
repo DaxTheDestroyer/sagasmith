@@ -13,12 +13,15 @@ from .prompts import (
     PromptFieldKind,
     parse_answer,
 )
+from .store import OnboardingStore, OnboardingTriple
 from .wizard import OnboardingWizard, StepResult
 
 __all__ = [
     "ONBOARDING_PHASES",
     "PHASE_ORDER",
     "OnboardingPhase",
+    "OnboardingStore",
+    "OnboardingTriple",
     "OnboardingWizard",
     "PhasePrompt",
     "PromptField",
