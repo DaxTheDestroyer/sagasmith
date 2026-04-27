@@ -26,6 +26,9 @@ sagasmith = "sagasmith.cli.main:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sagasmith"]
+include = [
+    "src/sagasmith/**/SKILL.md",
+]
 
 [dependency-groups]
 dev = [

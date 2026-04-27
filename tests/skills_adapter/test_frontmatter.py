@@ -77,40 +77,40 @@ class TestParseFrontmatter:
         assert fm["allowed_agents"] == []
 
     def test_missing_opening_delimiter(self):
-        from sagasmith.skills_adapter.frontmatter import parse_frontmatter, FrontmatterError
+        from sagasmith.skills_adapter.frontmatter import FrontmatterError, parse_frontmatter
 
         with pytest.raises(FrontmatterError, match="missing opening"):
             parse_frontmatter("# just body\n")
 
     def test_missing_closing_delimiter(self):
-        from sagasmith.skills_adapter.frontmatter import parse_frontmatter, FrontmatterError
+        from sagasmith.skills_adapter.frontmatter import FrontmatterError, parse_frontmatter
 
         with pytest.raises(FrontmatterError, match="missing closing"):
             parse_frontmatter("---\nkey: value\n# body\n")
 
     def test_folded_block_rejected(self):
-        from sagasmith.skills_adapter.frontmatter import parse_frontmatter, FrontmatterError
+        from sagasmith.skills_adapter.frontmatter import FrontmatterError, parse_frontmatter
 
         text = "---\ndesc: >\n  long text\n---\n"
         with pytest.raises(FrontmatterError, match="unsupported YAML feature"):
             parse_frontmatter(text)
 
     def test_literal_block_rejected(self):
-        from sagasmith.skills_adapter.frontmatter import parse_frontmatter, FrontmatterError
+        from sagasmith.skills_adapter.frontmatter import FrontmatterError, parse_frontmatter
 
         text = "---\ndesc: |\n  long\n---\n"
         with pytest.raises(FrontmatterError, match="unsupported YAML feature"):
             parse_frontmatter(text)
 
     def test_nested_map_rejected(self):
-        from sagasmith.skills_adapter.frontmatter import parse_frontmatter, FrontmatterError
+        from sagasmith.skills_adapter.frontmatter import FrontmatterError, parse_frontmatter
 
         text = "---\nopts:\n  a: 1\n---\n"
         with pytest.raises(FrontmatterError, match="unsupported YAML feature"):
             parse_frontmatter(text)
 
     def test_block_style_list_rejected(self):
-        from sagasmith.skills_adapter.frontmatter import parse_frontmatter, FrontmatterError
+        from sagasmith.skills_adapter.frontmatter import FrontmatterError, parse_frontmatter
 
         text = "---\nitems:\n  - a\n  - b\n---\n"
         with pytest.raises(FrontmatterError, match="unsupported YAML feature"):
@@ -123,7 +123,7 @@ class TestSupportedSubset:
 
         assert isinstance(SUPPORTED_SUBSET, str)
         assert "YAML-lite" in SUPPORTED_SUBSET
-        assert "scalar strings" in SUPPORTED_SUBSET
+        assert "Scalar strings" in SUPPORTED_SUBSET
         assert "NOT supported" in SUPPORTED_SUBSET
 
 
@@ -131,8 +131,8 @@ class TestErrorHierarchy:
     def test_all_importable(self):
         from sagasmith.skills_adapter.errors import (
             SkillAdapterError,
-            SkillValidationError,
             SkillNotFoundError,
+            SkillValidationError,
             UnauthorizedSkillError,
         )
         from sagasmith.skills_adapter.frontmatter import FrontmatterError
