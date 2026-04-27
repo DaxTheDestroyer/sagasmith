@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md (onboarding wizard domain + SQLite store)
-last_updated: "2026-04-27T14:57:26Z"
-last_activity: 2026-04-27 -- Phase 3 Plan 02 complete
+stopped_at: Completed 03-03-PLAN.md (Textual TUI shell + CommandRegistry + /help)
+last_updated: "2026-04-27T15:15:14Z"
+last_activity: 2026-04-27 -- Phase 3 Plan 03 complete
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 13
-  completed_plans: 11
-  percent: 29
+  completed_plans: 12
+  percent: 31
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 3 — CLI Setup, Onboarding, and TUI Controls (executing plan 3 of 4)
+**Current focus:** Phase 3 — CLI Setup, Onboarding, and TUI Controls (executing plan 4 of 4)
 
 ## Current Position
 
 Phase: 3 of 8 (CLI Setup, Onboarding, and TUI Controls)
-Plan: 2 of 4 in current phase (Plan 03-02 complete)
+Plan: 3 of 4 in current phase (Plan 03-03 complete)
 Status: Executing
-Last activity: 2026-04-27 -- Phase 3 Plan 02 complete (onboarding wizard domain + SQLite store)
+Last activity: 2026-04-27 -- Phase 3 Plan 03 complete (Textual TUI shell + CommandRegistry + /help)
 
-Progress: [███░░░░░░░] 29%
+Progress: [███░░░░░░░] 31%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 11
-- Average duration: 20 min
-- Total execution time: 1.6 hours
+- Total plans completed: 12
+- Average duration: 19 min
+- Total execution time: ~1.8 hours
 
 **By Phase:**
 
@@ -46,12 +46,12 @@ Progress: [███░░░░░░░] 29%
 |-------|-------|-------|----------|
 | 1. Contracts, Scaffold, and Eval Spine | 3 | 3 | 22 min |
 | 2. Deterministic Trust Services | 6 | 6 | -- |
-| 3. CLI Setup, Onboarding, and TUI Controls | 2 | 4 (planned) | -- |
+| 3. CLI Setup, Onboarding, and TUI Controls | 3 | 4 (planned) | -- |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-02 (8 min), 01-03 (10 min), 03-01 (16 min), 03-02 (12 min)
-- Trend: Phase 3 Plan 02 complete; onboarding wizard + store, 240/1 tests, schema v3.
+- Last 5 plans: 01-03 (10 min), 03-01 (16 min), 03-02 (12 min), 03-03 (12 min)
+- Trend: Phase 3 Plan 03 complete; TUI shell + CommandRegistry + /help, 262/1 tests.
 
 *Updated after each plan completion*
 
@@ -77,10 +77,15 @@ Recent decisions affecting current work:
 - [03-02]: StrEnum used for OnboardingPhase/PromptFieldKind (ruff UP042 fix, Python 3.11+ StrEnum).
 - [03-02]: BrokenContentPolicy subclass used for atomicity test — sqlite3.Connection.execute is read-only in CPython, cannot be patched via unittest.mock.patch.object.
 - [03-02]: Three separate onboarding tables (not one JSON blob) per plan spec — each maps to a distinct Pydantic model lifecycle.
+- [03-03]: textual>=0.79,<1 upper bound to avoid 1.x API churn; textual-dev not added (global dev tool per PROJECT.md).
+- [03-03]: RichLog(markup=False) for NarrationArea — prevents Rich markup injection from transcript content (T-03-17).
+- [03-03]: CommandRegistry is the only extension point; Plan 03-04 adds commands with zero app.py changes.
+- [03-03]: --headless-status flag added to `sagasmith play` to preserve Plan 03-01 test contract in CI.
+- [03-03]: Subclass-override pattern used in tests for CommandInvoked capture (Textual monkey-patch doesn't work with message dispatch).
 
 ### Pending Todos
 
-- Execute Phase 3 Plans 03-04 in wave order (03-03 in Wave 2, then 03-04 in Wave 3).
+- Execute Phase 3 Plan 03-04 (Wave 3): eleven control/safety/settings commands + safety_events migration.
 
 ### Blockers/Concerns
 
@@ -96,6 +101,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-27T14:57:26Z
-Stopped at: Completed 03-02-PLAN.md (onboarding wizard domain + SQLite store)
+Last session: 2026-04-27T15:15:14Z
+Stopped at: Completed 03-03-PLAN.md (Textual TUI shell + CommandRegistry + /help)
 Resume file: None

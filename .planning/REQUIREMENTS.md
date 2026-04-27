@@ -55,11 +55,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Textual TUI and Commands
 
-- [ ] **TUI-01**: User sees a Textual interface with narration area, status panel, safety bar, and input line.
-- [ ] **TUI-02**: User can type natural-language actions into the input line during play.
-- [ ] **TUI-03**: User can scroll or review completed transcript entries during a session.
-- [ ] **TUI-04**: User sees HP, conditions, active quest, current location, in-game clock, and last rolls in the status panel.
-- [ ] **TUI-05**: User can open `/help` to view supported slash commands and descriptions.
+- [x] **TUI-01**: User sees a Textual interface with narration area, status panel, safety bar, and input line.
+- [x] **TUI-02**: User can type natural-language actions into the input line during play.
+- [x] **TUI-03**: User can scroll or review completed transcript entries during a session.
+- [x] **TUI-04**: User sees HP, conditions, active quest, current location, in-game clock, and last rolls in the status panel.
+- [x] **TUI-05**: User can open `/help` to view supported slash commands and descriptions.
 - [ ] **TUI-06**: User can use `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`.
 - [ ] **TUI-07**: User sees a dice overlay or equivalent modal for reveal-mode checks that shows DC, modifier, d20 result, total, and degree.
 - [ ] **TUI-08**: User can quit from the TUI and resume later at the last safe prompt.
@@ -246,11 +246,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ONBD-03 | Phase 3 | Pending |
 | ONBD-04 | Phase 3 | Pending |
 | ONBD-05 | Phase 3 | Pending |
-| TUI-01 | Phase 3 | Pending |
-| TUI-02 | Phase 3 | Pending |
-| TUI-03 | Phase 3 | Pending |
-| TUI-04 | Phase 3 | Pending |
-| TUI-05 | Phase 3 | Pending |
+| TUI-01 | Phase 3 | Complete |
+| TUI-02 | Phase 3 | Complete |
+| TUI-03 | Phase 3 | Complete |
+| TUI-04 | Phase 3 | Complete |
+| TUI-05 | Phase 3 | Complete |
 | TUI-06 | Phase 3 | Pending |
 | SAFE-04 | Phase 3 | Pending |
 | SAFE-05 | Phase 3 | Pending |
