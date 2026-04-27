@@ -52,6 +52,7 @@ class BudgetInspection:
     tokens_prompt: int
     tokens_completion: int
     tokens_total: int
+    unknown_cost_call_count: int
     warnings_sent: tuple[Literal["70", "90"], ...]
     hard_stopped: bool
 
@@ -72,6 +73,7 @@ class CostGovernor:
         self._spent_usd_estimate = 0.0
         self._tokens_prompt = 0
         self._tokens_completion = 0
+        self._unknown_cost_call_count = 0
         self._warnings_sent: list[Literal["70", "90"]] = []
         self._hard_stopped = False
 
@@ -82,6 +84,7 @@ class CostGovernor:
             spent_usd_estimate=self._spent_usd_estimate,
             tokens_prompt=self._tokens_prompt,
             tokens_completion=self._tokens_completion,
+            unknown_cost_call_count=self._unknown_cost_call_count,
             warnings_sent=list(self._warnings_sent),
             hard_stopped=self._hard_stopped,
         )
@@ -110,6 +113,7 @@ class CostGovernor:
                 # D-09: unknown cost is better than crashing gameplay
                 cost_usd = 0.0
                 is_approximate = True
+                self._unknown_cost_call_count += 1
 
         self._spent_usd_estimate += cost_usd
         self._tokens_prompt += usage.prompt_tokens
@@ -168,6 +172,7 @@ class CostGovernor:
                 spent_usd_estimate=projected_spent,
                 tokens_prompt=self._tokens_prompt,
                 tokens_completion=self._tokens_completion,
+                unknown_cost_call_count=self._unknown_cost_call_count,
                 warnings_sent=list(self._warnings_sent),
                 hard_stopped=True,
             )
@@ -183,6 +188,7 @@ class CostGovernor:
             spent_usd_estimate=projected_spent,
             tokens_prompt=self._tokens_prompt,
             tokens_completion=self._tokens_completion,
+            unknown_cost_call_count=self._unknown_cost_call_count,
             warnings_sent=list(self._warnings_sent),
             hard_stopped=False,
         )
@@ -214,6 +220,7 @@ class CostGovernor:
             tokens_prompt=self._tokens_prompt,
             tokens_completion=self._tokens_completion,
             tokens_total=self._tokens_prompt + self._tokens_completion,
+            unknown_cost_call_count=self._unknown_cost_call_count,
             warnings_sent=tuple(self._warnings_sent),
             hard_stopped=self._hard_stopped,
         )

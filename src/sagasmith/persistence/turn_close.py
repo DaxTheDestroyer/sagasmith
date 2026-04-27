@@ -6,6 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
+from sagasmith.evals.redaction import RedactionCanary
 from sagasmith.schemas.mechanics import RollResult
 from sagasmith.schemas.persistence import (
     CheckpointRef,
@@ -41,6 +42,31 @@ class TurnCloseBundle:
     checkpoint_refs: list[CheckpointRef]
 
 
+def _assert_no_secret_shaped_payloads(bundle: TurnCloseBundle) -> None:
+    canary = RedactionCanary()
+    scan_targets: list[tuple[str, str]] = []
+
+    for index, entry in enumerate(bundle.transcript_entries):
+        scan_targets.append((f"transcript_entries[{index}]", entry.model_dump_json()))
+    for index, (roll, _turn_id) in enumerate(bundle.roll_results):
+        scan_targets.append((f"roll_results[{index}]", roll.model_dump_json()))
+    for index, log in enumerate(bundle.provider_logs):
+        scan_targets.append((f"provider_logs[{index}]", log.model_dump_json()))
+    for index, delta in enumerate(bundle.state_deltas):
+        scan_targets.append((f"state_deltas[{index}]", delta.model_dump_json()))
+    for index, cost in enumerate(bundle.cost_logs):
+        scan_targets.append((f"cost_logs[{index}]", cost.model_dump_json()))
+    for index, ref in enumerate(bundle.checkpoint_refs):
+        scan_targets.append((f"checkpoint_refs[{index}]", ref.model_dump_json()))
+
+    for location, text in scan_targets:
+        hits = canary.scan(text)
+        if hits:
+            raise TrustServiceError(
+                f"turn-close redaction sweep failed: location={location} label={hits[0].label}"
+            )
+
+
 def close_turn(conn: sqlite3.Connection, bundle: TurnCloseBundle) -> TurnRecord:
     """Apply PERSISTENCE_SPEC §4 steps 1-7 atomically. Mark turn complete only on commit.
 
@@ -64,6 +90,8 @@ def close_turn(conn: sqlite3.Connection, bundle: TurnCloseBundle) -> TurnRecord:
     turn_repo = TurnRecordRepository(conn)
 
     try:
+        _assert_no_secret_shaped_payloads(bundle)
+
         for entry in bundle.transcript_entries:
             transcript_repo.append(entry)
 

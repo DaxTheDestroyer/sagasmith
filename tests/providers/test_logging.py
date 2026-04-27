@@ -101,6 +101,43 @@ def test_invoke_with_retry_returns_on_first_success() -> None:
     assert logs[0].failure_kind == "none"
 
 
+def test_invoke_with_retry_logs_client_provider() -> None:
+    from sagasmith.evals.fixtures import make_fake_llm_response
+
+    class _OpenRouterLikeClient:
+        provider = "openrouter"
+
+        def complete(self, request: LLMRequest) -> Any:
+            return make_fake_llm_response(text="hello", parsed_json={"ok": True})
+
+        def stream(self, request: LLMRequest) -> Any:
+            return iter([])
+
+    request = LLMRequest(
+        agent_name="a",
+        model="m",
+        messages=[Message(role="user", content="hi")],
+        response_format="json_schema",
+        json_schema={
+            "type": "object",
+            "properties": {"ok": {"type": "boolean"}},
+            "required": ["ok"],
+        },
+        temperature=0.0,
+        timeout_seconds=10,
+    )
+    logs: list[Any] = []
+    invoke_with_retry(
+        _OpenRouterLikeClient(),  # type: ignore[arg-type]
+        request,
+        cheap_model="cheap",
+        agent_name="a",
+        turn_id=None,
+        logger=logs.append,
+    )
+    assert logs[0].provider == "openrouter"
+
+
 @pytest.mark.smoke
 def test_invoke_with_retry_exhausts_json_schema_ladder() -> None:
     from sagasmith.evals.fixtures import make_fake_llm_response
@@ -142,6 +179,59 @@ def test_invoke_with_retry_exhausts_json_schema_ladder() -> None:
     assert logs[2].retry_count == 2
     assert logs[3].retry_count == 3
     assert logs[3].failure_kind == "schema_validation"
+
+
+def test_invoke_with_retry_retries_provider_schema_validation_errors() -> None:
+    from sagasmith.evals.fixtures import make_fake_llm_response
+
+    class _SchemaValidationError(Exception):
+        failure_kind = "schema_validation"
+
+    class _RepairingClient:
+        provider = "openrouter"
+
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def complete(self, request: LLMRequest) -> Any:
+            self.calls += 1
+            if self.calls < 3:
+                raise _SchemaValidationError("provider returned malformed JSON")
+            return make_fake_llm_response(text='{"ok":true}', parsed_json={"ok": True})
+
+        def stream(self, request: LLMRequest) -> Any:
+            return iter([])
+
+    client = _RepairingClient()
+    request = LLMRequest(
+        agent_name="a",
+        model="m",
+        messages=[Message(role="user", content="hi")],
+        response_format="json_schema",
+        json_schema={
+            "type": "object",
+            "properties": {"ok": {"type": "boolean"}},
+            "required": ["ok"],
+        },
+        temperature=0.0,
+        timeout_seconds=10,
+    )
+    logs: list[Any] = []
+    response = invoke_with_retry(
+        client,  # type: ignore[arg-type]
+        request,
+        cheap_model="cheap",
+        agent_name="a",
+        turn_id=None,
+        logger=logs.append,
+    )
+    assert response.parsed_json == {"ok": True}
+    assert client.calls == 3
+    assert [log.failure_kind for log in logs] == [
+        "schema_validation",
+        "schema_validation",
+        "none",
+    ]
 
 
 def test_invoke_with_retry_network_timeout_single_retry() -> None:

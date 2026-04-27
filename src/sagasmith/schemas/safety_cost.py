@@ -26,5 +26,6 @@ class CostState(SchemaModel):
     spent_usd_estimate: float = Field(ge=0)
     tokens_prompt: int = Field(ge=0)
     tokens_completion: int = Field(ge=0)
+    unknown_cost_call_count: int = Field(default=0, ge=0)
     warnings_sent: list[Literal["70", "90"]]
     hard_stopped: bool

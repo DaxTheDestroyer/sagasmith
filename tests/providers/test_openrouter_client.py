@@ -112,7 +112,7 @@ def test_openrouter_complete_json_schema_parses_parsed_json(
     assert response.parsed_json == {"ok": True}
 
 
-def test_openrouter_complete_json_schema_parse_failure_raises_schema_error(
+def test_openrouter_complete_json_schema_parse_failure_returns_unparsed_response(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from tests.providers.conftest import FakeHttpTransport
@@ -141,9 +141,9 @@ def test_openrouter_complete_json_schema_parse_failure_raises_schema_error(
         temperature=0.0,
         timeout_seconds=10,
     )
-    with pytest.raises(_OpenRouterError) as exc_info:
-        client.complete(request)
-    assert exc_info.value.failure_kind == "schema_validation"
+    response = client.complete(request)
+    assert response.text == "not-json"
+    assert response.parsed_json is None
 
 
 def test_openrouter_complete_429_maps_rate_limit(monkeypatch: pytest.MonkeyPatch) -> None:

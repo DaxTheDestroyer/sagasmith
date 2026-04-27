@@ -32,6 +32,16 @@ class _SchemaViolation(Exception):
     """Internal: parsed_json failed schema validation."""
 
 
+def _client_provider(client: LLMClient) -> str:
+    provider = getattr(client, "provider", "fake")
+    return provider if isinstance(provider, str) else "fake"
+
+
+def _failure_kind(exc: Exception) -> str:
+    value = getattr(exc, "failure_kind", "other")
+    return value if isinstance(value, str) else "other"
+
+
 def _validate_parsed_json(parsed_json: object, schema: dict[str, object]) -> None:
     try:
         jsonschema.validate(instance=parsed_json, schema=schema)
@@ -60,6 +70,7 @@ def invoke_with_retry(
         return datetime.now()
 
     now = clock if clock is not None else _now
+    provider = _client_provider(client)
 
     def _emit(
         *,
@@ -71,7 +82,7 @@ def invoke_with_retry(
     ) -> None:
         text = response.text if response else ""
         record = build_provider_log_record(
-            provider="fake",
+            provider=provider,
             model=model,
             agent_name=agent_name,
             turn_id=turn_id,
@@ -93,7 +104,7 @@ def invoke_with_retry(
             response = client.complete(req)
         except Exception as exc:
             latency = (perf_counter_ns() - start) // 1_000_000
-            failure_kind = getattr(exc, "failure_kind", "other")
+            failure_kind = _failure_kind(exc)
             _emit(
                 model=req.model,
                 response=None,
@@ -132,21 +143,27 @@ def invoke_with_retry(
     except _SchemaViolation:
         pass
     except Exception as exc:
-        failure_kind = getattr(exc, "failure_kind", None)
-        if failure_kind in {"network_timeout", "rate_limit"}:
+        failure_kind = _failure_kind(exc)
+        if failure_kind == "schema_validation":
+            pass
+        elif failure_kind in {"network_timeout", "rate_limit"}:
             try:
                 return _call(request, 1)
             except Exception as exc2:
                 raise ProviderCallError(
                     f"{failure_kind} retry failed for agent={agent_name} model={request.model}"
                 ) from exc2
-        raise
+        else:
+            raise
 
     # Attempt 2 (same model repair)
     try:
         return _call(request, 1)
     except _SchemaViolation:
         pass
+    except Exception as exc:
+        if _failure_kind(exc) != "schema_validation":
+            raise
 
     # Attempt 3 (cheap model)
     cheap_request = request.model_copy(update={"model": cheap_model})
@@ -154,6 +171,9 @@ def invoke_with_retry(
         return _call(cheap_request, 2)
     except _SchemaViolation:
         pass
+    except Exception as exc:
+        if _failure_kind(exc) != "schema_validation":
+            raise
 
     # Exhausted
     _emit(

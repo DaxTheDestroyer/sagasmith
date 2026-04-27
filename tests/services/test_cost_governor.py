@@ -40,6 +40,14 @@ def test_record_unknown_model_returns_zero_approximate() -> None:
     update = gov.record_usage(provider="unknown", model="unknown", usage=usage)
     assert update.cost_usd == 0.0
     assert update.cost_is_approximate is True
+    assert update.new_state.unknown_cost_call_count == 1
+
+
+def test_budget_inspection_surfaces_unknown_cost_calls() -> None:
+    gov = CostGovernor(1.0)
+    usage = TokenUsage(prompt_tokens=100, completion_tokens=50, total_tokens=150)
+    gov.record_usage(provider="unknown", model="unknown", usage=usage)
+    assert gov.format_budget_inspection().unknown_cost_call_count == 1
 
 
 @pytest.mark.smoke
@@ -133,6 +141,7 @@ def test_raise_if_blocked_raises_BudgetStopError() -> None:
         spent_usd_estimate=0.0,
         tokens_prompt=0,
         tokens_completion=0,
+        unknown_cost_call_count=0,
         warnings_sent=[],
         hard_stopped=False,
     )

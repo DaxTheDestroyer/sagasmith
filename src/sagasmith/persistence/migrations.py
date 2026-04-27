@@ -27,6 +27,8 @@ def apply_migrations(conn: sqlite3.Connection) -> list[int]:
                 (version, datetime.now(UTC).isoformat()),
             )
             applied.append(version)
+    if applied:
+        conn.commit()
     return applied
 
 

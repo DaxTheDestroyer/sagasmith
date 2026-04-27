@@ -13,7 +13,7 @@ SagaSmith v1 follows a trust-before-breadth path: establish the local Python pac
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Contracts, Scaffold, and Eval Spine** - Developer can run a local package skeleton with typed state contracts and schema/eval guardrails. (completed 2026-04-26)
-- [ ] **Phase 2: Deterministic Trust Services** - Rules math, provider/cost handling, SQLite turn records, and privacy checks exist before paid gameplay.
+- [x] **Phase 2: Deterministic Trust Services** - Rules math, provider/cost handling, SQLite turn records, and privacy checks exist before paid gameplay. (completed 2026-04-26)
 - [ ] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls.
 - [ ] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure.
 - [ ] **Phase 5: Rules-First PF2e Vertical Slice** - User can inspect a pregen PC and complete deterministic skill/combat mechanics with auditable rolls.
@@ -63,12 +63,12 @@ Plans:
   5. Completed-turn records, roll logs, state deltas, cost logs, and SQLite transaction ordering exist before any turn is marked complete.
 **Plans**: 6 plans
 Plans:
-- [ ] 02-01-PLAN.md — Typed trust-service errors, SecretRef (keyring/env) resolver, RedactionCanary `sk-proj-` coverage, HP invariant, and fixture override revalidation (PROV-01, QA-04, D-05/D-06/D-08/D-16).
-- [ ] 02-02-PLAN.md — DiceService with seeded deterministic replay and pure `compute_degree` PF2e degree-of-success math (RULE-01, RULE-02, RULE-03, D-13/D-14).
-- [ ] 02-03-PLAN.md — `LLMClient` protocol, typed request/response/stream/config models, D-03 retry ladder, metadata-only provider logs, and `DeterministicFakeClient` (PROV-02, PROV-03, PROV-04, PROV-05, PROV-06).
-- [ ] 02-04-PLAN.md — `CostGovernor` with static pricing table, exactly-once 70/90 warnings, pre-call worst-case budget block, and `BudgetInspection` data layer (COST-01, COST-02, COST-03, COST-04, COST-05, QA-07).
-- [ ] 02-05-PLAN.md — `OpenRouterClient` over injected `HttpTransport`, opt-in live verification, secret-free error paths (PROV-01, PROV-03, PROV-04).
-- [ ] 02-06-PLAN.md — SQLite trust-records schema v1, typed repositories, and atomic `close_turn` transaction with redaction sweep (PERS-01, PERS-02, PERS-04, QA-04).
+- [x] 02-01-PLAN.md — Typed trust-service errors, SecretRef (keyring/env) resolver, RedactionCanary `sk-proj-` coverage, HP invariant, and fixture override revalidation (PROV-01, QA-04, D-05/D-06/D-08/D-16).
+- [x] 02-02-PLAN.md — DiceService with seeded deterministic replay and pure `compute_degree` PF2e degree-of-success math (RULE-01, RULE-02, RULE-03, D-13/D-14).
+- [x] 02-03-PLAN.md — `LLMClient` protocol, typed request/response/stream/config models, D-03 retry ladder, metadata-only provider logs, and `DeterministicFakeClient` (PROV-02, PROV-03, PROV-04, PROV-05, PROV-06).
+- [x] 02-04-PLAN.md — `CostGovernor` with static pricing table, exactly-once 70/90 warnings, pre-call worst-case budget block, and `BudgetInspection` data layer (COST-01, COST-02, COST-03, COST-04, COST-05, QA-07).
+- [x] 02-05-PLAN.md — `OpenRouterClient` over injected `HttpTransport`, opt-in live verification, secret-free error paths (PROV-01, PROV-03, PROV-04).
+- [x] 02-06-PLAN.md — SQLite trust-records schema v1, typed repositories, and atomic `close_turn` transaction with redaction sweep (PERS-01, PERS-02, PERS-04, QA-04).
 
 ### Phase 3: CLI Setup, Onboarding, and TUI Controls
 **Goal**: User can initialize a local campaign, complete onboarding, and use responsive control commands in the Textual shell
@@ -161,7 +161,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Contracts, Scaffold, and Eval Spine | 3/3 | Complete | 2026-04-26 |
-| 2. Deterministic Trust Services | 0/6 | Ready to execute | - |
+| 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
 | 3. CLI Setup, Onboarding, and TUI Controls | 0/TBD | Not started | - |
 | 4. Graph Runtime and Agent Skills | 0/TBD | Not started | - |
 | 5. Rules-First PF2e Vertical Slice | 0/TBD | Not started | - |

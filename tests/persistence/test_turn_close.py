@@ -294,6 +294,45 @@ def test_turn_not_marked_complete_when_transaction_fails(
         assert tr.get("t1") is None
 
 
+@pytest.mark.smoke
+def test_close_turn_rejects_secret_shaped_payload_before_writes(tmp_path: Path) -> None:
+    path = _db(tmp_path)
+    with campaign_db(path) as conn:
+        apply_migrations(conn)
+
+        bundle = TurnCloseBundle(
+            turn_record=TurnRecord(
+                turn_id="t1",
+                campaign_id="c1",
+                session_id="s1",
+                status="complete",
+                started_at="2026-04-26T12:00:00Z",
+                completed_at="2026-04-26T12:00:00Z",
+                schema_version=1,
+            ),
+            transcript_entries=[
+                TranscriptEntry(
+                    turn_id="t1",
+                    kind="player_input",
+                    content="Authorization: Bearer abcdefghijklmnop",
+                    sequence=0,
+                    created_at="2026-04-26T12:00:00Z",
+                )
+            ],
+            roll_results=[],
+            provider_logs=[],
+            state_deltas=[],
+            cost_logs=[],
+            checkpoint_refs=[],
+        )
+
+        with pytest.raises(TrustServiceError, match="redaction sweep failed"):
+            close_turn(conn, bundle)
+
+        assert conn.execute("SELECT COUNT(*) FROM transcript_entries").fetchone()[0] == 0
+        assert TurnRecordRepository(conn).get("t1") is None
+
+
 def test_redaction_over_all_tables_clean(tmp_path: Path) -> None:
     from sagasmith.evals.redaction import RedactionCanary
 

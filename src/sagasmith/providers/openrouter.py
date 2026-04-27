@@ -45,6 +45,8 @@ def _map_status_to_failure_kind(status_code: int) -> str:
 class OpenRouterClient:
     """Real OpenRouter LLMClient implementation."""
 
+    provider = "openrouter"
+
     def __init__(
         self,
         config: ProviderConfig,
@@ -97,10 +99,8 @@ class OpenRouterClient:
             if request.response_format == "json_schema":
                 try:
                     parsed_json = json.loads(text)
-                except json.JSONDecodeError as exc:
-                    raise _OpenRouterError(
-                        failure_kind="schema_validation", status_code=200
-                    ) from exc
+                except json.JSONDecodeError:
+                    parsed_json = None
 
             return LLMResponse(
                 text=text,

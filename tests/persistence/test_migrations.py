@@ -62,6 +62,16 @@ def test_current_schema_version_one_after_migration(tmp_path: Path) -> None:
         assert current_schema_version(conn) == 1
 
 
+def test_apply_migrations_persists_schema_version_after_reopen(tmp_path: Path) -> None:
+    path = tmp_path / "test.db"
+    with campaign_db(path) as conn:
+        assert apply_migrations(conn) == [1]
+
+    with campaign_db(path) as conn:
+        assert current_schema_version(conn) == 1
+        assert apply_migrations(conn) == []
+
+
 def test_open_campaign_db_enables_foreign_keys(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     conn = open_campaign_db(path)

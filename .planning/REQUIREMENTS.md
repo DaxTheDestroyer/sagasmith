@@ -33,17 +33,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Provider, Secrets, and Cost
 
-- [ ] **PROV-01**: User can configure OpenRouter credentials by keyring reference or environment-variable reference without storing plaintext keys in campaign files.
-- [ ] **PROV-02**: System exposes a model-agnostic `LLMClient` protocol for non-streaming structured calls and streaming text calls.
-- [ ] **PROV-03**: System can make OpenRouter structured JSON calls and validate the returned payload against the requested schema.
-- [ ] **PROV-04**: System can stream narration tokens through the provider abstraction.
-- [ ] **PROV-05**: System logs LLM request/response metadata, failures, token usage, and cost estimates with secrets redacted.
-- [ ] **PROV-06**: User can configure default, narration, and cheap/fallback model names for a campaign.
-- [ ] **COST-01**: User can set a per-session budget during setup or onboarding.
-- [ ] **COST-02**: System updates `CostState` after every provider call using provider-reported or static-table pricing.
-- [ ] **COST-03**: System warns the user exactly once at 70% and 90% of the configured session budget.
-- [ ] **COST-04**: System hard-stops before making a paid LLM call that would exceed the configured session budget.
-- [ ] **COST-05**: User can inspect current cost and token usage with `/budget`.
+- [x] **PROV-01**: User can configure OpenRouter credentials by keyring reference or environment-variable reference without storing plaintext keys in campaign files.
+- [x] **PROV-02**: System exposes a model-agnostic `LLMClient` protocol for non-streaming structured calls and streaming text calls.
+- [x] **PROV-03**: System can make OpenRouter structured JSON calls and validate the returned payload against the requested schema.
+- [x] **PROV-04**: System can stream narration tokens through the provider abstraction.
+- [x] **PROV-05**: System logs LLM request/response metadata, failures, token usage, and cost estimates with secrets redacted.
+- [x] **PROV-06**: User can configure default, narration, and cheap/fallback model names for a campaign.
+- [x] **COST-01**: User can set a per-session budget during setup or onboarding.
+- [x] **COST-02**: System updates `CostState` after every provider call using provider-reported or static-table pricing.
+- [x] **COST-03**: System warns the user exactly once at 70% and 90% of the configured session budget.
+- [x] **COST-04**: System hard-stops before making a paid LLM call that would exceed the configured session budget.
+- [x] **COST-05**: User can inspect current cost and token usage with `/budget`.
 
 ### Onboarding and Player Contract
 
@@ -66,9 +66,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Deterministic Rules and Dice
 
-- [ ] **RULE-01**: System computes PF2e degree of success from natural d20 value, total, and DC, including natural 1 and natural 20 adjustment rules.
-- [ ] **RULE-02**: System rolls dice through a seeded deterministic DiceService that records seed, inputs, natural value, modifier, total, DC, and timestamp.
-- [ ] **RULE-03**: System reproduces identical roll results when replaying the same seed and ordered roll inputs.
+- [x] **RULE-01**: System computes PF2e degree of success from natural d20 value, total, and DC, including natural 1 and natural 20 adjustment rules.
+- [x] **RULE-02**: System rolls dice through a seeded deterministic DiceService that records seed, inputs, natural value, modifier, total, DC, and timestamp.
+- [x] **RULE-03**: System reproduces identical roll results when replaying the same seed and ordered roll inputs.
 - [ ] **RULE-04**: User can inspect one valid level-1 pregenerated martial `CharacterSheet` with `/sheet`.
 - [ ] **RULE-05**: System resolves a skill or Perception check against a fixed DC and emits a validated `CheckResult`.
 - [ ] **RULE-06**: System resolves Perception initiative and persists initiative order through checkpoints.
@@ -114,10 +114,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Persistence and Vault Memory
 
-- [ ] **PERS-01**: System stores profiles, settings, transcripts, roll logs, turn records, checkpoints, cost logs, and applied state deltas in SQLite.
-- [ ] **PERS-02**: System performs turn-close SQLite writes in a transaction before writing vault files or derived indices.
+- [x] **PERS-01**: System stores profiles, settings, transcripts, roll logs, turn records, checkpoints, cost logs, and applied state deltas in SQLite.
+- [x] **PERS-02**: System performs turn-close SQLite writes in a transaction before writing vault files or derived indices.
 - [ ] **PERS-03**: System writes master-vault pages with atomic file replacement and validates YAML frontmatter after write.
-- [ ] **PERS-04**: System marks a turn complete only after turn-close persistence succeeds.
+- [x] **PERS-04**: System marks a turn complete only after turn-close persistence succeeds.
 - [ ] **PERS-05**: System surfaces a repair warning when player-vault sync or derived-index updates fail after a completed turn.
 - [ ] **PERS-06**: System can rebuild derived indices from SQLite plus master vault after corruption or deletion.
 - [ ] **VAULT-01**: System creates a master vault in app data and a player vault in the campaign directory.
@@ -145,10 +145,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **QA-01**: User can retcon the last completed turn after confirmation for simple state and vault changes.
 - [ ] **QA-02**: System excludes retconned turns from canonical replay, summaries, and vault rebuilds.
 - [ ] **QA-03**: Test suite covers PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
-- [ ] **QA-04**: Test suite verifies API keys and auth headers never appear in logs, vaults, transcripts, checkpoints, or generated artifacts.
+- [x] **QA-04**: Test suite verifies API keys and auth headers never appear in logs, vaults, transcripts, checkpoints, or generated artifacts.
 - [ ] **QA-05**: Test suite verifies configured hard-limit content does not appear in player-facing prose across a regression scenario.
 - [ ] **QA-06**: Test suite verifies player-vault projection contains no GM-only fields, comments, or pages.
-- [ ] **QA-07**: Test suite verifies CostGovernor warnings and hard-stop behavior.
+- [x] **QA-07**: Test suite verifies CostGovernor warnings and hard-stop behavior.
 - [ ] **QA-08**: Smoke suite verifies install/init/configure/onboard/play skill challenge/play simple combat/quit/resume without paid LLM calls.
 - [ ] **QA-09**: Release gate requires lint, type check, unit tests, smoke tests, and secret scan to pass.
 
@@ -218,25 +218,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATE-03 | Phase 1 | Complete |
 | STATE-04 | Phase 1 | Complete |
 | STATE-05 | Phase 1 | Complete |
-| PROV-01 | Phase 2 | Pending |
-| PROV-02 | Phase 2 | Pending |
-| PROV-03 | Phase 2 | Pending |
-| PROV-04 | Phase 2 | Pending |
-| PROV-05 | Phase 2 | Pending |
-| PROV-06 | Phase 2 | Pending |
-| COST-01 | Phase 2 | Pending |
-| COST-02 | Phase 2 | Pending |
-| COST-03 | Phase 2 | Pending |
-| COST-04 | Phase 2 | Pending |
-| COST-05 | Phase 2 | Pending |
-| RULE-01 | Phase 2 | Pending |
-| RULE-02 | Phase 2 | Pending |
-| RULE-03 | Phase 2 | Pending |
-| PERS-01 | Phase 2 | Pending |
-| PERS-02 | Phase 2 | Pending |
-| PERS-04 | Phase 2 | Pending |
-| QA-04 | Phase 2 | Pending |
-| QA-07 | Phase 2 | Pending |
+| PROV-01 | Phase 2 | Complete |
+| PROV-02 | Phase 2 | Complete |
+| PROV-03 | Phase 2 | Complete |
+| PROV-04 | Phase 2 | Complete |
+| PROV-05 | Phase 2 | Complete |
+| PROV-06 | Phase 2 | Complete |
+| COST-01 | Phase 2 | Complete |
+| COST-02 | Phase 2 | Complete |
+| COST-03 | Phase 2 | Complete |
+| COST-04 | Phase 2 | Complete |
+| COST-05 | Phase 2 | Complete |
+| RULE-01 | Phase 2 | Complete |
+| RULE-02 | Phase 2 | Complete |
+| RULE-03 | Phase 2 | Complete |
+| PERS-01 | Phase 2 | Complete |
+| PERS-02 | Phase 2 | Complete |
+| PERS-04 | Phase 2 | Complete |
+| QA-04 | Phase 2 | Complete |
+| QA-07 | Phase 2 | Complete |
 | CLI-01 | Phase 3 | Pending |
 | CLI-02 | Phase 3 | Pending |
 | CLI-03 | Phase 3 | Pending |

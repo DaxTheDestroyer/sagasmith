@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 from sagasmith.schemas.provider import (
     CompletedEvent,
@@ -18,6 +19,7 @@ from sagasmith.schemas.provider import (
 class DeterministicFakeClient:
     """Fake LLMClient that returns scripted responses and streams."""
 
+    provider: ClassVar[str] = "fake"
     scripted_responses: dict[str, LLMResponse] = field(default_factory=dict[str, LLMResponse])
     scripted_streams: dict[str, list[LLMStreamEvent]] = field(
         default_factory=dict[str, list[LLMStreamEvent]]
