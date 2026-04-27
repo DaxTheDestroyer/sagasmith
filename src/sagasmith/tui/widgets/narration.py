@@ -11,6 +11,10 @@ class NarrationArea(Widget):
 
     Uses RichLog with markup=False to prevent Rich escape-sequence injection
     from transcript content (T-03-17 mitigation).
+
+    ``_logged_lines`` is a plain list tracking every line written via
+    ``append_line()`` \u2014 used by tests to verify command output without
+    inspecting Textual's internal rendering state.
     """
 
     DEFAULT_CSS = """
@@ -18,6 +22,7 @@ class NarrationArea(Widget):
     """
 
     def compose(self):  # type: ignore[override]
+        self.logged_lines: list[str] = []
         yield RichLog(
             id="narration-log",
             wrap=True,
@@ -29,6 +34,9 @@ class NarrationArea(Widget):
     def append_line(self, text: str) -> None:
         log = self.query_one("#narration-log", RichLog)
         log.write(text)
+        if not hasattr(self, "logged_lines"):
+            self.logged_lines = []
+        self.logged_lines.append(text)
 
     def load_scrollback(self, lines: list[str]) -> None:
         log = self.query_one("#narration-log", RichLog)

@@ -1,10 +1,33 @@
-"""Commands sub-package \u2014 CommandRegistry, TUICommand protocol, and built-in commands."""
+"""Commands sub-package — CommandRegistry, TUICommand protocol, and all command implementations."""
 
+from sagasmith.tui.commands.control import (
+    BudgetCommand,
+    ClockCommand,
+    InventoryCommand,
+    MapCommand,
+    RecapCommand,
+    RetconCommand,
+    SaveCommand,
+    SheetCommand,
+)
 from sagasmith.tui.commands.help import HelpCommand
 from sagasmith.tui.commands.registry import CommandRegistry, TUICommand
+from sagasmith.tui.commands.safety import LineCommand, PauseCommand
+from sagasmith.tui.commands.settings import SettingsCommand
 
 __all__ = [
+    "BudgetCommand",
+    "ClockCommand",
     "CommandRegistry",
     "HelpCommand",
+    "InventoryCommand",
+    "LineCommand",
+    "MapCommand",
+    "PauseCommand",
+    "RecapCommand",
+    "RetconCommand",
+    "SaveCommand",
+    "SettingsCommand",
+    "SheetCommand",
     "TUICommand",
 ]

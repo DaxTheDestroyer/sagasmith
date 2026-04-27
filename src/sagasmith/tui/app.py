@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
@@ -15,6 +15,11 @@ from sagasmith.tui.widgets.input_line import InputLine
 from sagasmith.tui.widgets.narration import NarrationArea
 from sagasmith.tui.widgets.safety_bar import SafetyBar
 from sagasmith.tui.widgets.status_panel import StatusPanel
+
+if TYPE_CHECKING:
+    from sagasmith.onboarding.store import OnboardingStore
+    from sagasmith.services.cost import CostGovernor
+    from sagasmith.services.safety import SafetyEventService
 
 
 class PlayerInputSubmitted(Message):
@@ -55,6 +60,11 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         # registry is assigned by runtime.build_app BEFORE mount (Plan 03-03).
         # Plan 03-04 replaces None-guard with full registry dispatch.
         self.commands = None  # type: ignore[assignment]
+        # Runtime-scoped services set by build_app (Plan 03-04).
+        # Explicitly typed | None so unit tests can construct apps without services.
+        self.onboarding_store: OnboardingStore | None = None
+        self.safety_events: SafetyEventService | None = None
+        self.cost_governor: CostGovernor | None = None
 
     def compose(self) -> ComposeResult:
         yield SafetyBar()

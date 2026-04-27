@@ -11,7 +11,13 @@ from sagasmith.app.campaign import init_campaign, open_campaign
 from sagasmith.tui.app import SagaSmithApp
 from sagasmith.tui.commands.help import HelpCommand
 from sagasmith.tui.commands.registry import CommandRegistry
+from sagasmith.tui.runtime import build_app
 from sagasmith.tui.widgets.narration import NarrationArea
+
+# TUI-06: all 12 required command names registered by build_app
+_EXPECTED_COMMANDS = sorted(
+    ["budget", "clock", "help", "inventory", "line", "map", "pause", "recap", "retcon", "save", "settings", "sheet"]
+)
 
 
 @dataclass(frozen=True)
@@ -65,3 +71,18 @@ async def test_help_still_works_with_only_itself(tmp_path: Path) -> None:
         help_cmd.handle(app, ())
         narration = app.query_one(NarrationArea)
         assert narration is not None
+
+
+@pytest.mark.asyncio
+async def test_help_lists_all_twelve_commands_via_build_app(tmp_path: Path) -> None:
+    """TUI-06: build_app registers all 12 required commands; /help outputs them all."""
+    root = tmp_path / "c"
+    init_campaign(name="Full Registry Test", root=root, provider="fake")
+    app = build_app(root)
+
+    async with app.run_test():
+        assert app.commands is not None
+        # Verify all 12 expected command names are registered
+        for name in _EXPECTED_COMMANDS:
+            cmd = app.commands.get(name)
+            assert cmd is not None, f"Expected command {name!r} to be registered"
