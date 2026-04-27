@@ -8,13 +8,13 @@ from sagasmith.skills_adapter.catalog import SkillCatalog, render_catalog_for_pr
 from sagasmith.skills_adapter.store import SkillStore
 
 FIXTURES = Path(__file__).with_name("fixtures")
-ORACLE_SKILLS = FIXTURES / "agents" / "oracle" / "skills"
-SHARED_SKILLS = FIXTURES / "skills"
+AGENTS_ROOT = FIXTURES / "agents"
+SHARED_ROOT = FIXTURES / "skills"
 
 
 class TestCatalog:
     def test_for_agent_returns_sorted_tuples(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         catalog = SkillCatalog.for_agent(store, "oracle")
         names = [name for name, _desc in catalog.entries]
@@ -23,14 +23,14 @@ class TestCatalog:
         assert "shared-skill" in names
 
     def test_description_length_cap(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         catalog = SkillCatalog.for_agent(store, "oracle")
         for _name, desc in catalog.entries:
             assert len(desc) <= 256
 
     def test_render_catalog_for_prompt(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         catalog = SkillCatalog.for_agent(store, "oracle")
         rendered = render_catalog_for_prompt(catalog)

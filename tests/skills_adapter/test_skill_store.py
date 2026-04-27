@@ -6,19 +6,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
-from sagasmith.skills_adapter.errors import SkillValidationError
-from sagasmith.skills_adapter.store import SkillRecord, SkillStore
+from sagasmith.skills_adapter.store import SkillStore
 
 FIXTURES = Path(__file__).with_name("fixtures")
-ORACLE_SKILLS = FIXTURES / "agents" / "oracle" / "skills"
-SHARED_SKILLS = FIXTURES / "skills"
+AGENTS_ROOT = FIXTURES / "agents"
+SHARED_ROOT = FIXTURES / "skills"
 
 
 class TestScan:
     def test_discovers_all_skills(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         oracle_records = {r.name for r in store.skills.get("oracle", [])}
         shared_records = {r.name for r in store.skills.get("_shared", [])}
@@ -26,7 +23,7 @@ class TestScan:
         assert "shared-skill" in shared_records
 
     def test_deterministic_path_sort(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         first = [r.path for r in store.skills.get("oracle", [])]
         store.scan()
@@ -48,7 +45,7 @@ class TestScan:
         assert names == ["a-skill", "b-skill", "c-skill"]
 
     def test_valid_skill_record(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         record = store.find(name="valid-skill", agent_scope="oracle")
         assert record is not None
@@ -62,7 +59,7 @@ class TestScan:
 
     def test_first_slice_defaults_true(self):
         # Create a skill without first_slice key
-        root = Path(__file__).with_name("fixtures")
+        root = Path(__file__).with_name("fixtures") / "agents"
         store = SkillStore(roots=[root])
         store.scan()
         record = store.find(name="valid-skill", agent_scope="oracle")
@@ -70,18 +67,18 @@ class TestScan:
         assert record.first_slice is True
 
     def test_first_slice_explicit_false(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         record = store.find(name="non-first-slice", agent_scope="oracle")
-        assert record is None  # filtered out by default first_slice_only=False
+        assert record is not None  # included when first_slice_only=False (default)
         # But if we set first_slice_only=True, it should be skipped
-        store2 = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS], first_slice_only=True)
+        store2 = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT], first_slice_only=True)
         store2.scan()
         assert store2.find(name="non-first-slice", agent_scope="oracle") is None
         assert any("non-first-slice" in str(p) for p, _ in store2.skipped)
 
     def test_first_slice_only_filter_reason(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS], first_slice_only=True)
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT], first_slice_only=True)
         store.scan()
         skipped_paths = [p for p, _ in store.skipped]
         assert any("non-first-slice" in str(p) for p in skipped_paths)
@@ -89,32 +86,32 @@ class TestScan:
         assert any("first_slice_only filter" in r for r in reasons)
 
     def test_invalid_name_rejected(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         bad_name_errors = [msg for p, msg in store.errors if "bad-name" in str(p)]
         assert any("invalid name" in msg for msg in bad_name_errors)
 
     def test_missing_frontmatter_rejected(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         missing_fm_errors = [msg for p, msg in store.errors if "missing-frontmatter" in str(p)]
         assert any("frontmatter" in msg for msg in missing_fm_errors)
 
     def test_duplicate_name_rejected(self, tmp_path: Path):
-        root = tmp_path / "agents" / "oracle" / "skills"
-        (root / "dup" / "SKILL.md").parent.mkdir(parents=True)
-        (root / "dup2" / "SKILL.md").parent.mkdir(parents=True)
+        root = tmp_path / "agents"
+        (root / "oracle" / "skills" / "dup" / "SKILL.md").parent.mkdir(parents=True)
+        (root / "oracle" / "skills" / "dup2" / "SKILL.md").parent.mkdir(parents=True)
         text = "---\nname: dup\ndescription: d\nallowed_agents: [oracle]\nimplementation_surface: prompted\n---\n"
-        (root / "dup" / "SKILL.md").write_text(text)
-        (root / "dup2" / "SKILL.md").write_text(text)
-        store = SkillStore(roots=[tmp_path])
+        (root / "oracle" / "skills" / "dup" / "SKILL.md").write_text(text)
+        (root / "oracle" / "skills" / "dup2" / "SKILL.md").write_text(text)
+        store = SkillStore(roots=[root])
         store.scan()
-        dup_errors = [msg for p, msg in store.errors if "duplicate name" in msg]
+        dup_errors = [msg for _path, msg in store.errors if "duplicate name" in msg]
         assert len(dup_errors) == 1
         assert "dup" in dup_errors[0]
 
     def test_agent_star_rejected(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         star_errors = [
             msg for p, msg in store.errors
@@ -124,14 +121,14 @@ class TestScan:
         assert "agent-scoped skills must not declare allowed_agents: ['*']" in star_errors[0]
 
     def test_cross_cutting_star_allowed(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         record = store.find(name="shared-skill", agent_scope="_shared")
         assert record is not None
         assert record.allowed_agents == ("*",)
 
     def test_redacted_skill_rejected(self):
-        store = SkillStore(roots=[ORACLE_SKILLS, SHARED_SKILLS])
+        store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
         redacted_errors = [msg for p, msg in store.errors if "redacted-skill" in str(p)]
         assert any("redacted content" in msg for msg in redacted_errors)

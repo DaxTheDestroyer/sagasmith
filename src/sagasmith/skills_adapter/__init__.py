@@ -13,6 +13,7 @@ Modules:
 
 from __future__ import annotations
 
+from sagasmith.skills_adapter.catalog import SkillCatalog, render_catalog_for_prompt
 from sagasmith.skills_adapter.errors import (
     FrontmatterError,
     SkillAdapterError,
@@ -21,13 +22,21 @@ from sagasmith.skills_adapter.errors import (
     UnauthorizedSkillError,
 )
 from sagasmith.skills_adapter.frontmatter import SUPPORTED_SUBSET, parse_frontmatter
+from sagasmith.skills_adapter.loader import LoadedSkill, load_skill
+from sagasmith.skills_adapter.store import SkillRecord, SkillStore
 
 __all__ = [
     "SUPPORTED_SUBSET",
     "FrontmatterError",
+    "LoadedSkill",
     "SkillAdapterError",
+    "SkillCatalog",
     "SkillNotFoundError",
+    "SkillRecord",
+    "SkillStore",
     "SkillValidationError",
     "UnauthorizedSkillError",
+    "load_skill",
     "parse_frontmatter",
+    "render_catalog_for_prompt",
 ]

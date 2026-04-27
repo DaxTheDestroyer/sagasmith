@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.resources
+from typing import Any
 
 import pytest
 
@@ -19,7 +20,19 @@ class TestPackaging:
         except ModuleNotFoundError:
             pytest.skip("sagasmith package not installed")
 
-        skill_files = list(files.rglob("SKILL.md"))
+        def _collect_skills(node: Any) -> list[Any]:
+            results: list[Any] = []
+            try:
+                for child in node.iterdir():
+                    if child.is_dir():
+                        results.extend(_collect_skills(child))
+                    elif child.name == "SKILL.md":
+                        results.append(child)
+            except (OSError, AttributeError):
+                pass
+            return results
+
+        skill_files = _collect_skills(files)
         # If we are in editable mode there may be zero packaged SKILL.md files.
         if not skill_files:
             pytest.skip("No packaged SKILL.md found (editable install?)")
