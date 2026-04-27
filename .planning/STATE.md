@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 replanned via --reviews (3 → 5 plans) after cross-AI review feedback
-last_updated: "2026-04-27T19:16:00Z"
-last_activity: 2026-04-27 -- Phase 4 replanned: 5 plans in 4 waves incorporating Gemini/Claude/Codex/OpenCode review feedback
+stopped_at: Phase 4 complete — advancing to Phase 5 (Rules-First PF2e Vertical Slice)
+last_updated: "2026-04-27T21:20:00Z"
+last_activity: 2026-04-27 -- Phase 4 executed: 5 plans, 4 waves, 442 tests passing
 progress:
   total_phases: 8
-  completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
-  percent: 38
+  completed_phases: 4
+  total_plans: 18
+  completed_plans: 18
+  percent: 50
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 3 complete — ready for Phase 4 (Graph Runtime and Agent Skills)
+**Current focus:** Phase 4 complete — ready for Phase 5 (Rules-First PF2e Vertical Slice)
 
 ## Current Position
 
-Phase: 4 of 8 (Graph Runtime and Agent Skills) — READY TO EXECUTE (5 plans in 4 waves)
-Plan: 0 of 5 in current phase (planning complete after --reviews replanning)
+Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — READY TO PLAN
+Plan: 0 of TBD in current phase
 Status: Executing
-Last activity: 2026-04-27 -- Phase 4 replanned via --reviews (3 → 5 plans, waves 1→4)
+Last activity: 2026-04-27 -- Phase 4 complete: 5 plans, 4 waves, 442 tests passing
 
-Progress: [████░░░░░░] 38%
+Progress: [██████░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 13
-- Average duration: 19 min
-- Total execution time: ~2.1 hours
+- Total plans completed: 18
+- Average duration: 22 min
+- Total execution time: ~2.8 hours
 
 **By Phase:**
 
@@ -47,11 +47,12 @@ Progress: [████░░░░░░] 38%
 | 1. Contracts, Scaffold, and Eval Spine | 3 | 3 | 22 min |
 | 2. Deterministic Trust Services | 6 | 6 | -- |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
+| 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-01 (16 min), 03-02 (12 min), 03-03 (12 min), 03-04 (21 min)
-- Trend: Phase 3 complete; 12/12 slash commands, safety events, 295/1 tests.
+- Last 5 plans: 04-01 (35 min), 04-02 (40 min), 04-03 (35 min), 04-04 (60 min), 04-05 (10 min)
+- Trend: Phase 4 complete; 442 tests passing, LangGraph runtime + interrupts + skills adapter + 14 SKILL.md files shipped.
 
 *Updated after each plan completion*
 
@@ -82,22 +83,27 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 4 (Graph Runtime and Agent Skills): `/gsd-execute-phase 4`
-  - Wave 1: 04-01 (runtime foundation)
-  - Wave 2: 04-02 (persistent graph + activation log) ∥ 04-04 (skills adapter package)
-  - Wave 3: 04-03 (native interrupts + TUI wiring + E2E smoke)
-  - Wave 4: 04-05 (first-slice SKILL.md catalog + node wiring)
+- Plan Phase 5 (Rules-First PF2e Vertical Slice): `/gsd-plan-phase 5`
 
 ### Blockers/Concerns
 
-- None currently. Phase 4 revision addressed all HIGH/MEDIUM concerns from 04-REVIEWS.md consensus:
-  - LangGraph native interrupt primitives (Claude, Codex, OpenCode HIGH)
-  - Pre-narration checkpoint ownership at runtime boundary (OpenCode, Claude HIGH)
-  - Task splits (Claude, Codex HIGH)
-  - Thread-id convention locked to `campaign:<id>` (Codex HIGH)
-  - Skill packaging via pyproject.toml (Codex HIGH)
-  - first_slice as first-class field (Claude, OpenCode)
-  - Required-set assertions instead of exact counts (Codex)
+- None currently. Phase 4 complete with all reviewer concerns addressed.
+
+### Decisions (continued from Phase 4)
+
+- [04-01]: SagaGraphState TypedDict mirror with import-time field-drift guard prevents silent schema regressions.
+- [04-01]: PHASE_TO_ENTRY uses END sentinel (not str) for terminated phases; combat routes to END in Phase 4, Phase 5 adds sub-routing.
+- [04-02]: Thread identity locked to `campaign:<campaign_id>`; turn_id stays in state + checkpoint_refs.
+- [04-02]: Pre-narration and final CheckpointRef writes owned by GraphRuntime boundary, not nodes or TUI.
+- [04-02]: AgentActivationLogger uses ContextVar for skill_name injection without re-plumbing node signatures.
+- [04-03]: Native LangGraph update_state + Command(resume) for interrupts; nodes remain interrupt-agnostic.
+- [04-03]: BudgetStopError translation lives ONLY in runtime wrapper.
+- [04-03]: RetconCommand acknowledge-only in Phase 4; Phase 8 owns full confirmation + rollback.
+- [04-04]: YAML-lite hand-rolled parser (no PyYAML dependency) with documented SUPPORTED_SUBSET.
+- [04-04]: Agent-scoped skills with `allowed_agents: ["*"]` are REJECTED, not silently downgraded.
+- [04-04]: Deterministic scan order via `sorted(Path.rglob("SKILL.md"))`.
+- [04-05]: _default_skill_store() raises loud on production scan errors at startup.
+- [04-05]: ContextVar handoff pattern: nodes call `get_current_activation().set_skill(...)` when activation is present.
 
 ## Deferred Items
 
@@ -109,6 +115,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-27T09:43:02Z
-Stopped at: Completed 03-04-PLAN.md (all 12 slash commands + safety events + Phase 3 complete)
+Last session: 2026-04-27T21:20:00Z
+Stopped at: Completed Phase 4 execution (5 plans, 442 tests, all waves green)
 Resume file: None

@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Contracts, Scaffold, and Eval Spine** - Developer can run a local package skeleton with typed state contracts and schema/eval guardrails. (completed 2026-04-26)
 - [x] **Phase 2: Deterministic Trust Services** - Rules math, provider/cost handling, SQLite turn records, and privacy checks exist before paid gameplay. (completed 2026-04-26)
 - [x] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls. (completed 2026-04-27)
-- [ ] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure.
+- [x] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure. (completed 2026-04-27)
 - [ ] **Phase 5: Rules-First PF2e Vertical Slice** - User can inspect a pregen PC and complete deterministic skill/combat mechanics with auditable rolls.
 - [ ] **Phase 6: AI GM Story Loop** - User can play AI-planned, AI-narrated turns while rules, safety, cost, and narration boundaries hold.
 - [ ] **Phase 7: Memory, Vault, and Resume Differentiator** - User gets durable spoiler-safe campaign memory, repairable vaults, recap, and later-process resume.
@@ -99,11 +99,11 @@ Plans:
   4. Developer can discover skills, present compact catalogs, load full skill instructions on demand, and inspect per-turn agent/skill activation logs.
 **Plans**: 5 plans (revised 2026-04-27 via `/gsd-plan-phase 4 --reviews` after cross-AI review feedback; originally 3 plans, split for task-size and LangGraph-native-interrupt concerns)
 Plans:
-- [ ] 04-01-PLAN.md — LangGraph runtime foundation: add langgraph + langgraph-checkpoint-sqlite deps, typed StateGraph over SagaState, five thin agent node stubs (onboarding/oracle/rules_lawyer/orator/archivist), phase-driven routing with combat deferred to Phase 5, pending_narration field hoisted to Task 1 (GRAPH-01).
-- [ ] 04-02-PLAN.md — LangGraph integration spike + persistent graph: prove interrupt_before / checkpoint_id / thread_id semantics, then SqliteSaver-backed GraphRuntime with pre-narration + final CheckpointRef ownership at the runtime boundary (not inside nodes), agent_skill_log migration 0005 + AgentActivationLogger with contextvar (GRAPH-02, GRAPH-03, GRAPH-05, AI-12).
-- [ ] 04-03-PLAN.md — Native LangGraph interrupts + TUI command wiring + end-to-end smoke test: InterruptKind envelopes via update_state + Command(resume), /pause and /line dual-write SafetyEvents + interrupts, BudgetStopError translation at runtime boundary, RetconCommand deferred to Phase 8, tests/integration/test_tui_graph_smoke.py (GRAPH-04).
-- [ ] 04-04-PLAN.md — Skills adapter package: YAML-lite frontmatter parser, SkillStore with first_slice field + deterministic path sort + agent-scoped `["*"]` rejection, SkillCatalog, load_skill, errors hierarchy, pyproject.toml package-data config for SKILL.md files (SKILL-01, SKILL-02, SKILL-03, SKILL-05 mechanism).
-- [ ] 04-05-PLAN.md — First-slice SKILL.md catalog (13 first_slice + 1 future-scoped = 14 files across 5 agents + 3 cross-cutting) + node wiring via contextvar handoff (set_skill calls in every agent node), bootstrap helper that raises loud on production scan errors, end-to-end first_slice_only=True play turn proof (SKILL-04, SKILL-05 end-to-end).
+- [x] 04-01-PLAN.md — LangGraph runtime foundation: add langgraph + langgraph-checkpoint-sqlite deps, typed StateGraph over SagaState, five thin agent node stubs (onboarding/oracle/rules_lawyer/orator/archivist), phase-driven routing with combat deferred to Phase 5, pending_narration field hoisted to Task 1 (GRAPH-01).
+- [x] 04-02-PLAN.md — LangGraph integration spike + persistent graph: prove interrupt_before / checkpoint_id / thread_id semantics, then SqliteSaver-backed GraphRuntime with pre-narration + final CheckpointRef ownership at the runtime boundary (not inside nodes), agent_skill_log migration 0005 + AgentActivationLogger with contextvar (GRAPH-02, GRAPH-03, GRAPH-05, AI-12).
+- [x] 04-03-PLAN.md — Native LangGraph interrupts + TUI command wiring + end-to-end smoke test: InterruptKind envelopes via update_state + Command(resume), /pause and /line dual-write SafetyEvents + interrupts, BudgetStopError translation at runtime boundary, RetconCommand deferred to Phase 8, tests/integration/test_tui_graph_smoke.py (GRAPH-04).
+- [x] 04-04-PLAN.md — Skills adapter package: YAML-lite frontmatter parser, SkillStore with first_slice field + deterministic path sort + agent-scoped `["*"]` rejection, SkillCatalog, load_skill, errors hierarchy, pyproject.toml package-data config for SKILL.md files (SKILL-01, SKILL-02, SKILL-03, SKILL-05 mechanism).
+- [x] 04-05-PLAN.md — First-slice SKILL.md catalog (13 first_slice + 1 future-scoped = 14 files across 5 agents + 3 cross-cutting) + node wiring via contextvar handoff (set_skill calls in every agent node), bootstrap helper that raises loud on production scan errors, end-to-end first_slice_only=True play turn proof (SKILL-04, SKILL-05 end-to-end).
 
 ### Phase 5: Rules-First PF2e Vertical Slice
 **Goal**: User can complete first-slice PF2e mechanics with a visible character sheet, dice overlay, replayable rolls, and no LLM-authored math
@@ -174,7 +174,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Contracts, Scaffold, and Eval Spine | 3/3 | Complete | 2026-04-26 |
 | 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
-| 4. Graph Runtime and Agent Skills | 0/5 | Not started | - |
+| 4. Graph Runtime and Agent Skills | 5/5 | Complete | 2026-04-27 |
 | 5. Rules-First PF2e Vertical Slice | 0/TBD | Not started | - |
 | 6. AI GM Story Loop | 0/TBD | Not started | - |
 | 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
