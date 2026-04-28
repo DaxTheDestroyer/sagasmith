@@ -427,4 +427,54 @@ def run_smoke() -> SmokeResult:
     except Exception as exc:
         result.checks.append(SmokeCheck("cli.init.creates_storage", False, str(exc)[:200]))
 
+    # Check #12: Phase 5 deterministic rules-first vertical slice (no provider calls).
+    try:
+        from sagasmith.rules.first_slice import make_first_slice_character, make_first_slice_enemies
+        from sagasmith.services.combat_engine import CombatEngine
+        from sagasmith.services.dice import DiceService
+        from sagasmith.services.rules_engine import RulesEngine
+
+        sheet = make_first_slice_character()
+        dice = DiceService(campaign_seed="smoke_rules_first", session_seed="session_001")
+        rules = RulesEngine(dice=dice)
+        skill = rules.resolve_check(
+            sheet,
+            stat="athletics",
+            dc=15,
+            reason="smoke rules-first skill check",
+            roll_index=0,
+        )
+        combat = CombatEngine(dice=dice, rules=rules)
+        combat_state, initiative = combat.start_encounter(
+            sheet,
+            make_first_slice_enemies(),
+            roll_index=1,
+        )
+        while combat_state.active_combatant_id != sheet.id:
+            combat_state = combat.end_turn(combat_state)
+        combat_state, attack, damage = combat.resolve_strike(
+            combat_state,
+            sheet.id,
+            "enemy_weak_melee",
+            "longsword",
+            roll_index=len([skill, *initiative]),
+        )
+        ok = (
+            skill.roll_result.roll_id.startswith("roll_")
+            and len(initiative) == 3
+            and attack.roll_result.roll_id.startswith("roll_attack_longsword_")
+            and combat_state.action_counts[sheet.id] == 2
+            and combat_state.initiative_order
+            and (damage is None or damage.roll_id.startswith("roll_damage_longsword_"))
+        )
+        if ok:
+            detail = f"skill={skill.roll_result.roll_id} attack={attack.roll_result.roll_id}"
+            result.checks.append(SmokeCheck("rules_first_vertical_slice", True, detail))
+        else:
+            result.checks.append(
+                SmokeCheck("rules_first_vertical_slice", False, "mechanics state mismatch")
+            )
+    except Exception as exc:
+        result.checks.append(SmokeCheck("rules_first_vertical_slice", False, str(exc)[:200]))
+
     return result
