@@ -96,7 +96,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AI-03**: Oracle can produce 3-5 starting hooks or a curated first-slice hook aligned with onboarding preferences.
 - [ ] **AI-04**: Oracle can re-plan when the player accepts, rejects, bypasses, or reframes a planned beat.
 - [ ] **AI-05**: Oracle can create small-scope NPC drafts for the active scene while preserving future consistency through Archivist records.
-- [ ] **AI-06**: RulesLawyer converts player intent and scene context into mechanical proposals without narrating outcomes.
+- [x] **AI-06**: RulesLawyer converts player intent and scene context into mechanical proposals without narrating outcomes.
 - [ ] **AI-07**: Orator is the only player-facing narrative voice and renders scene plans, memory, player input, and resolved mechanics into second-person prose.
 - [ ] **AI-08**: Orator streams at least one complete beat of narration for each completed turn.
 - [ ] **AI-09**: Orator respects configured dice UX modes: auto, reveal, and hidden.
@@ -282,7 +282,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-03 | Phase 6 | Complete |
 | AI-04 | Phase 6 | Pending |
 | AI-05 | Phase 6 | Pending |
-| AI-06 | Phase 6 | Pending |
+| AI-06 | Phase 6 | Complete |
 | AI-07 | Phase 6 | Pending |
 | AI-08 | Phase 6 | Pending |
 | AI-09 | Phase 6 | Pending |
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 6 Plan 06-01 completion*
+*Last updated: 2026-04-28 after Phase 6 Plan 06-03 completion*

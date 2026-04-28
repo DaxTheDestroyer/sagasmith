@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-28T17:20:18Z"
-last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-01 Oracle world bible and campaign seed generation
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-04-28T17:29:40Z"
+last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-03 RulesLawyer intent-to-proposal layer
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 31
-  completed_plans: 25
-  percent: 81
+  completed_plans: 26
+  percent: 84
 ---
 
 # Project State
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Current Position
 
 Phase: 6 of 8 (AI GM Story Loop) — IN PROGRESS
-Plan: 2 of 8 completed in current phase (06-05 and 06-01 completed; execution order is dependency-aware)
+Plan: 3 of 8 completed in current phase (06-05, 06-01, and 06-03 completed; execution order is dependency-aware)
 Status: Ready for remaining Phase 6 plans
-Last activity: 2026-04-28 -- Completed 06-01 Oracle world bible and campaign seed generation
+Last activity: 2026-04-28 -- Completed 06-03 RulesLawyer intent-to-proposal layer
 
-Progress: [████████░░] 81%
+Progress: [████████░░] 84%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: 22 min
-- Total execution time: ~3.8 hours
+- Total execution time: ~3.9 hours
 
 **By Phase:**
 
@@ -49,12 +49,12 @@ Progress: [████████░░] 81%
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
-| 6. AI GM Story Loop | 2 | 17 min | 9 min |
+| 6. AI GM Story Loop | 3 | 24 min | 8 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-03 (5 min), 05-04 (4 min), 05-05 (53 min), 06-05 (8 min), 06-01 (9 min)
-- Trend: Phase 6 now has provider-free memory context plus Oracle one-shot world/seed generation ready for scene planning.
+- Last 5 plans: 05-04 (4 min), 05-05 (53 min), 06-05 (8 min), 06-01 (9 min), 06-03 (7 min)
+- Trend: Phase 6 now has provider-free memory context, Oracle one-shot world/seed generation, and RulesLawyer intent-to-proposal routing ready for scene planning/rendering.
 
 *Updated after each plan completion*
 
@@ -85,7 +85,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Continue remaining Phase 6 plans in dependency order: 06-02, 06-03, 06-04, 06-06, 06-07, 06-08.
+- Continue remaining Phase 6 plans in dependency order: 06-02, 06-04, 06-06, 06-07, 06-08.
 
 ### Blockers/Concerns
 
@@ -125,6 +125,9 @@ Recent decisions affecting current work:
 - [06-01]: Worldgen Agent Skills are future-scoped (`first_slice: false`) and run only when an LLM client is injected, preserving no-paid-call behavior.
 - [06-01]: Oracle stores `world_bible` and `campaign_seed` idempotently; re-entry skips generation once both fields exist.
 - [06-01]: Prompt modules live under `src/sagasmith/prompts/oracle/` with `PROMPT_VERSION`, `SYSTEM_PROMPT`, `build_user_prompt`, and `JSON_SCHEMA` per D-06.5.
+- [06-03]: RulesLawyer LLM fallback classifies only action shape; deterministic services rebuild CheckProposal math from trusted state.
+- [06-03]: Non-mechanical player input returns no RulesLawyer update so narration can proceed without a visible rules error.
+- [06-03]: Intent LLM unavailability or budget exhaustion degrades to deterministic-only routing instead of failing the turn.
 
 ## Deferred Items
 
@@ -136,6 +139,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T17:20:18Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-04-28T17:29:40Z
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
