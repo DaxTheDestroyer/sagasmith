@@ -1,8 +1,7 @@
 """Phase-driven routing for the SagaSmith StateGraph.
 
-Combat phase routes to END in Phase 4. Phase 5 will introduce CombatState
-sub-routing (initiative, action economy). Documented deferral per
-04-REVIEWS.md consensus.
+Phase 5 routes combat through RulesLawyer first-slice mechanics before
+returning completed encounters to play.
 """
 
 from __future__ import annotations
@@ -18,7 +17,7 @@ PHASE_TO_ENTRY: dict[str, object] = {
     Phase.ONBOARDING.value: "onboarding",
     Phase.CHARACTER_CREATION.value: "onboarding",  # Phase 5 will split
     Phase.PLAY.value: "oracle",
-    Phase.COMBAT.value: END,  # Phase 5 adds CombatState sub-routing
+    Phase.COMBAT.value: "rules_lawyer",
     Phase.PAUSED.value: END,
     Phase.SESSION_END.value: END,
 }

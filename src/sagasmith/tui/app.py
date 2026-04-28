@@ -129,11 +129,18 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             state = self._build_play_state(event.text)
             self.graph_runtime.invoke_turn(state)
 
-    def _build_play_state(self, player_input: str) -> dict[str, object]:
+    def _build_play_state(
+        self,
+        player_input: str,
+        current_state: dict[str, object] | None = None,
+    ) -> dict[str, object]:
         """Minimal play-phase state for stub graph nodes."""
+        from sagasmith.rules.first_slice import make_first_slice_character
+
         budget = 0.0
         if self.cost_governor is not None:
             budget = self.cost_governor.state.session_budget_usd
+        existing_sheet = None if current_state is None else current_state.get("character_sheet")
         return {
             "campaign_id": self.manifest.campaign_id,
             "session_id": self.current_session_id,
@@ -142,7 +149,7 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             "player_profile": None,
             "content_policy": None,
             "house_rules": None,
-            "character_sheet": None,
+            "character_sheet": existing_sheet if existing_sheet is not None else make_first_slice_character().model_dump(),
             "session_state": {
                 "current_scene_id": None,
                 "current_location_id": None,
