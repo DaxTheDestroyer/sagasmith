@@ -136,7 +136,7 @@ Plans:
 **Plans**: 8 plans
 Plans:
 - [x] 06-01-PLAN.md — Implement World Bible and Campaign Seed Generation (Oracle).
-- [ ] 06-02-PLAN.md — Implement Scene Brief Composition (Oracle).
+- [x] 06-02-PLAN.md — Implement Scene Brief Composition (Oracle).
 - [x] 06-03-PLAN.md — Implement Intent-to-Proposal Layer (RulesLawyer).
 - [ ] 06-04-PLAN.md — Implement Scene Rendering with Safety Gates (Orator).
 - [x] 06-05-PLAN.md — Implement Memory Packet Stub Assembly (Archivist).
@@ -191,6 +191,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
 | 4. Graph Runtime and Agent Skills | 5/5 | Complete | 2026-04-27 |
 | 5. Rules-First PF2e Vertical Slice | 5/5 | Complete | 2026-04-28 |
-| 6. AI GM Story Loop | 3/8 | In progress | - |
+| 6. AI GM Story Loop | 4/8 | In progress | - |
 | 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
 | 8. Retcon, Repair, and Release Hardening | 0/TBD | Not started | - |

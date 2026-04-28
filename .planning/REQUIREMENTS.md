@@ -91,10 +91,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### AI Agent Loop
 
-- [ ] **AI-01**: Oracle produces a validated `SceneBrief` with intent, beats, success outcomes, failure outcomes, present entities, pacing target, and relevant triggers.
-- [ ] **AI-02**: Oracle never emits direct player-facing narration.
+- [x] **AI-01**: Oracle produces a validated `SceneBrief` with intent, beats, success outcomes, failure outcomes, present entities, pacing target, and relevant triggers.
+- [x] **AI-02**: Oracle never emits direct player-facing narration.
 - [x] **AI-03**: Oracle can produce 3-5 starting hooks or a curated first-slice hook aligned with onboarding preferences.
-- [ ] **AI-04**: Oracle can re-plan when the player accepts, rejects, bypasses, or reframes a planned beat.
+- [x] **AI-04**: Oracle can re-plan when the player accepts, rejects, bypasses, or reframes a planned beat.
 - [ ] **AI-05**: Oracle can create small-scope NPC drafts for the active scene while preserving future consistency through Archivist records.
 - [x] **AI-06**: RulesLawyer converts player intent and scene context into mechanical proposals without narrating outcomes.
 - [ ] **AI-07**: Orator is the only player-facing narrative voice and renders scene plans, memory, player input, and resolved mechanics into second-person prose.
@@ -277,10 +277,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RULE-12 | Phase 5 | Complete |
 | TUI-07 | Phase 5 | Complete |
 | QA-03 | Phase 5 | Complete |
-| AI-01 | Phase 6 | Pending |
-| AI-02 | Phase 6 | Pending |
+| AI-01 | Phase 6 | Complete |
+| AI-02 | Phase 6 | Complete |
 | AI-03 | Phase 6 | Complete |
-| AI-04 | Phase 6 | Pending |
+| AI-04 | Phase 6 | Complete |
 | AI-05 | Phase 6 | Pending |
 | AI-06 | Phase 6 | Complete |
 | AI-07 | Phase 6 | Pending |
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 6 Plan 06-03 completion*
+*Last updated: 2026-04-28 after Phase 6 Plan 06-02 completion*

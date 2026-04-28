@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-04-28T17:29:40Z"
-last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-03 RulesLawyer intent-to-proposal layer
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-04-28T17:43:53Z"
+last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-02 Oracle scene brief composition
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 31
-  completed_plans: 26
-  percent: 84
+  completed_plans: 27
+  percent: 87
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Current Position
 
 Phase: 6 of 8 (AI GM Story Loop) — IN PROGRESS
-Plan: 3 of 8 completed in current phase (06-05, 06-01, and 06-03 completed; execution order is dependency-aware)
+Plan: 4 of 8 completed in current phase (06-05, 06-01, 06-03, and 06-02 completed; execution order is dependency-aware)
 Status: Ready for remaining Phase 6 plans
-Last activity: 2026-04-28 -- Completed 06-03 RulesLawyer intent-to-proposal layer
+Last activity: 2026-04-28 -- Completed 06-02 Oracle scene brief composition
 
-Progress: [████████░░] 84%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: 22 min
 - Total execution time: ~3.9 hours
 
@@ -49,12 +49,12 @@ Progress: [████████░░] 84%
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
-| 6. AI GM Story Loop | 3 | 24 min | 8 min |
+| 6. AI GM Story Loop | 4 | 35 min | 9 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-04 (4 min), 05-05 (53 min), 06-05 (8 min), 06-01 (9 min), 06-03 (7 min)
-- Trend: Phase 6 now has provider-free memory context, Oracle one-shot world/seed generation, and RulesLawyer intent-to-proposal routing ready for scene planning/rendering.
+- Last 5 plans: 05-05 (53 min), 06-05 (8 min), 06-01 (9 min), 06-03 (7 min), 06-02 (11 min)
+- Trend: Phase 6 now has provider-free memory context, Oracle world/seed generation, RulesLawyer intent routing, and Oracle scene planning with beat-ID lifecycle routing.
 
 *Updated after each plan completion*
 
@@ -85,7 +85,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Continue remaining Phase 6 plans in dependency order: 06-02, 06-04, 06-06, 06-07, 06-08.
+- Continue remaining Phase 6 plans in dependency order: 06-04, 06-06, 06-07, 06-08.
 
 ### Blockers/Concerns
 
@@ -128,6 +128,9 @@ Recent decisions affecting current work:
 - [06-03]: RulesLawyer LLM fallback classifies only action shape; deterministic services rebuild CheckProposal math from trusted state.
 - [06-03]: Non-mechanical player input returns no RulesLawyer update so narration can proceed without a visible rules error.
 - [06-03]: Intent LLM unavailability or budget exhaustion degrades to deterministic-only routing instead of failing the turn.
+- [06-02]: SceneBrief keeps readable `beats` and adds parallel `beat_ids` for explicit Orator resolution tracking.
+- [06-02]: Oracle replans only when no brief exists, all active beat IDs are resolved, or player-choice branching detects bypass/rejection/reframe.
+- [06-02]: Scene intent pre-gate routing is deterministic skill-level logic now; full Task 7 safety service/post-gate regression remains separate.
 
 ## Deferred Items
 
@@ -139,6 +142,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T17:29:40Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-04-28T17:43:53Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
