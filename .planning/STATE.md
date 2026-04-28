@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-04-28T11:09:07Z"
-last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-01 deterministic first-slice rules data and check resolution
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-04-28T11:15:21Z"
+last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-02 first-slice combat engine
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 23
-  completed_plans: 19
-  percent: 52
+  completed_plans: 20
+  percent: 55
 ---
 
 # Project State
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Current Position
 
 Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — IN PROGRESS
-Plan: 1 of 5 in current phase
-Status: Ready for 05-02
-Last activity: 2026-04-28 -- Completed 05-01 deterministic first-slice pregen/enemy data and RulesEngine skill/Perception check resolution
+Plan: 2 of 5 in current phase
+Status: Ready for 05-03
+Last activity: 2026-04-28 -- Completed 05-02 deterministic first-slice combat engine for initiative, actions, positions, Strikes, HP deltas, and completion
 
-Progress: [██████░░░░] 52%
+Progress: [██████░░░░] 55%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 19
-- Average duration: 22 min
-- Total execution time: ~2.8 hours
+- Total plans completed: 20
+- Average duration: 21 min
+- Total execution time: ~2.9 hours
 
 **By Phase:**
 
@@ -48,12 +48,12 @@ Progress: [██████░░░░] 52%
 | 2. Deterministic Trust Services | 6 | 6 | -- |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
-| 5. Rules-First PF2e Vertical Slice | 1 | 3 min | 3 min |
+| 5. Rules-First PF2e Vertical Slice | 2 | 7 min | 4 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 04-02 (40 min), 04-03 (35 min), 04-04 (60 min), 04-05 (10 min), 05-01 (3 min)
-- Trend: Phase 5 execution started; first-slice rules data and deterministic check resolution are ready for combat engine work.
+- Last 5 plans: 04-03 (35 min), 04-04 (60 min), 04-05 (10 min), 05-01 (3 min), 05-02 (4 min)
+- Trend: Phase 5 mechanics foundation is progressing quickly; deterministic rules data and combat engine are ready for graph wiring.
 
 *Updated after each plan completion*
 
@@ -84,7 +84,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Continue Phase 5 with `05-02-PLAN.md` first-slice combat engine.
+- Continue Phase 5 with `05-03-PLAN.md` deterministic RulesLawyer graph behavior and combat routing.
 
 ### Blockers/Concerns
 
@@ -107,6 +107,8 @@ Recent decisions affecting current work:
 - [04-05]: ContextVar handoff pattern: nodes call `get_current_activation().set_skill(...)` when activation is present.
 - [05-01]: RulesEngine rejects unsupported stat names before rolling so player input cannot trigger hidden fields or unsupported mechanics.
 - [05-01]: CombatantState carries defaulted first-slice enemy mechanics fields so enemy data validates as typed models while existing callers remain compatible.
+- [05-02]: CombatEngine returns both Strike CheckResult and optional damage RollResult so downstream roll-log persistence can store the attack and exactly one damage roll_id.
+- [05-02]: First-slice melee targeting validates target position and fails before action consumption or rolling when range is invalid.
 
 ## Deferred Items
 
@@ -118,6 +120,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T11:09:07Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-04-28T11:15:21Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None

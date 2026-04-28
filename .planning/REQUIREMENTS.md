@@ -71,11 +71,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **RULE-03**: System reproduces identical roll results when replaying the same seed and ordered roll inputs.
 - [x] **RULE-04**: User can inspect one valid level-1 pregenerated martial `CharacterSheet` with `/sheet`.
 - [x] **RULE-05**: System resolves a skill or Perception check against a fixed DC and emits a validated `CheckResult`.
-- [ ] **RULE-06**: System resolves Perception initiative and persists initiative order through checkpoints.
-- [ ] **RULE-07**: System resolves Strike actions against target AC and applies hit, miss, critical hit, damage, and HP state deltas.
-- [ ] **RULE-08**: System tracks three actions and one reaction per combatant per round in simple combat.
-- [ ] **RULE-09**: System applies theater-of-mind position tags `close`, `near`, `far`, and `behind_cover` for movement and targeting constraints.
-- [ ] **RULE-10**: User can complete one simple combat encounter with no more than two enemies.
+- [x] **RULE-06**: System resolves Perception initiative and persists initiative order through checkpoints.
+- [x] **RULE-07**: System resolves Strike actions against target AC and applies hit, miss, critical hit, damage, and HP state deltas.
+- [x] **RULE-08**: System tracks three actions and one reaction per combatant per round in simple combat.
+- [x] **RULE-09**: System applies theater-of-mind position tags `close`, `near`, `far`, and `behind_cover` for movement and targeting constraints.
+- [x] **RULE-10**: User can complete one simple combat encounter with no more than two enemies.
 - [x] **RULE-11**: System logs every mechanical check and roll in an auditable roll log.
 - [x] **RULE-12**: System prevents LLM agents from directly inventing modifiers, DCs, damage, HP changes, action counts, or degree-of-success outcomes.
 
@@ -268,11 +268,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SKILL-05 | Phase 4 | Complete |
 | RULE-04 | Phase 5 | Complete |
 | RULE-05 | Phase 5 | Complete |
-| RULE-06 | Phase 5 | Pending |
-| RULE-07 | Phase 5 | Pending |
-| RULE-08 | Phase 5 | Pending |
-| RULE-09 | Phase 5 | Pending |
-| RULE-10 | Phase 5 | Pending |
+| RULE-06 | Phase 5 | Complete |
+| RULE-07 | Phase 5 | Complete |
+| RULE-08 | Phase 5 | Complete |
+| RULE-09 | Phase 5 | Complete |
+| RULE-10 | Phase 5 | Complete |
 | RULE-11 | Phase 5 | Complete |
 | RULE-12 | Phase 5 | Complete |
 | TUI-07 | Phase 5 | Pending |
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 5 Plan 05-01 completion*
+*Last updated: 2026-04-28 after Phase 5 Plan 05-02 completion*
