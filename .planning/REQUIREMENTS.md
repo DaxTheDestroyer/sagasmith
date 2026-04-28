@@ -61,7 +61,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TUI-04**: User sees HP, conditions, active quest, current location, in-game clock, and last rolls in the status panel.
 - [x] **TUI-05**: User can open `/help` to view supported slash commands and descriptions.
 - [x] **TUI-06**: User can use `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`.
-- [ ] **TUI-07**: User sees a dice overlay or equivalent modal for reveal-mode checks that shows DC, modifier, d20 result, total, and degree.
+- [x] **TUI-07**: User sees a dice overlay or equivalent modal for reveal-mode checks that shows DC, modifier, d20 result, total, and degree.
 - [ ] **TUI-08**: User can quit from the TUI and resume later at the last safe prompt.
 
 ### Deterministic Rules and Dice
@@ -275,7 +275,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RULE-10 | Phase 5 | Complete |
 | RULE-11 | Phase 5 | Complete |
 | RULE-12 | Phase 5 | Complete |
-| TUI-07 | Phase 5 | Pending |
+| TUI-07 | Phase 5 | Complete |
 | QA-03 | Phase 5 | Complete |
 | AI-01 | Phase 6 | Pending |
 | AI-02 | Phase 6 | Pending |
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 5 Plan 05-03 completion*
+*Last updated: 2026-04-28 after Phase 5 Plan 05-04 completion*
