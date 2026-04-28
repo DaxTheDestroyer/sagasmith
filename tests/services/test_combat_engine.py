@@ -71,7 +71,7 @@ def test_start_encounter_rolls_initiative_and_sets_action_state() -> None:
         enemies[0].id,
     ]
     assert [result.roll_result.roll_id for result in initiative_results] == [
-        f"roll_initiative_{sheet.id}_000004",
+        f"roll_perception_{sheet.id}_000004",
         f"roll_initiative_{enemies[0].id}_000005",
         f"roll_initiative_{enemies[1].id}_000006",
     ]
