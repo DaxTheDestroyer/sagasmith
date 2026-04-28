@@ -1,4 +1,4 @@
-"""Tests for control commands: save, recap, sheet, inventory, map, clock, budget, retcon."""
+"""Tests for control commands: save, recap, inventory, map, clock, budget, retcon."""
 
 from __future__ import annotations
 
@@ -17,7 +17,6 @@ from sagasmith.tui.commands.control import (
     RecapCommand,
     RetconCommand,
     SaveCommand,
-    SheetCommand,
 )
 from sagasmith.tui.commands.registry import CommandRegistry
 from sagasmith.tui.state import StatusSnapshot
@@ -42,7 +41,6 @@ def _make_app(tmp_path: Path) -> SagaSmithApp:
 _STUB_CASES = [
     (SaveCommand(), "/save", "Phase 4"),
     (RecapCommand(), "/recap", "Phase 7"),
-    (SheetCommand(), "/sheet", "Phase 5"),
     (InventoryCommand(), "/inventory", "Phase 5"),
     (MapCommand(), "/map", "Phase 5"),
     (RetconCommand(), "/retcon", "Phase 8"),

@@ -16,6 +16,7 @@ from sagasmith.skills_adapter.errors import SkillNotFoundError, UnauthorizedSkil
 _STAT_PATTERN = r"(athletics|acrobatics|survival|intimidation|perception)"
 _ROLL_CHECK_RE = re.compile(rf"^(?:roll|check)\s+{_STAT_PATTERN}\s+dc\s+(\d+)$")
 _PERCEPTION_RE = re.compile(r"^perception\s+dc\s+(\d+)$")
+_LEGACY_PERCEPTION_TRIGGER_RE = re.compile(r"^roll\s+perception$")
 _START_COMBAT_RE = re.compile(r"^start\s+combat$")
 _STRIKE_RE = re.compile(r"^strike\s+(enemy_weak_melee|enemy_weak_ranged)\s+with\s+(longsword|shortbow)$")
 _MOVE_RE = re.compile(r"^move\s+(close|near|far|behind_cover)$")
@@ -67,6 +68,10 @@ def rules_lawyer_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                 roll_index=len(check_results),
             )
             return {"check_results": [*check_results, check_result.model_dump()]}
+
+        if _LEGACY_PERCEPTION_TRIGGER_RE.match(normalized):
+            _activate_skill(services, "skill-check-resolution")
+            return _rules_error(check_results, _HELP_MESSAGE)
 
         if _START_COMBAT_RE.match(normalized):
             _activate_skill(services, "combat-resolution")
