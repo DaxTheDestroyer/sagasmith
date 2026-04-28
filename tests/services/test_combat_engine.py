@@ -8,7 +8,7 @@ import pytest
 
 from sagasmith.rules.first_slice import make_first_slice_character, make_first_slice_enemies
 from sagasmith.schemas.common import CombatantState
-from sagasmith.schemas.mechanics import RollResult
+from sagasmith.schemas.mechanics import CharacterSheet, CombatState, RollResult
 from sagasmith.services.combat_engine import CombatEngine
 from sagasmith.services.dice import DiceService
 from sagasmith.services.rules_engine import RulesEngine
@@ -96,11 +96,11 @@ class ScriptedCombatDice:
         )
 
 
-def _engine_with_dice(dice: InitiativeDice | DiceService) -> CombatEngine:
+def _engine_with_dice(dice: InitiativeDice | ScriptedCombatDice | DiceService) -> CombatEngine:
     return CombatEngine(dice=dice, rules=RulesEngine(dice=dice))  # type: ignore[arg-type]
 
 
-def _started_state(dice: ScriptedCombatDice) -> tuple[CombatEngine, object, tuple[CombatantState, CombatantState], object]:
+def _started_state(dice: ScriptedCombatDice) -> tuple[CombatEngine, CharacterSheet, tuple[CombatantState, CombatantState], CombatState]:
     sheet = make_first_slice_character()
     enemies = make_first_slice_enemies()
     engine = CombatEngine(dice=dice, rules=RulesEngine(dice=dice))  # type: ignore[arg-type]
@@ -206,6 +206,7 @@ def test_resolve_strike_handles_hit_miss_and_critical_hit_with_damage_rolls() ->
     assert hit_damage is not None
     assert hit_state.action_counts[sheet.id] == 2
     assert f"damage_roll={hit_damage.roll_id}" in hit_check.effects[0].description
+    assert "damage_roll=roll_" in hit_check.effects[0].description
     assert next(c.current_hp for c in hit_state.combatants if c.id == enemies[0].id) == 1
 
     miss_state, miss_check, miss_damage = engine.resolve_strike(state, sheet.id, enemies[0].id, "longsword", roll_index=20)
@@ -214,13 +215,15 @@ def test_resolve_strike_handles_hit_miss_and_critical_hit_with_damage_rolls() ->
     assert miss_check.state_deltas == []
     assert next(c.current_hp for c in miss_state.combatants if c.id == enemies[0].id) == enemies[0].current_hp
 
+    close_second_enemy_state = state.model_copy(update={"positions": {**state.positions, enemies[1].id: "close"}})
     critical_state, critical_check, critical_damage = engine.resolve_strike(
-        state, sheet.id, enemies[1].id, "longsword", roll_index=30
+        close_second_enemy_state, sheet.id, enemies[1].id, "longsword", roll_index=30
     )
     assert critical_check.degree == "critical_success"
     assert critical_damage is not None
     assert critical_check.state_deltas[0].value == 0
     assert f"damage_roll={critical_damage.roll_id}" in critical_check.effects[0].description
+    assert "damage_roll=roll_" in critical_check.effects[0].description
     assert f"damage={2 * critical_damage.total}" in critical_check.effects[0].description
     assert critical_check.effects[0].description.count("damage_roll=roll_") == 1
     assert next(c.current_hp for c in critical_state.combatants if c.id == enemies[1].id) == 0
@@ -275,7 +278,6 @@ def test_end_turn_skips_defeated_combatants_and_resets_reaction() -> None:
 
 
 def test_is_encounter_complete_when_pc_or_all_enemies_are_defeated() -> None:
-    sheet = make_first_slice_character()
     enemies = make_first_slice_enemies()
     dice = ScriptedCombatDice({}, {})
     engine, _, _, state = _started_state(dice)
