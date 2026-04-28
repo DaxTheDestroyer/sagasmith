@@ -114,7 +114,13 @@ Plans:
   2. User can complete a skill or Perception check, see reveal-mode dice details when configured, and audit the roll log afterward.
   3. User can complete a simple theater-of-mind combat with initiative, action economy, position tags, Strikes, HP deltas, and no more than two enemies.
   4. Developer can run rules tests for PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 05-01-PLAN.md — Build deterministic first-slice pregen/enemy data and skill/Perception check resolution with auditable roll outputs (RULE-04, RULE-05, RULE-11, RULE-12, QA-03).
+- [ ] 05-02-PLAN.md — Implement first-slice combat engine for initiative, action economy, positions, Strikes, HP deltas, and encounter completion (RULE-06, RULE-07, RULE-08, RULE-09, RULE-10, RULE-11, RULE-12, QA-03).
+- [ ] 05-03-PLAN.md — Wire deterministic RulesLawyer graph behavior and combat routing so play/combat inputs use rules services, not LLM-authored math (RULE-05 through RULE-12).
+- [ ] 05-04-PLAN.md — Replace TUI stubs with `/sheet`, reveal-mode dice detail rendering, and combat-aware status output (RULE-04, RULE-06 through RULE-11, TUI-07).
+- [ ] 05-05-PLAN.md — Add no-paid-call vertical-slice integration and QA-03 verification gates for sheet, checks, reveal audit, and simple combat (RULE-04 through RULE-12, TUI-07, QA-03).
 **UI hint**: yes
 
 ### Phase 6: AI GM Story Loop
@@ -175,7 +181,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
 | 4. Graph Runtime and Agent Skills | 5/5 | Complete | 2026-04-27 |
-| 5. Rules-First PF2e Vertical Slice | 0/TBD | Not started | - |
+| 5. Rules-First PF2e Vertical Slice | 0/5 | Planned | - |
 | 6. AI GM Story Loop | 0/TBD | Not started | - |
 | 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
 | 8. Retcon, Repair, and Release Hardening | 0/TBD | Not started | - |
