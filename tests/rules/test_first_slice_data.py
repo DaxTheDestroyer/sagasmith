@@ -54,4 +54,7 @@ def test_make_first_slice_enemies_returns_two_valid_combatants() -> None:
         assert enemy.armor_class > 0
         assert enemy.max_hp > 0
         assert enemy.current_hp == enemy.max_hp
-        assert hasattr(enemy, "attacks") is False
+        assert enemy.perception_modifier > 0
+        assert len(enemy.attacks) == 1
+        assert set(enemy.saving_throws) == {"fortitude", "reflex", "will"}
+        assert enemy.xp_value > 0

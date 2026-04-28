@@ -111,9 +111,14 @@ class CombatantState(SchemaModel):
 
     id: str
     name: str
+    level: int = 0
     current_hp: int = Field(ge=0)
     max_hp: int = Field(gt=0)
     armor_class: int = Field(gt=0)
+    perception_modifier: int = 0
+    attacks: list[AttackProfile] = Field(default_factory=list[AttackProfile])
+    saving_throws: dict[str, int] = Field(default_factory=dict[str, int])
+    xp_value: int = Field(default=0, ge=0)
     conditions: list[ConditionInstance] = Field(default_factory=list[ConditionInstance])
 
     @model_validator(mode="after")
