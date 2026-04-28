@@ -144,7 +144,7 @@ None - no external service configuration required.
 - `uv run pytest tests/skills_adapter/test_production_catalog.py tests/agents/test_nodes_with_skills.py` — passed.
 - `uv run ruff check src tests` — passed.
 - `uv run pyright src/sagasmith/services/intent_resolution.py src/sagasmith/agents/rules_lawyer src/sagasmith/prompts/rules_lawyer tests/services/test_intent_resolution.py tests/agents/rules_lawyer/test_intent_to_proposal.py tests/integration/test_intent_resolution_flow.py tests/agents/test_node_contracts.py tests/skills_adapter/test_production_catalog.py` — 0 errors, warnings only.
-- `uv run pytest` — 516 passed, 1 skipped, 1 transient failure; rerun of `tests/graph/test_checkpoints.py::test_resume_and_close_writes_final_checkpoint_and_completes_turn` passed.
+- `uv run pytest` — 517 passed, 1 skipped.
 
 ## Next Phase Readiness
 
