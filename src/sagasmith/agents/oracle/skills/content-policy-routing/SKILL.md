@@ -12,9 +12,19 @@ success_signal: Redlined fixture intents are rerouted before Orator sees them.
 Before finalizing a scene brief or beat that may touch hard or soft content limits.
 
 ## Procedure
-Evaluate scene_intent against ContentPolicy. If any element violates a hard
-limit, reshape or reject it. If a soft limit is approached, flag for Orator
-safety post-gate. See oracle-skills.md §2.9.
+Evaluate `scene_intent` against `ContentPolicy` before scene-brief-composition.
+Use deterministic keyword/pattern matching based on the RedactionCanary model:
+hard limits return `Allowed`, `Rerouted(new_intent)`, or `Blocked(reason)` per
+D-06.3; soft limits are adjusted or surfaced as content warnings for downstream
+post-gate work without duplicating Task 7's full safety service.
+
+## Inputs
+- `scene_intent`
+- `ContentPolicy.hard_limits`
+- `ContentPolicy.soft_limits`
+
+## Output
+- `Allowed` intent, rerouted safe intent, or blocked routing result.
 
 ## Failure Handling
 If policy rules are ambiguous, default to the more restrictive interpretation.

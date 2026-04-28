@@ -6,7 +6,7 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
-from sagasmith.graph.routing import route_by_phase
+from sagasmith.graph.routing import route_after_oracle, route_by_phase
 from sagasmith.graph.state import SagaGraphState
 
 
@@ -31,7 +31,7 @@ def build_saga_graph(bootstrap: Any) -> Any:
         },
     )
     # Play chain
-    g.add_edge("oracle", "rules_lawyer")
+    g.add_conditional_edges("oracle", route_after_oracle, {"rules_lawyer": "rules_lawyer", END: END})
     g.add_edge("rules_lawyer", "orator")
     g.add_edge("orator", "archivist")
     g.add_edge("archivist", END)

@@ -10,12 +10,28 @@ success_signal: Every brief includes required fields and never contains player-f
 
 ## When to Activate
 At the start of every turn where `state.phase == "play"` and `state.scene_brief`
-is None or stale.
+is None, all `scene_brief.beat_ids` appear in `state.resolved_beat_ids`, or
+player-choice-branching detects a bypass/rejection of the active scene.
+
+## Inputs
+- `MemoryPacket` with bounded recent campaign context.
+- `ContentPolicy` after content-policy-routing pre-gate.
+- `PlayerProfile`, plus optional `WorldBible`, `CampaignSeed`, and prior `SceneBrief`.
+- Latest `pending_player_input` and a planning `scene_intent`.
+
+## Output
+- A valid `SceneBrief` object with readable `beats` and parallel stable `beat_ids`.
+- Planning-only notes; no second-person/player-facing narration.
 
 ## Procedure
-(Phase 6 implementation.) LLM synthesizes a SceneBrief using MemoryPacket,
-content_policy, and player_profile. Strict output format per oracle-skills.md §2.3.
+Use `sagasmith.prompts.oracle.scene_brief_composition` (D-06.5) and call the
+configured LLM through `invoke_with_retry` with structured JSON output. Include
+memory, safety, player preferences, world/campaign context, and any bypass-derived
+intent. Validate the response against `SceneBrief` before it enters graph state.
+Never ask the LLM to author PF2e math; mechanical triggers are requests only.
 
 ## Failure Handling
-If the LLM response fails schema validation, retry once; on second failure,
-route to safety-redline-check and surface a safe fallback SceneBrief.
+Schema failures use `invoke_with_retry`. `BudgetStopError` is handled by Oracle:
+return the prior scene brief unchanged and post a `BUDGET_STOP` interrupt. If no
+LLM client is configured, use the deterministic first-slice fallback brief so
+no-paid-call smoke flows continue.

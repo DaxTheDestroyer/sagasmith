@@ -39,6 +39,8 @@ class SagaState(SchemaModel):
     pending_player_input: str | None
     memory_packet: MemoryPacket | None
     scene_brief: SceneBrief | None
+    resolved_beat_ids: list[str] = Field(default_factory=list[str])
+    oracle_bypass_detected: bool = False
     check_results: list[CheckResult] = Field(default_factory=list[CheckResult])
     state_deltas: list[StateDelta] = Field(default_factory=list[StateDelta])
     pending_conflicts: list[CanonConflict] = Field(default_factory=list[CanonConflict])

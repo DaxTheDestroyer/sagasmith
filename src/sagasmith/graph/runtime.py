@@ -201,7 +201,7 @@ def build_persistent_graph(
     # Build the graph structure, then recompile with checkpointer + interrupt_before.
     from langgraph.graph import END, START, StateGraph
 
-    from sagasmith.graph.routing import route_by_phase
+    from sagasmith.graph.routing import route_after_oracle, route_by_phase
     from sagasmith.graph.state import SagaGraphState
 
     g = StateGraph(SagaGraphState)
@@ -215,7 +215,7 @@ def build_persistent_graph(
         route_by_phase,
         {"onboarding": "onboarding", "oracle": "oracle", "rules_lawyer": "rules_lawyer", END: END},
     )
-    g.add_edge("oracle", "rules_lawyer")
+    g.add_conditional_edges("oracle", route_after_oracle, {"rules_lawyer": "rules_lawyer", END: END})
     g.add_edge("rules_lawyer", "orator")
     g.add_edge("orator", "archivist")
     g.add_edge("archivist", END)

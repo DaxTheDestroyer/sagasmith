@@ -26,6 +26,7 @@ from sagasmith.schemas import (
     PlotHook,
     ProviderConfig,
     SagaState,
+    SceneBrief,
     SeedArc,
     SeedCharacter,
     SessionState,
@@ -150,6 +151,27 @@ def make_valid_memory_packet(**overrides: Any) -> MemoryPacket:
         recent_turns=["turn_0000: The player arrived in Rivermouth."],
         open_callbacks=["cb_missing_merchant_witness"],
         retrieval_notes=["Fixture memory uses IDs and summaries only."],
+    )
+    return _with_overrides(instance, overrides)
+
+
+def make_valid_scene_brief(**overrides: Any) -> SceneBrief:
+    """Return a deterministic planning-only Oracle scene brief."""
+
+    instance = SceneBrief(
+        scene_id="scene_rivermouth_001",
+        intent="Investigate the missing barge at the old ford.",
+        location="Rivermouth old ford",
+        present_entities=["npc_mira_warden"],
+        beats=["Establish riverbank clues", "Invite a social or survival approach"],
+        beat_ids=["beat_riverbank_clues", "beat_choose_approach"],
+        success_outs=["The trail into Copperwood becomes actionable."],
+        failure_outs=["A rival witness complicates the investigation."],
+        pacing_target={"pillar": "exploration", "tension": "low", "length": "short"},  # type: ignore[arg-type]
+        callbacks_seeded=["cb_missing_barge_witness"],
+        callbacks_payoff_candidates=[],
+        mechanical_triggers=[],
+        content_warnings=[],
     )
     return _with_overrides(instance, overrides)
 
@@ -326,12 +348,15 @@ def make_valid_saga_state(**overrides: Any) -> SagaState:
         pending_player_input=None,
         memory_packet=None,
         scene_brief=None,
+        resolved_beat_ids=[],
+        oracle_bypass_detected=False,
         check_results=[],
         state_deltas=[],
         pending_conflicts=[],
         pending_narration=[],
         safety_events=[],
         cost_state=make_valid_cost_state(),
+        last_interrupt=None,
     )
     return _with_overrides(instance, overrides)
 

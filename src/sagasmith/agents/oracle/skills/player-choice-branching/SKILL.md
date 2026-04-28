@@ -12,9 +12,20 @@ success_signal: Bypass fixtures produce coherent replans without forcing the ori
 When the player accepts, rejects, bypasses, or reframes a planned beat.
 
 ## Procedure
-Synthesize revised scene intent or next brief request using player_input,
-prior_scene_brief, and memory_packet. See oracle-skills.md §2.4 for output
-format and edge-case handling.
+Analyze `player_input` against the prior `SceneBrief` and `MemoryPacket`. Detect
+explicit bypass/rejection markers (leave, ignore, refuse, instead, avoid, skip)
+without forcing the original beat. Emit a `BranchingDecision` with kind
+`continue`, `bypass`, `reject`, or `reframe`; bypass/reject/reframe produces a
+revised planning intent for scene-brief-composition.
+
+## Inputs
+- `player_input`
+- `prior_scene_brief`
+- `memory_packet`
+
+## Output
+- `BranchingDecision` with `bypass_detected`, optional `revised_intent`, and an
+  audit reason.
 
 ## Failure Handling
 If the branch request is ambiguous, emit a clarification brief instead of

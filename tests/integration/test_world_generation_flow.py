@@ -8,6 +8,7 @@ from sagasmith.evals.fixtures import (
     make_fake_llm_response,
     make_valid_campaign_seed,
     make_valid_saga_state,
+    make_valid_scene_brief,
     make_valid_world_bible,
 )
 from sagasmith.graph.bootstrap import GraphBootstrap, default_skill_store
@@ -38,6 +39,9 @@ def test_first_play_turn_generates_world_and_seed_once_before_scene_brief() -> N
             ),
             "oracle.campaign-seed-generation": make_fake_llm_response(
                 parsed_json=make_valid_campaign_seed().model_dump()
+            ),
+            "oracle.scene-brief-composition": make_fake_llm_response(
+                parsed_json=make_valid_scene_brief().model_dump()
             ),
         }
     )

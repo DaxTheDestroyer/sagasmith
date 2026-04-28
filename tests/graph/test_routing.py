@@ -7,8 +7,8 @@ import subprocess
 import sys
 from typing import TYPE_CHECKING
 
-from sagasmith.evals.fixtures import make_valid_saga_state
-from sagasmith.graph.routing import PHASE_TO_ENTRY, route_by_phase
+from sagasmith.evals.fixtures import make_valid_saga_state, make_valid_scene_brief
+from sagasmith.graph.routing import PHASE_TO_ENTRY, route_by_phase, should_route_to_oracle
 from sagasmith.graph.state import SagaGraphState, from_saga_state, to_saga_state
 from sagasmith.schemas.enums import Phase
 from sagasmith.schemas.export import LLM_BOUNDARY_AND_PERSISTED_MODELS
@@ -78,6 +78,31 @@ class TestRouteByPhase:
         """Phase 5: graph state carries checks and combat state between turns."""
         assert "check_results" in SagaGraphState.__annotations__
         assert "combat_state" in SagaGraphState.__annotations__
+
+    def test_scene_lifecycle_fields_remain_in_graph_contract(self) -> None:
+        assert "resolved_beat_ids" in SagaGraphState.__annotations__
+        assert "oracle_bypass_detected" in SagaGraphState.__annotations__
+
+    def test_play_skips_oracle_when_scene_beats_unresolved(self) -> None:
+        brief = make_valid_scene_brief()
+        state = make_valid_saga_state(
+            phase="play",
+            scene_brief=brief,
+            resolved_beat_ids=[brief.beat_ids[0]],
+        ).model_dump()
+
+        assert should_route_to_oracle(state) is False
+        assert route_by_phase(state) == "rules_lawyer"
+
+    def test_play_routes_to_oracle_when_all_beats_resolved(self) -> None:
+        brief = make_valid_scene_brief()
+        state = make_valid_saga_state(
+            phase="play",
+            scene_brief=brief,
+            resolved_beat_ids=brief.beat_ids,
+        ).model_dump()
+
+        assert should_route_to_oracle(state) is True
 
 
 class TestLightweightImports:

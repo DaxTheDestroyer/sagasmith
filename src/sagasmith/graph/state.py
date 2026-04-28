@@ -29,6 +29,8 @@ class SagaGraphState(TypedDict):
     pending_player_input: str | None
     memory_packet: object | None
     scene_brief: object | None
+    resolved_beat_ids: list[str]
+    oracle_bypass_detected: bool
     check_results: list[object]
     state_deltas: list[object]
     pending_conflicts: list[object]

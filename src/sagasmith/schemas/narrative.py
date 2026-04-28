@@ -34,6 +34,7 @@ class SceneBrief(SchemaModel):
     location: str | None
     present_entities: list[str]
     beats: list[str]
+    beat_ids: list[str] = Field(default_factory=list[str])
     success_outs: list[str]
     failure_outs: list[str]
     pacing_target: PacingTarget
@@ -41,6 +42,18 @@ class SceneBrief(SchemaModel):
     callbacks_payoff_candidates: list[str] = Field(default_factory=list[str])
     mechanical_triggers: list[MechanicalTrigger] = Field(default_factory=list[MechanicalTrigger])
     content_warnings: list[str] = Field(default_factory=list[str])
+
+    @model_validator(mode="after")
+    def _beat_ids_valid(self) -> SceneBrief:
+        if len(set(self.beat_ids)) != len(self.beat_ids):
+            raise ValueError("SceneBrief beat_ids must be unique")
+        if self.beat_ids and len(self.beat_ids) != len(self.beats):
+            raise ValueError("SceneBrief beat_ids must match beats length when provided")
+        player_facing_markers = ("you see", "you hear", "you feel", "you are", "you stand")
+        audit_text = "\n".join([self.intent, *self.beats]).lower()
+        if any(marker in audit_text for marker in player_facing_markers):
+            raise ValueError("SceneBrief must remain planning-only and not player-facing narration")
+        return self
 
 
 class MemoryPacket(SchemaModel):

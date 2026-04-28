@@ -24,6 +24,7 @@ class InterruptKind(StrEnum):
     LINE = "line"
     RETCON = "retcon"      # defined but not posted in Phase 4 — Phase 8 scope
     BUDGET_STOP = "budget_stop"
+    SAFETY_BLOCK = "safety_block"
     SESSION_END = "session_end"
 
 
