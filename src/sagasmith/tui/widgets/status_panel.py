@@ -44,6 +44,22 @@ def format_combat_status(combat_state: CombatState | None) -> list[str]:
     ]
 
 
+def format_status_snapshot(snapshot: StatusSnapshot) -> str:
+    """Format the full status snapshot for tests and the Textual widget."""
+
+    lines = [
+        snapshot.format_hp(),
+        "Conditions: " + (", ".join(snapshot.conditions) if snapshot.conditions else "—"),
+        f"Quest: {snapshot.active_quest or '—'}",
+        f"Location: {snapshot.location or '—'}",
+        snapshot.format_clock(),
+        "Last rolls:",
+        *[f"  {roll}" for roll in (snapshot.last_rolls or ("—",))[:3]],
+        *format_combat_status(snapshot.combat_state),
+    ]
+    return "\n".join(lines)
+
+
 class StatusPanel(Widget):
     """Right-side status panel showing HP, conditions, quest, location, clock, and last rolls."""
 
@@ -61,14 +77,4 @@ class StatusPanel(Widget):
         body.update(self._format_snapshot(new))
 
     def _format_snapshot(self, s: StatusSnapshot) -> str:
-        lines = [
-            s.format_hp(),
-            "Conditions: " + (", ".join(s.conditions) if s.conditions else "—"),
-            f"Quest: {s.active_quest or '—'}",
-            f"Location: {s.location or '—'}",
-            s.format_clock(),
-            "Last rolls:",
-            *[f"  {r}" for r in (s.last_rolls or ("—",))[:3]],
-            *format_combat_status(s.combat_state),
-        ]
-        return "\n".join(lines)
+        return format_status_snapshot(s)

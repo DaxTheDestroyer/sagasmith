@@ -5,7 +5,7 @@ from __future__ import annotations
 from sagasmith.schemas.common import CombatantState, InitiativeEntry
 from sagasmith.schemas.mechanics import CombatState
 from sagasmith.tui.state import StatusSnapshot
-from sagasmith.tui.widgets.status_panel import StatusPanel, format_combat_status
+from sagasmith.tui.widgets.status_panel import format_combat_status, format_status_snapshot
 
 
 def _combat_state(*, active_id: str = "pc", pc_hp: int = 20, enemies: int = 2) -> CombatState:
@@ -84,7 +84,7 @@ def test_status_panel_limits_last_rolls_and_appends_combat_lines() -> None:
         combat_state=_combat_state(),
     )
 
-    text = StatusPanel()._format_snapshot(snapshot)
+    text = format_status_snapshot(snapshot)
 
     assert text.count("roll ") == 3
     assert "roll four" not in text
