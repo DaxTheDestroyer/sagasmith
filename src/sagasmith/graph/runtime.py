@@ -211,7 +211,7 @@ def build_persistent_graph(
     g.add_conditional_edges(
         START,
         route_by_phase,
-        {"onboarding": "onboarding", "oracle": "oracle", END: END},
+        {"onboarding": "onboarding", "oracle": "oracle", "rules_lawyer": "rules_lawyer", END: END},
     )
     g.add_edge("oracle", "rules_lawyer")
     g.add_edge("rules_lawyer", "orator")

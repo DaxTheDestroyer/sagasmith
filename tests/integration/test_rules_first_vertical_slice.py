@@ -61,7 +61,7 @@ def rules_first_app(tmp_path):
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     apply_migrations(conn)
     manifest = CampaignManifest(
-        campaign_id="cmp_rules_first_001",
+        campaign_id="cmp_rules_first_000",
         campaign_name="Rules First Test",
         campaign_slug="rules-first-test",
         created_at=datetime.now(UTC).isoformat(),
@@ -201,7 +201,7 @@ async def test_rules_first_vertical_slice_sheet_check_reveal_and_combat(rules_fi
 
         rendered_status = format_status_snapshot(app.state.status)
         rendered_output = "\n".join([*app.narration.logged_lines, rendered_status])
-        assert manifest.campaign_id == "cmp_rules_first_001"
+        assert manifest.campaign_id == "cmp_rules_first_000"
         assert "Round: 1" in rendered_output
         assert "Actions: 2/3" in rendered_output
         assert "damage_roll=roll_" in rendered_output
