@@ -55,19 +55,29 @@ class TestRouteByPhase:
         assert route_by_phase(state) == "oracle"
 
     def test_paused_session_end_combat_route_to_end(self) -> None:
-        """Test 5: paused/session_end/combat → END sentinel (identity)."""
+        """Test 5: paused/session_end → END sentinel (identity)."""
         from langgraph.graph import END
 
-        for phase in ("paused", "session_end", "combat"):
+        for phase in ("paused", "session_end"):
             state: SagaGraphState = {"phase": phase}  # type: ignore[typeddict-item]
             result = route_by_phase(state)
             assert result is END, f"phase={phase!r} expected END, got {result!r}"
+
+    def test_combat_routes_to_rules_lawyer(self) -> None:
+        """Phase 5: combat routes into deterministic RulesLawyer mechanics."""
+        state: SagaGraphState = {"phase": "combat"}  # type: ignore[typeddict-item]
+        assert route_by_phase(state) == "rules_lawyer"
 
     def test_phase_to_entry_covers_all_enum_values(self) -> None:
         """Test 6: PHASE_TO_ENTRY covers every Phase literal."""
         enum_values = {p.value for p in Phase}
         routed_values = set(PHASE_TO_ENTRY.keys())
         assert enum_values == routed_values
+
+    def test_mechanics_state_fields_remain_in_graph_contract(self) -> None:
+        """Phase 5: graph state carries checks and combat state between turns."""
+        assert "check_results" in SagaGraphState.__annotations__
+        assert "combat_state" in SagaGraphState.__annotations__
 
 
 class TestLightweightImports:

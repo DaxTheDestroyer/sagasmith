@@ -7,11 +7,14 @@ import copy
 import pytest
 
 from sagasmith.agents.rules_lawyer.node import rules_lawyer_node
+from sagasmith.app.paths import CampaignPaths
 from sagasmith.evals.fixtures import make_valid_saga_state
 from sagasmith.graph.bootstrap import AgentServices
 from sagasmith.rules.first_slice import make_first_slice_character
+from sagasmith.schemas.campaign import CampaignManifest
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.dice import DiceService
+from sagasmith.tui.app import SagaSmithApp
 
 
 class ExplodingLLM:
@@ -135,3 +138,54 @@ def test_rules_lawyer_does_not_mutate_input_or_touch_llm(services: AgentServices
     rules_lawyer_node(state, services)
 
     assert state == before
+
+
+def test_completed_combat_returns_phase_to_play(services: AgentServices) -> None:
+    started = rules_lawyer_node(_state("start combat"), services)
+    combat_state = copy.deepcopy(started["combat_state"])
+    for combatant in combat_state["combatants"]:
+        if combatant["id"] == "enemy_weak_melee":
+            combatant["current_hp"] = 1
+            combatant["armor_class"] = 1
+        elif combatant["id"].startswith("enemy_"):
+            combatant["current_hp"] = 0
+
+    result = rules_lawyer_node(
+        _state(
+            "strike enemy_weak_melee with longsword",
+            combat_state=combat_state,
+            check_results=started["check_results"],
+        ),
+        services,
+    )
+
+    assert result["phase"] == "play"
+    assert "Combat complete" in result["pending_narration"][-1]
+
+
+def test_tui_build_play_state_seeds_first_slice_sheet_and_preserves_existing(tmp_path) -> None:
+    manifest = CampaignManifest(
+        campaign_id="cmp_phase5_001",
+        campaign_name="Phase 5",
+        campaign_slug="phase-5",
+        created_at="2026-04-28T00:00:00+00:00",
+        sagasmith_version="0.0.1",
+        schema_version=1,
+        manifest_version=1,
+    )
+    app = SagaSmithApp(
+        paths=CampaignPaths(
+            root=tmp_path,
+            manifest=tmp_path / "campaign.toml",
+            db=tmp_path / "campaign.sqlite",
+            player_vault=tmp_path / "player_vault",
+        ),
+        manifest=manifest,
+    )
+
+    state = app._build_play_state("roll athletics dc 15")
+
+    assert state["character_sheet"] == make_first_slice_character().model_dump()
+    existing_sheet = {**make_first_slice_character().model_dump(), "current_hp": 7}
+    preserved = app._build_play_state("look", current_state={"character_sheet": existing_sheet})
+    assert preserved["character_sheet"] == existing_sheet
