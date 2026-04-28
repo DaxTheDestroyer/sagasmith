@@ -183,9 +183,12 @@ def test_tui_build_play_state_seeds_first_slice_sheet_and_preserves_existing(tmp
         manifest=manifest,
     )
 
-    state = app._build_play_state("roll athletics dc 15")
+    state = app._build_play_state("roll athletics dc 15")  # pyright: ignore[reportPrivateUsage]
 
     assert state["character_sheet"] == make_first_slice_character().model_dump()
     existing_sheet = {**make_first_slice_character().model_dump(), "current_hp": 7}
-    preserved = app._build_play_state("look", current_state={"character_sheet": existing_sheet})
+    preserved = app._build_play_state(  # pyright: ignore[reportPrivateUsage]
+        "look",
+        current_state={"character_sheet": existing_sheet},
+    )
     assert preserved["character_sheet"] == existing_sheet

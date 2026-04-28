@@ -75,12 +75,12 @@ class TestGraphBootstrap:
         graph.invoke(from_saga_state(state), {"configurable": {"thread_id": "t3"}})
         assert services.services._call_recorder == []
 
-    def test_combat_terminates_immediately(self, services) -> None:
-        """Test 5: phase=combat terminates immediately (Phase 5 deferral)."""
+    def test_combat_routes_through_rules_lawyer_chain(self, services) -> None:
+        """Test 5: phase=combat enters RulesLawyer first-slice mechanics."""
         state = make_valid_saga_state(phase="combat")
         graph = build_default_graph(services)
         graph.invoke(from_saga_state(state), {"configurable": {"thread_id": "t4"}})
-        assert services.services._call_recorder == []
+        assert services.services._call_recorder == ["rules_lawyer", "orator", "archivist"]
 
     def test_bootstrap_tolerates_llm_none(self) -> None:
         """Test 13: Bootstrap tolerates llm=None."""

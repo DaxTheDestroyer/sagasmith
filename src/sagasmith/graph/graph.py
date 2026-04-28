@@ -26,6 +26,7 @@ def build_saga_graph(bootstrap: Any) -> Any:
         {
             "onboarding": "onboarding",
             "oracle": "oracle",
+            "rules_lawyer": "rules_lawyer",
             END: END,
         },
     )
