@@ -93,7 +93,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **AI-01**: Oracle produces a validated `SceneBrief` with intent, beats, success outcomes, failure outcomes, present entities, pacing target, and relevant triggers.
 - [ ] **AI-02**: Oracle never emits direct player-facing narration.
-- [ ] **AI-03**: Oracle can produce 3-5 starting hooks or a curated first-slice hook aligned with onboarding preferences.
+- [x] **AI-03**: Oracle can produce 3-5 starting hooks or a curated first-slice hook aligned with onboarding preferences.
 - [ ] **AI-04**: Oracle can re-plan when the player accepts, rejects, bypasses, or reframes a planned beat.
 - [ ] **AI-05**: Oracle can create small-scope NPC drafts for the active scene while preserving future consistency through Archivist records.
 - [ ] **AI-06**: RulesLawyer converts player intent and scene context into mechanical proposals without narrating outcomes.
@@ -279,7 +279,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QA-03 | Phase 5 | Complete |
 | AI-01 | Phase 6 | Pending |
 | AI-02 | Phase 6 | Pending |
-| AI-03 | Phase 6 | Pending |
+| AI-03 | Phase 6 | Complete |
 | AI-04 | Phase 6 | Pending |
 | AI-05 | Phase 6 | Pending |
 | AI-06 | Phase 6 | Pending |
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 5 Plan 05-05 completion*
+*Last updated: 2026-04-28 after Phase 6 Plan 06-01 completion*

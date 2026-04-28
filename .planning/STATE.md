@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 06-05-PLAN.md
-last_updated: "2026-04-28T17:09:14Z"
-last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-05 memory packet stub assembly
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-28T17:20:18Z"
+last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-01 Oracle world bible and campaign seed generation
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 31
-  completed_plans: 24
-  percent: 77
+  completed_plans: 25
+  percent: 81
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Current Position
 
 Phase: 6 of 8 (AI GM Story Loop) — IN PROGRESS
-Plan: 5 of 8 in current phase (06-05 completed first to unblock memory context)
+Plan: 2 of 8 completed in current phase (06-05 and 06-01 completed; execution order is dependency-aware)
 Status: Ready for remaining Phase 6 plans
-Last activity: 2026-04-28 -- Completed 06-05 transcript-bounded MemoryPacket stub assembly
+Last activity: 2026-04-28 -- Completed 06-01 Oracle world bible and campaign seed generation
 
-Progress: [████████░░] 77%
+Progress: [████████░░] 81%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: 22 min
 - Total execution time: ~3.8 hours
 
@@ -49,12 +49,12 @@ Progress: [████████░░] 77%
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
-| 6. AI GM Story Loop | 1 | 8 min | 8 min |
+| 6. AI GM Story Loop | 2 | 17 min | 9 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-02 (4 min), 05-03 (5 min), 05-04 (4 min), 05-05 (53 min), 06-05 (8 min)
-- Trend: Phase 6 has begun with provider-free memory packet context unblocking Oracle and Orator work.
+- Last 5 plans: 05-03 (5 min), 05-04 (4 min), 05-05 (53 min), 06-05 (8 min), 06-01 (9 min)
+- Trend: Phase 6 now has provider-free memory context plus Oracle one-shot world/seed generation ready for scene planning.
 
 *Updated after each plan completion*
 
@@ -85,11 +85,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Plan Phase 6 (AI GM Story Loop) after Phase 5 verification.
+- Continue remaining Phase 6 plans in dependency order: 06-02, 06-03, 06-04, 06-06, 06-07, 06-08.
 
 ### Blockers/Concerns
 
-- None currently. Phase 5 plans are ready for execution.
+- None currently. Remaining Phase 6 plans are ready for execution.
 
 ### Decisions (continued from Phase 4)
 
@@ -122,6 +122,9 @@ Recent decisions affecting current work:
 - [06-05]: Phase 6 memory assembly is transcript-only and provider-free; full vault/search retrieval remains deferred to Phase 7.
 - [06-05]: `memory-packet-assembly` is first-slice safe and is the Archivist skill logged during Phase 6 turn flow.
 - [06-05]: `GraphRuntime` injects the SQLite transcript connection into `AgentServices` so agent nodes remain pure while memory logic can read recent transcript rows.
+- [06-01]: Worldgen Agent Skills are future-scoped (`first_slice: false`) and run only when an LLM client is injected, preserving no-paid-call behavior.
+- [06-01]: Oracle stores `world_bible` and `campaign_seed` idempotently; re-entry skips generation once both fields exist.
+- [06-01]: Prompt modules live under `src/sagasmith/prompts/oracle/` with `PROMPT_VERSION`, `SYSTEM_PROMPT`, `build_user_prompt`, and `JSON_SCHEMA` per D-06.5.
 
 ## Deferred Items
 
@@ -133,6 +136,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T17:09:14Z
-Stopped at: Completed 06-05-PLAN.md
+Last session: 2026-04-28T17:20:18Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
