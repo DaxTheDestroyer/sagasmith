@@ -1,6 +1,9 @@
 -- Expand turn_records.status CHECK to include narration recovery states.
 -- SQLite does not support ALTER CHECK, so the table is recreated.
--- No foreign keys reference turn_records at the SQL level (FK is application-enforced).
+-- agent_skill_log has FOREIGN KEY (turn_id) REFERENCES turn_records(turn_id),
+-- so we temporarily disable FK enforcement during the table swap.
+
+PRAGMA foreign_keys = OFF;
 
 CREATE TABLE IF NOT EXISTS turn_records_new (
     turn_id TEXT PRIMARY KEY,
@@ -17,3 +20,6 @@ INSERT INTO turn_records_new (turn_id, campaign_id, session_id, status, started_
 
 DROP TABLE turn_records;
 ALTER TABLE turn_records_new RENAME TO turn_records;
+
+PRAGMA foreign_key_check;
+PRAGMA foreign_keys = ON;
