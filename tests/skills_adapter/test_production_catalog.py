@@ -26,7 +26,7 @@ _PRODUCTION_ROOTS = [Path("src/sagasmith/agents"), Path("src/sagasmith/skills")]
 _REQUIRED_SET: dict[str, set[str]] = {
     "_shared": {"schema-validation", "safety-redline-check", "command-dispatch"},
     "oracle": {"scene-brief-composition", "player-choice-branching", "content-policy-routing", "inline-npc-creation"},
-    "rules_lawyer": {"degree-of-success", "seeded-roll-resolution", "skill-check-resolution"},
+    "rules_lawyer": {"degree-of-success", "seeded-roll-resolution", "skill-check-resolution", "combat-resolution"},
     "orator": {"scene-rendering"},
     "archivist": {"turn-close-persistence"},
     "onboarding": {"onboarding-phase-wizard"},
@@ -45,7 +45,8 @@ _EXPECTED_SURFACE: dict[str, str] = {
     "inline-npc-creation": "prompted",
     "degree-of-success": "deterministic",
     "seeded-roll-resolution": "deterministic",
-    "skill-check-resolution": "deterministic",
+    "skill-check-resolution": "hybrid",
+    "combat-resolution": "hybrid",
     "scene-rendering": "prompted",
     "memory-packet-assembly": "hybrid",
     "turn-close-persistence": "deterministic",

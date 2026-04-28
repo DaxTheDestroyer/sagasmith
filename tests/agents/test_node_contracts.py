@@ -117,11 +117,10 @@ class TestRulesLawyerNode:
         assert cr["degree"] in ("critical_success", "success", "failure", "critical_failure")
         assert cr["roll_result"]["natural"] in range(1, 21)
 
-    def test_no_match_returns_visible_error(self, services) -> None:
+    def test_no_match_skips_mechanics_for_narration(self, services) -> None:
         state = make_valid_saga_state(pending_player_input="hello world").model_dump()
         result = rules_lawyer_node(state, services)
-        assert result["check_results"] == []
-        assert "Rules error:" in result["pending_narration"][0]
+        assert result == {}
 
     def test_determinism_natural_and_total(self, services) -> None:
         """Test 9: Same inputs → same natural/total (NOT roll_id)."""

@@ -25,6 +25,7 @@ class RulesEngine:
         stat: str,
         dc: int,
         reason: str,
+        roll_index: int = 0,
         kind: CheckKind = "skill",
         target_id: str | None = None,
     ) -> CheckProposal:
@@ -35,7 +36,7 @@ class RulesEngine:
             stat=stat,
             dc=dc,
             reason=reason,
-            roll_index=0,
+            roll_index=roll_index,
             kind=kind,
             target_id=target_id,
         )
