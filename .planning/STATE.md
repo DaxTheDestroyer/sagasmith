@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready_to_execute
-stopped_at: Phase 5 plans created
+stopped_at: Phase 5 plans revised from cross-AI reviews
 last_updated: "2026-04-28T01:45:59Z"
-last_activity: 2026-04-27 -- Phase 5 planning complete with 5 executable plans for rules-first PF2e vertical slice
+last_activity: 2026-04-27 -- Phase 5 plans revised from cross-AI reviews; 5 executable plans remain ready for rules-first PF2e vertical slice
 progress:
   total_phases: 8
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 5 planned — ready to execute Rules-First PF2e Vertical Slice
+**Current focus:** Phase 5 plans revised — ready to execute Rules-First PF2e Vertical Slice
 
 ## Current Position
 
 Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — READY TO EXECUTE
 Plan: 0 of 5 in current phase
 Status: Ready to execute
-Last activity: 2026-04-27 -- Phase 5 planned: deterministic rules foundation, combat engine, graph wiring, TUI mechanics surfaces, and QA gate
+Last activity: 2026-04-27 -- Phase 5 plans revised from review feedback: damage auditability, parser/error UX, live sheet state, reveal behavior, combat edge cases, and QA-03 behavior coverage
 
 Progress: [██████░░░░] 50%
 
@@ -52,7 +52,7 @@ Progress: [██████░░░░] 50%
 **Recent Trend:**
 
 - Last 5 plans: 04-01 (35 min), 04-02 (40 min), 04-03 (35 min), 04-04 (60 min), 04-05 (10 min)
-- Trend: Phase 5 planning complete; 5 plans cover deterministic rules foundation, combat, graph wiring, TUI surfaces, and QA-03 verification.
+- Trend: Phase 5 planning revised after cross-AI review; 5 plans cover deterministic rules foundation, combat, graph wiring, TUI surfaces, and QA-03 verification.
 
 *Updated after each plan completion*
 
@@ -115,6 +115,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-27T19:45:59-06:00
-Stopped at: Phase 5 planning complete
+Last session: 2026-04-27T20:03:34-06:00
+Stopped at: Phase 5 planning revised after reviews
 Resume file: .planning/phases/05-rules-first-pf2e-vertical-slice/05-01-PLAN.md

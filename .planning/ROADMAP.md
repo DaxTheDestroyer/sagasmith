@@ -114,7 +114,7 @@ Plans:
   2. User can complete a skill or Perception check, see reveal-mode dice details when configured, and audit the roll log afterward.
   3. User can complete a simple theater-of-mind combat with initiative, action economy, position tags, Strikes, HP deltas, and no more than two enemies.
   4. Developer can run rules tests for PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
-**Plans**: 5 plans
+**Plans**: 5 plans (revised 2026-04-27 via `/gsd-plan-phase 5 --reviews` to address cross-AI review feedback on damage auditability, parser/error UX, live sheet state, reveal behavior, combat edge cases, and QA-03 behavior coverage)
 Plans:
 - [ ] 05-01-PLAN.md — Build deterministic first-slice pregen/enemy data and skill/Perception check resolution with auditable roll outputs (RULE-04, RULE-05, RULE-11, RULE-12, QA-03).
 - [ ] 05-02-PLAN.md — Implement first-slice combat engine for initiative, action economy, positions, Strikes, HP deltas, and encounter completion (RULE-06, RULE-07, RULE-08, RULE-09, RULE-10, RULE-11, RULE-12, QA-03).
