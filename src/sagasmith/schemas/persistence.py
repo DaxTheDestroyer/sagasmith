@@ -26,12 +26,23 @@ class CostLogRecord(SchemaModel):
 
 
 class TurnRecord(SchemaModel):
-    """Completed-turn record written during turn close."""
+    """Completed-turn record written during turn close.
+
+    Status state machine::
+
+        in_progress  --(orator complete)--> narrated
+        narrated     --(turn_close)-------> complete
+        in_progress  --(user /retry)------> retried  (then re-invoke for fresh attempt)
+        in_progress  --(user /discard)----> discarded
+
+    ``needs_vault_repair`` is the initial pre-close status used by the runtime
+    and maps to "in_progress" in the state-machine above.
+    """
 
     turn_id: str
     campaign_id: str
     session_id: str
-    status: Literal["complete", "needs_vault_repair"]
+    status: Literal["complete", "needs_vault_repair", "narrated", "discarded", "retried"]
     started_at: str
     completed_at: str
     schema_version: int = Field(ge=1)

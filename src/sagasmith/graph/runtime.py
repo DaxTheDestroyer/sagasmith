@@ -156,6 +156,105 @@ class GraphRuntime:
         )
         return close_turn(self.db_conn, bundle)
 
+    def discard_incomplete_turn(self, turn_id: str) -> TurnRecord:
+        """Rewind the graph thread to the pre-narration checkpoint and mark the
+        turn as ``discarded``.
+
+        Raises ``ValueError`` if no pre-narration checkpoint exists for the turn.
+        """
+        repo = CheckpointRefRepository(self.db_conn)
+        refs = [r for r in repo.list_for_turn(turn_id) if r.kind == CheckpointKind.PRE_NARRATION.value]
+        if not refs:
+            raise ValueError(f"No pre_narration checkpoint for turn {turn_id}")
+
+        pre_narration_ref = refs[-1]  # most recent pre_narration
+        self._rewind_to_checkpoint(pre_narration_ref.checkpoint_id)
+
+        now = datetime.now(UTC).isoformat()
+        turn_repo = TurnRecordRepository(self.db_conn)
+        existing = turn_repo.get(turn_id)
+        if existing is None:
+            raise ValueError(f"No TurnRecord for turn {turn_id}")
+
+        discarded = TurnRecord(
+            turn_id=existing.turn_id,
+            campaign_id=existing.campaign_id,
+            session_id=existing.session_id,
+            status="discarded",
+            started_at=existing.started_at,
+            completed_at=now,
+            schema_version=existing.schema_version,
+        )
+        turn_repo.upsert(discarded)
+        self.db_conn.commit()
+        return discarded
+
+    def retry_narration(self, turn_id: str) -> dict[str, Any]:
+        """Rewind to the pre-narration checkpoint, clear pending narration, and
+        re-invoke orator + archivist.
+
+        Returns the final graph state values after the retry completes.
+
+        Deterministic invariant: check_results, dice outcomes, and HP/state are
+        byte-identical to a non-retried run because the pre-narration snapshot
+        freezes all mechanical state before the orator begins.
+
+        Raises ``ValueError`` if no pre-narration checkpoint exists for the turn.
+        """
+        repo = CheckpointRefRepository(self.db_conn)
+        refs = [r for r in repo.list_for_turn(turn_id) if r.kind == CheckpointKind.PRE_NARRATION.value]
+        if not refs:
+            raise ValueError(f"No pre_narration checkpoint for turn {turn_id}")
+
+        pre_narration_ref = refs[-1]
+        self._rewind_to_checkpoint(pre_narration_ref.checkpoint_id, clear_pending_narration=True)
+
+        # Mark the turn record as retried (for audit trail).
+        turn_repo = TurnRecordRepository(self.db_conn)
+        existing = turn_repo.get(turn_id)
+        if existing is not None:
+            now = datetime.now(UTC).isoformat()
+            retried = TurnRecord(
+                turn_id=existing.turn_id,
+                campaign_id=existing.campaign_id,
+                session_id=existing.session_id,
+                status="retried",
+                started_at=existing.started_at,
+                completed_at=now,
+                schema_version=existing.schema_version,
+            )
+            turn_repo.upsert(retried)
+            self.db_conn.commit()
+
+        # Re-invoke past the orator interrupt through archivist.
+        # After rewind the graph is paused at orator; invoke(None) runs orator → archivist → END.
+        _ = self.graph.invoke(None, self.thread_config)
+        return self.graph.get_state(self.thread_config).values
+
+    def _rewind_to_checkpoint(
+        self, checkpoint_id: str, *, clear_pending_narration: bool = False
+    ) -> None:
+        """Fork the thread from a specific checkpoint.
+
+        Uses LangGraph's ``update_state`` with a ``checkpoint_id`` to create a
+        new branch point at the target snapshot.  The thread's head advances to
+        this forked checkpoint so the next ``invoke`` continues from here.
+
+        If *clear_pending_narration* is ``True``, the ``pending_narration``
+        field is reset to ``[]`` in the forked state (defensive — the
+        pre-narration snapshot should already have it empty).
+        """
+        rewind_config: dict[str, Any] = {
+            "configurable": {
+                "thread_id": self.thread_config["configurable"]["thread_id"],
+                "checkpoint_id": checkpoint_id,
+            }
+        }
+        updates: dict[str, Any] = {}
+        if clear_pending_narration:
+            updates["pending_narration"] = []
+        self.graph.update_state(rewind_config, updates if updates else None)
+
     def _record_pre_narration_checkpoint(self, turn_id: str, snapshot) -> None:
         cp_id = extract_checkpoint_id(snapshot)
         if cp_id is None:
