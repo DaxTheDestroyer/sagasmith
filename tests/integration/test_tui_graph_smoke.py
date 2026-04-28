@@ -153,9 +153,9 @@ async def test_resume_completes_turn_with_stub_narration(wired_app):
         app._sync_narration_from_graph()
         app._sync_narration_from_graph()
 
-        # Narration area received stub
-        assert any("take a moment to assess" in line for line in app.narration.logged_lines)
-        assert sum("take a moment to assess" in line for line in app.narration.logged_lines) == 1
+        # Narration area received fallback (no LLM client in test)
+        assert any("scene shifts" in line for line in app.narration.logged_lines)
+        assert sum("scene shifts" in line for line in app.narration.logged_lines) == 1
 
         # Both checkpoints written
         cur = conn.execute(

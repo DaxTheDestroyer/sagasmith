@@ -1,11 +1,12 @@
 """Orator agent node.
 
-Phase 6 replaces stub with streaming narration through LLMClient +
-safety post-gate.
+Plan 06-04: Buffered stream-after-classify pipeline replaces stub narration.
+Tokens are accumulated in a private buffer, run through inline hard-limit
+matcher + SafetyPostGate + mechanical-consistency audit BEFORE any tokens
+reach pending_narration.  Player sees a paced playback of validated tokens.
 
-Plan 06-07: Integrates SafetyPostGate for post-generation content scanning.
-Two-rewrite limit enforcement is deferred to the real Orator pipeline (06-04);
-this stub applies the post-gate once and uses fallback narration on block.
+Plan 06-07: SafetyPostGate integration for post-generation content scanning.
+Two-rewrite limit enforced by this pipeline (not the post-gate service).
 """
 
 from __future__ import annotations
@@ -16,141 +17,202 @@ from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet_stub,
 )
 from sagasmith.graph.activation_log import get_current_activation
+from sagasmith.schemas.mechanics import CheckResult
+from sagasmith.schemas.narrative import MemoryPacket, SceneBrief
+from sagasmith.schemas.player import ContentPolicy, PlayerProfile
 from sagasmith.schemas.safety_cost import SafetyEvent
-from sagasmith.services.safety_post_gate import (
-    BlockFallback,
-    Rewrite,
-    SafetyPostGate,
-)
+from sagasmith.services.errors import BudgetStopError
 
-_FIRST_SLICE_NARRATION = "You take a moment to assess the scene."
 _FALLBACK_NARRATION = "The scene shifts. A new detail draws your attention."
 
 
 def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
-    """Ensure memory context, then append one fixed narration line when scene_brief is present.
+    """Render scene narration through the buffered stream-after-classify pipeline.
 
-    Plan 06-07: Post-gate safety scanning runs on generated narration before
-    it enters ``pending_narration``.  On block, fallback narration is used.
+    D-06.1: Tokens are buffered, validated, then played back.
+    D-06.4: Emits resolved_beat_ids.
+    D-06.6: Per-turn budget covers initial generation + up to two rewrites.
+    On budget exhaustion, emits fallback narration and posts BUDGET_STOP.
     """
     if services._call_recorder is not None:
         services._call_recorder.append("orator")
+
     updates: dict[str, Any] = {}
+
+    # Ensure memory context
     if state.get("memory_packet") is None:
         memory_packet = assemble_memory_packet_stub(
             state,
             conn=getattr(services, "transcript_conn", None),
         )
         updates["memory_packet"] = memory_packet.model_dump()
+
     activation = get_current_activation()
     if activation is not None:
         activation.set_skill("scene-rendering")
-    if state["scene_brief"] is not None:
-        narration = _FIRST_SLICE_NARRATION
-        # Post-gate safety scan (Plan 06-07)
-        narration, safety_events = _apply_post_gate(
-            narration=narration,
-            state=state,
-            services=services,
-        )
-        updates["pending_narration"] = state["pending_narration"] + [narration]
-        if safety_events:
-            updates["safety_events"] = [*state.get("safety_events", []), *safety_events]
+
+    if state.get("scene_brief") is None:
+        return updates
+
+    # --- Budget preflight (D-06.6) ---
+    cost_governor = getattr(services, "cost", None)
+    if cost_governor is not None:
+        try:
+            cost_governor.preflight(
+                provider=_get_provider(state),
+                model=_get_narration_model(state),
+                prompt_tokens=256,  # conservative estimate
+                max_tokens_fallback=1024,
+            ).raise_if_blocked()
+        except BudgetStopError:
+            updates["pending_narration"] = state["pending_narration"] + [_FALLBACK_NARRATION]
+            updates.setdefault("safety_events", [])
+            updates["safety_events"] = [
+                *state.get("safety_events", []),
+                SafetyEvent(
+                    id=f"safety_{state.get('turn_id', 'unknown')}_budget_stop",
+                    turn_id=str(state.get("turn_id", "unknown")),
+                    kind="fallback",
+                    policy_ref=None,
+                    action_taken="budget_exhausted:fallback_narration",
+                ).model_dump(),
+            ]
+            return updates
+
+    # --- Buffered stream-after-classify pipeline (D-06.1) ---
+    scene_brief = _build_scene_brief(state["scene_brief"])
+    check_results = _build_check_results(state.get("check_results", []))
+    memory_packet = _build_memory_packet(state.get("memory_packet"))
+    content_policy = _build_content_policy(state.get("content_policy"))
+    player_profile = _build_player_profile(state.get("player_profile"))
+    dice_ux_mode = _get_dice_ux_mode(state)
+
+    llm_client = getattr(services, "llm", None)
+    narration_model = _get_narration_model(state)
+    cheap_model = _get_cheap_model(state)
+    turn_id = str(state.get("turn_id", "unknown"))
+    campaign_id = str(state.get("campaign_id", ""))
+    safety_svc = getattr(services, "safety", None)
+
+    from sagasmith.agents.orator.skills.scene_rendering.logic import render_scene
+
+    result = render_scene(
+        scene_brief=scene_brief,
+        check_results=check_results,
+        memory_packet=memory_packet,
+        content_policy=content_policy,
+        player_profile=player_profile,
+        house_rules_dice_ux=dice_ux_mode,
+        llm_client=llm_client,
+        narration_model=narration_model,
+        cheap_model=cheap_model,
+        cost_governor=cost_governor,
+        provider=_get_provider(state),
+        turn_id=turn_id,
+        campaign_id=campaign_id,
+        safety_svc=safety_svc,
+    )
+
+    updates["pending_narration"] = state["pending_narration"] + result.narration_lines
+    if result.resolved_beat_ids:
+        existing = list(state.get("resolved_beat_ids", []))
+        merged = list(dict.fromkeys(existing + result.resolved_beat_ids))
+        updates["resolved_beat_ids"] = merged
+    if result.safety_events:
+        updates["safety_events"] = [*state.get("safety_events", []), *result.safety_events]
+
     return updates
 
 
-def _apply_post_gate(
-    *,
-    narration: str,
-    state: dict[str, Any],
-    services: Any,
-) -> tuple[str, list[dict[str, Any]]]:
-    """Run post-gate safety scan on narration.
+# ---------------------------------------------------------------------------
+# Helpers: extract typed objects from state dicts
+# ---------------------------------------------------------------------------
 
-    Returns (final_narration, list_of_safety_event_dicts).
-    """
-    content_policy = state.get("content_policy")
-    if content_policy is None:
-        return narration, []
 
-    llm_client = getattr(services, "llm", None)
-    cheap_model = "fake-cheap"
-    # Try to extract cheap_model from provider config if available
+def _get_provider(state: dict[str, Any]) -> str:
     provider_config = state.get("provider_config")
     if provider_config is not None:
-        cheap_model = getattr(provider_config, "cheap_model", cheap_model)
         if isinstance(provider_config, dict):
-            cheap_model = provider_config.get("cheap_model", cheap_model)
+            return provider_config.get("provider", "fake")
+        return getattr(provider_config, "provider", "fake")
+    return "fake"
 
-    gate = SafetyPostGate(llm_client=llm_client, cheap_model=cheap_model)
-    verdict = gate.scan(narration, content_policy)
 
-    events: list[dict[str, Any]] = []
-    turn_id = str(state.get("turn_id") or "unknown")
+def _get_narration_model(state: dict[str, Any]) -> str:
+    provider_config = state.get("provider_config")
+    if provider_config is not None:
+        if isinstance(provider_config, dict):
+            return provider_config.get("narration_model", "fake-narration")
+        return getattr(provider_config, "narration_model", "fake-narration")
+    return "fake-narration"
 
-    if isinstance(verdict, BlockFallback):
-        # Log and use fallback narration
-        _log_post_gate_event(services, state, "fallback", verdict.violated_term, verdict.reason or "blocked")
-        events.append(
-            SafetyEvent(
-                id=f"safety_{turn_id}_post_gate_block",
-                turn_id=turn_id,
-                kind="fallback",
-                policy_ref=verdict.violated_term,
-                action_taken=f"fallback:{verdict.reason or 'blocked'}"[:200],
-            ).model_dump()
+
+def _get_cheap_model(state: dict[str, Any]) -> str:
+    provider_config = state.get("provider_config")
+    if provider_config is not None:
+        if isinstance(provider_config, dict):
+            return provider_config.get("cheap_model", "fake-cheap")
+        return getattr(provider_config, "cheap_model", "fake-cheap")
+    return "fake-cheap"
+
+
+def _get_dice_ux_mode(state: dict[str, Any]) -> str | None:
+    """Extract dice_ux from house_rules or player_profile."""
+    hr = state.get("house_rules")
+    if hr is not None:
+        if isinstance(hr, dict):
+            return hr.get("dice_ux")
+        return getattr(hr, "dice_ux", None)
+    pp = state.get("player_profile")
+    if pp is not None:
+        if isinstance(pp, dict):
+            return pp.get("dice_ux")
+        return getattr(pp, "dice_ux", None)
+    return None
+
+
+def _build_scene_brief(data: Any) -> SceneBrief | None:
+    if data is None:
+        return None
+    if isinstance(data, SceneBrief):
+        return data
+    return SceneBrief.model_validate(data)
+
+
+def _build_check_results(data: Any) -> list[CheckResult]:
+    if not data:
+        return []
+    if data and isinstance(data[0], CheckResult):
+        return data  # type: ignore[return-value]
+    return [CheckResult.model_validate(cr) for cr in data]
+
+
+def _build_memory_packet(data: Any) -> MemoryPacket:
+    if data is None:
+        return MemoryPacket(
+            token_cap=256,
+            summary="No prior context.",
+            entities=[],
+            recent_turns=[],
+            open_callbacks=[],
+            retrieval_notes=[],
         )
-        return _FALLBACK_NARRATION, events
-
-    if isinstance(verdict, Rewrite):
-        # Log the rewrite; in the stub, we accept the narration as-is
-        # (real Orator 06-04 will re-invoke LLM)
-        _log_post_gate_event(services, state, "post_gate_rewrite", verdict.violated_term, verdict.reason or "rewrite")
-        events.append(
-            SafetyEvent(
-                id=f"safety_{turn_id}_post_gate_rewrite",
-                turn_id=turn_id,
-                kind="post_gate_rewrite",
-                policy_ref=verdict.violated_term,
-                action_taken=f"rewrite:{verdict.reason or 'rewrite'}"[:200],
-            ).model_dump()
-        )
-        # For the stub, use fallback on rewrite to avoid showing flagged content
-        return _FALLBACK_NARRATION, events
-
-    # Pass — narration is safe
-    return narration, []
+    if isinstance(data, MemoryPacket):
+        return data
+    return MemoryPacket.model_validate(data)
 
 
-def _log_post_gate_event(
-    services: Any,
-    state: dict[str, Any],
-    event_kind: str,
-    policy_ref: str | None,
-    reason: str,
-) -> None:
-    """Log a post-gate event via SafetyEventService (SQLite) when available."""
-    safety_svc = getattr(services, "safety", None)
-    if safety_svc is None:
-        return
-    campaign_id = state.get("campaign_id", "")
-    turn_id = state.get("turn_id")
-    try:
-        if event_kind == "fallback":
-            safety_svc.log_fallback(
-                campaign_id=campaign_id,
-                reason=reason,
-                turn_id=turn_id,
-            )
-        elif event_kind == "post_gate_rewrite":
-            safety_svc.log_post_gate_rewrite(
-                campaign_id=campaign_id,
-                policy_ref=policy_ref,
-                reason=reason,
-                turn_id=turn_id,
-            )
-    except Exception:
-        try:
-            safety_svc.conn.rollback()
-        except Exception:
-            pass
+def _build_content_policy(data: Any) -> ContentPolicy | None:
+    if data is None:
+        return None
+    if isinstance(data, ContentPolicy):
+        return data
+    return ContentPolicy.model_validate(data)
+
+
+def _build_player_profile(data: Any) -> PlayerProfile | None:
+    if data is None:
+        return None
+    if isinstance(data, PlayerProfile):
+        return data
+    return PlayerProfile.model_validate(data)

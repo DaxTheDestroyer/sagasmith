@@ -158,7 +158,8 @@ class TestOratorNode:
             pending_narration=[],
         ).model_dump()
         result = orator_node(state, services)
-        assert result["pending_narration"] == ["You take a moment to assess the scene."]
+        # Plan 06-04: No LLM client → deterministic fallback narration
+        assert result["pending_narration"] == ["The scene shifts. A new detail draws your attention."]
         assert result["memory_packet"] is not None
 
     def test_leaves_unchanged_when_scene_brief_none(self, services) -> None:
@@ -190,7 +191,7 @@ class TestOratorNode:
         result = orator_node(state, services)
         assert result["pending_narration"] == [
             "existing line",
-            "You take a moment to assess the scene.",
+            "The scene shifts. A new detail draws your attention.",
         ]
         assert result["memory_packet"] is not None
 
