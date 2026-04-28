@@ -52,7 +52,7 @@ class TestNodePurity:
     def test_rules_lawyer_node_does_not_mutate_input(self, services) -> None:
         """Test 6: rules_lawyer_node is pure."""
         state = make_valid_saga_state(
-            pending_player_input="roll perception",
+            pending_player_input="perception dc 10",
         ).model_dump()
         before = copy.deepcopy(state)
         rules_lawyer_node(state, services)
@@ -101,9 +101,9 @@ class TestOracleNode:
 
 class TestRulesLawyerNode:
     def test_roll_perception_appends_check_result(self, services) -> None:
-        """Test 8: trigger phrase produces CheckResult via DiceService."""
+        """Test 8: deterministic first-slice command produces CheckResult via DiceService."""
         state = make_valid_saga_state(
-            pending_player_input="roll perception",
+            pending_player_input="perception dc 10",
             character_sheet=make_valid_character_sheet(),
             check_results=[],
         ).model_dump()
@@ -111,19 +111,20 @@ class TestRulesLawyerNode:
         assert "check_results" in result
         assert len(result["check_results"]) == 1
         cr = result["check_results"][0]
-        assert cr["proposal_id"].startswith("cp_")
+        assert cr["proposal_id"].startswith("check_perception_")
         assert cr["degree"] in ("critical_success", "success", "failure", "critical_failure")
         assert cr["roll_result"]["natural"] in range(1, 21)
 
-    def test_no_match_returns_empty(self, services) -> None:
+    def test_no_match_returns_visible_error(self, services) -> None:
         state = make_valid_saga_state(pending_player_input="hello world").model_dump()
         result = rules_lawyer_node(state, services)
-        assert result == {}
+        assert result["check_results"] == []
+        assert "Rules error:" in result["pending_narration"][0]
 
     def test_determinism_natural_and_total(self, services) -> None:
         """Test 9: Same inputs → same natural/total (NOT roll_id)."""
         base_state = make_valid_saga_state(
-            pending_player_input="roll perception",
+            pending_player_input="perception dc 10",
             character_sheet=make_valid_character_sheet(),
             check_results=[],
         ).model_dump()
