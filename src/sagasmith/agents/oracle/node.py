@@ -102,6 +102,7 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
         )
         route = safety_pre_gate(scene_intent, state.get("content_policy"))
         if isinstance(route, Blocked):
+            _log_safety_event_to_service(services, state, "pre_gate_block", route.policy_ref, route.reason or "blocked")
             return {
                 **updates,
                 "last_interrupt": _safety_block_interrupt(
@@ -111,6 +112,7 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
                 "safety_events": [*state.get("safety_events", []), _safety_event(state, route.policy_ref, "pre_gate_block", route.reason or "blocked")],
             }
         if isinstance(route, Rerouted):
+            _log_safety_event_to_service(services, state, "pre_gate_reroute", route.policy_ref, route.reason or "rerouted")
             updates["safety_events"] = [
                 *state.get("safety_events", []),
                 _safety_event(state, route.policy_ref, "pre_gate_reroute", route.reason or "rerouted"),
@@ -272,3 +274,39 @@ def _set_skill_if_available(activation: Any, services: AgentServices, skill_name
     store = services.skill_store
     if store is not None and store.find(name=skill_name, agent_scope="oracle") is not None:
         activation.set_skill(skill_name)
+
+
+def _log_safety_event_to_service(
+    services: AgentServices,
+    state: dict[str, Any],
+    event_kind: str,
+    policy_ref: str | None,
+    reason: str,
+) -> None:
+    """Log a safety event via SafetyEventService (SQLite) when available."""
+    safety_svc = services.safety
+    if safety_svc is None:
+        return
+    campaign_id = state.get("campaign_id", "")
+    turn_id = state.get("turn_id")
+    try:
+        if event_kind == "pre_gate_block":
+            safety_svc.log_pre_gate_block(
+                campaign_id=campaign_id,
+                policy_ref=policy_ref or "",
+                reason=reason,
+                turn_id=turn_id,
+            )
+        elif event_kind == "pre_gate_reroute":
+            safety_svc.log_pre_gate_reroute(
+                campaign_id=campaign_id,
+                policy_ref=policy_ref or "",
+                reason=reason,
+                turn_id=turn_id,
+            )
+    except Exception:
+        # Roll back failed transaction so the connection stays usable
+        try:
+            safety_svc.conn.rollback()
+        except Exception:
+            pass

@@ -75,7 +75,15 @@ class SafetyEventRecord(SchemaModel):
     event_id: str
     campaign_id: str
     turn_id: str | None  # None when event is pre-gameplay (/pause during onboarding)
-    kind: Literal["pause", "line", "soft_limit_fade", "post_gate_rewrite", "fallback"]
+    kind: Literal[
+        "pause",
+        "line",
+        "soft_limit_fade",
+        "post_gate_rewrite",
+        "fallback",
+        "pre_gate_reroute",
+        "pre_gate_block",
+    ]
     policy_ref: str | None
     action_taken: str
     timestamp: str  # ISO 8601 UTC

@@ -83,14 +83,64 @@ class SafetyEventService:
         reason: str,
         turn_id: str | None = None,
     ) -> SafetyEventRecord:
-        """Reserved for Phase 6 SafetyGuard post-gate fallback. Exposed now so
-        the service surface is stable when Phase 6 lands."""
+        """Phase 6 SafetyGuard post-gate fallback — persistent violation after retries."""
         return self._log(
             campaign_id=campaign_id,
             turn_id=turn_id,
             kind="fallback",
             policy_ref=None,
             action_taken=f"fallback:{reason[:200]}",
+        )
+
+    def log_pre_gate_reroute(
+        self,
+        *,
+        campaign_id: str,
+        policy_ref: str,
+        reason: str,
+        turn_id: str | None = None,
+    ) -> SafetyEventRecord:
+        """Phase 6 pre-gate: intent was rerouted (soft/hard limit redaction)."""
+        return self._log(
+            campaign_id=campaign_id,
+            turn_id=turn_id,
+            kind="pre_gate_reroute",
+            policy_ref=policy_ref[:200] if policy_ref else None,
+            action_taken=f"rerouted:{reason[:200]}",
+        )
+
+    def log_pre_gate_block(
+        self,
+        *,
+        campaign_id: str,
+        policy_ref: str,
+        reason: str,
+        turn_id: str | None = None,
+    ) -> SafetyEventRecord:
+        """Phase 6 pre-gate: intent was blocked (hard limit or ask_first)."""
+        return self._log(
+            campaign_id=campaign_id,
+            turn_id=turn_id,
+            kind="pre_gate_block",
+            policy_ref=policy_ref[:200] if policy_ref else None,
+            action_taken=f"blocked:{reason[:200]}",
+        )
+
+    def log_post_gate_rewrite(
+        self,
+        *,
+        campaign_id: str,
+        policy_ref: str | None = None,
+        reason: str,
+        turn_id: str | None = None,
+    ) -> SafetyEventRecord:
+        """Phase 6 post-gate: generated prose needs rewriting (soft-limit violation)."""
+        return self._log(
+            campaign_id=campaign_id,
+            turn_id=turn_id,
+            kind="post_gate_rewrite",
+            policy_ref=policy_ref[:200] if policy_ref else None,
+            action_taken=f"rewrite:{reason[:200]}",
         )
 
     def list_recent(self, campaign_id: str, *, limit: int = 20) -> list[SafetyEventRecord]:

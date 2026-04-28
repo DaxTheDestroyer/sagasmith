@@ -37,8 +37,12 @@ class Blocked(PolicyRouteResult):
 
 _POLICY_SYNONYMS: dict[str, tuple[str, ...]] = {
     "graphic_sexual_content": ("sexual assault", "explicit sex", "graphic sexual"),
-    "harm_to_children": ("harm a child", "children are harmed", "child corpse", "injured child"),
+    "harm_to_children": ("harm a child", "children are harmed", "child corpse", "injured child", "child harmed", "harmed child", "children harmed", "harming children"),
     "graphic_violence": ("gore", "dismember", "graphic violence", "viscera"),
+}
+
+_REGEX_SYNONYMS: dict[str, tuple[str, ...]] = {
+    "harm_to_children": (r"child.{0,30}harm", r"harm.{0,30}child"),
 }
 
 
@@ -98,7 +102,12 @@ def safety_pre_gate(intent: str, content_policy: ContentPolicy | dict[str, Any] 
 def _matches_policy_term(text: str, policy_term: str) -> bool:
     normalized = policy_term.replace("_", " ").lower()
     terms = (normalized, policy_term.lower(), *_POLICY_SYNONYMS.get(policy_term, ()))
-    return any(re.search(rf"\b{re.escape(term)}\b", text) for term in terms if term)
+    if any(re.search(rf"\b{re.escape(term)}\b", text) for term in terms if term):
+        return True
+    for loose in _REGEX_SYNONYMS.get(policy_term, ()):
+        if re.search(loose, text, re.IGNORECASE):
+            return True
+    return False
 
 
 def _redact_term(text: str, policy_term: str) -> str:
