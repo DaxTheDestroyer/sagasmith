@@ -133,7 +133,16 @@ Plans:
   3. RulesLawyer converts player intent into deterministic mechanical proposals/results without letting LLMs invent modifiers, DCs, damage, HP, action counts, or degrees.
   4. Orator is the only player-facing narrative voice, streams at least one complete beat per completed turn, respects dice UX, and does not contradict resolved mechanics.
   5. Unsafe scene intents or generated prose are blocked, rerouted, retried, or safely degraded, and incomplete narration can be retried or discarded without changing deterministic outcomes.
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+- [ ] 06-01-PLAN.md — Implement World Bible and Campaign Seed Generation (Oracle).
+- [ ] 06-02-PLAN.md — Implement Scene Brief Composition (Oracle).
+- [ ] 06-03-PLAN.md — Implement Intent-to-Proposal Layer (RulesLawyer).
+- [ ] 06-04-PLAN.md — Implement Scene Rendering with Safety Gates (Orator).
+- [x] 06-05-PLAN.md — Implement Memory Packet Stub Assembly (Archivist).
+- [ ] 06-06-PLAN.md — Implement Narration Discard + Recovery Commands (Graph + TUI).
+- [ ] 06-07-PLAN.md — Implement Safety Event Logging and Testing (Safety).
+- [ ] 06-08-PLAN.md — Integration Testing and Quality Assurance.
 
 ### Phase 7: Memory, Vault, and Resume Differentiator
 **Goal**: User gets persistent campaign memory, spoiler-safe Obsidian vault projection, recap, repair commands, and later-process resume
@@ -182,6 +191,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
 | 4. Graph Runtime and Agent Skills | 5/5 | Complete | 2026-04-27 |
 | 5. Rules-First PF2e Vertical Slice | 5/5 | Complete | 2026-04-28 |
-| 6. AI GM Story Loop | 0/TBD | Not started | - |
+| 6. AI GM Story Loop | 1/8 | In progress | - |
 | 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
 | 8. Retcon, Repair, and Release Hardening | 0/TBD | Not started | - |

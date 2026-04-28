@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 05-05-PLAN.md
-last_updated: "2026-04-28T12:23:08Z"
-last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-05 rules-first vertical-slice QA
+stopped_at: Completed 06-05-PLAN.md
+last_updated: "2026-04-28T17:09:14Z"
+last_activity: 2026-04-28 -- Completed Phase 6 Plan 06-05 memory packet stub assembly
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 23
-  completed_plans: 23
-  percent: 64
+  total_plans: 31
+  completed_plans: 24
+  percent: 77
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 5 complete — ready for Phase 6 planning
+**Current focus:** Phase 6 in progress — AI GM Story Loop
 
 ## Current Position
 
-Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — COMPLETE
-Plan: 5 of 5 in current phase
-Status: Ready for Phase 6 planning
-Last activity: 2026-04-28 -- Completed 05-05 no-paid-call vertical-slice integration and QA-03 verification gates
+Phase: 6 of 8 (AI GM Story Loop) — IN PROGRESS
+Plan: 5 of 8 in current phase (06-05 completed first to unblock memory context)
+Status: Ready for remaining Phase 6 plans
+Last activity: 2026-04-28 -- Completed 06-05 transcript-bounded MemoryPacket stub assembly
 
-Progress: [██████░░░░] 64%
+Progress: [████████░░] 77%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: 22 min
 - Total execution time: ~3.8 hours
 
@@ -49,11 +49,12 @@ Progress: [██████░░░░] 64%
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
+| 6. AI GM Story Loop | 1 | 8 min | 8 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-01 (3 min), 05-02 (4 min), 05-03 (5 min), 05-04 (4 min), 05-05 (53 min)
-- Trend: Phase 5 is complete; deterministic first-slice rules, combat, TUI mechanics surfaces, no-paid-call integration, and QA-03 gates are all executable.
+- Last 5 plans: 05-02 (4 min), 05-03 (5 min), 05-04 (4 min), 05-05 (53 min), 06-05 (8 min)
+- Trend: Phase 6 has begun with provider-free memory packet context unblocking Oracle and Orator work.
 
 *Updated after each plan completion*
 
@@ -118,6 +119,9 @@ Recent decisions affecting current work:
 - [05-05]: Sequential Textual rules inputs preserve graph mechanics state so `/sheet`, skill checks, combat start, turn advancement, and Strikes can be regression-tested without paid calls.
 - [05-05]: QA-03 coverage is scenario-driven through deterministic services rather than a hardcoded label-set assertion.
 - [05-05]: Smoke harness registration uses a provider-free `rules_first_vertical_slice` check for sheet, skill, initiative, and Strike mechanics.
+- [06-05]: Phase 6 memory assembly is transcript-only and provider-free; full vault/search retrieval remains deferred to Phase 7.
+- [06-05]: `memory-packet-assembly` is first-slice safe and is the Archivist skill logged during Phase 6 turn flow.
+- [06-05]: `GraphRuntime` injects the SQLite transcript connection into `AgentServices` so agent nodes remain pure while memory logic can read recent transcript rows.
 
 ## Deferred Items
 
@@ -129,6 +133,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T12:23:08Z
-Stopped at: Completed 05-05-PLAN.md
+Last session: 2026-04-28T17:09:14Z
+Stopped at: Completed 06-05-PLAN.md
 Resume file: None
