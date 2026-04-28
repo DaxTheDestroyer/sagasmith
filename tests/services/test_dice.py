@@ -74,6 +74,30 @@ def test_roll_d4_natural_in_range() -> None:
     assert 1 <= result.natural <= 4
 
 
+def test_roll_d8_replays_with_same_seed_and_inputs() -> None:
+    dice1 = DiceService(campaign_seed="c", session_seed="s")
+    dice2 = DiceService(campaign_seed="c", session_seed="s")
+
+    r1 = dice1.roll(die="d8", purpose="damage", actor_id="pc1", modifier=4, roll_index=3)
+    r2 = dice2.roll(die="d8", purpose="damage", actor_id="pc1", modifier=4, roll_index=3)
+
+    assert r1 == r2
+    assert 1 <= r1.natural <= 8
+    assert r1.total == r1.natural + 4
+
+
+def test_roll_d6_replays_with_same_seed_and_inputs() -> None:
+    dice1 = DiceService(campaign_seed="c", session_seed="s")
+    dice2 = DiceService(campaign_seed="c", session_seed="s")
+
+    r1 = dice1.roll(die="d6", purpose="damage", actor_id="enemy1", modifier=0, roll_index=5)
+    r2 = dice2.roll(die="d6", purpose="damage", actor_id="enemy1", modifier=0, roll_index=5)
+
+    assert r1 == r2
+    assert 1 <= r1.natural <= 6
+    assert r1.total == r1.natural
+
+
 def test_dc_flows_through_to_result() -> None:
     dice = DiceService(campaign_seed="c", session_seed="s")
     with_dc = dice.roll_d20(purpose="p", actor_id="a", modifier=0, roll_index=0, dc=15)
