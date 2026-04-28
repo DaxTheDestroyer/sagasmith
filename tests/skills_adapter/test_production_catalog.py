@@ -68,13 +68,13 @@ class TestProductionScan:
             assert not missing, f"missing skills in {scope}: {missing}"
 
     def test_first_slice_filtering(self):
-        """Test 3: first_slice_only=True excludes memory-packet-assembly."""
+        """Test 3: first_slice_only=True includes provider-free memory-packet-assembly."""
         store = SkillStore(roots=_PRODUCTION_ROOTS, first_slice_only=True)
         store.scan()
-        assert store.find(name="memory-packet-assembly", agent_scope="archivist") is None
+        assert store.find(name="memory-packet-assembly", agent_scope="archivist") is not None
         skipped_names = {Path(p).parent.name for p, _ in store.skipped}
-        assert "memory-packet-assembly" in skipped_names
-        assert any("first_slice_only filter" in r for _p, r in store.skipped)
+        assert "memory-packet-assembly" not in skipped_names
+        assert store.errors == []
 
     def test_implementation_surface_matches_spec(self):
         """Test 4: every shipped skill's surface matches the spec catalog."""

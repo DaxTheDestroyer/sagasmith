@@ -194,6 +194,8 @@ def build_persistent_graph(
     bootstrap, db_conn: sqlite3.Connection, campaign_id: str
 ) -> GraphRuntime:
     """Compile the graph with SqliteSaver + interrupt_before=[orator] + activation wrappers."""
+    if getattr(bootstrap.services, "transcript_conn", None) is None:
+        object.__setattr__(bootstrap.services, "transcript_conn", db_conn)
     # Wrap each node with an activation logger. Re-bind bootstrap.
     wrapped = _wrap_bootstrap_with_logger(bootstrap, db_conn)
     # Build the graph structure, then recompile with checkpointer + interrupt_before.

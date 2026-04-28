@@ -230,7 +230,7 @@ def test_activation_logging_counts():
     assert skill_by_agent["oracle"] == "scene-brief-composition"
     assert skill_by_agent["rules_lawyer"] == "skill-check-resolution"
     assert skill_by_agent["orator"] == "scene-rendering"
-    assert skill_by_agent["archivist"] == "turn-close-persistence"
+    assert skill_by_agent["archivist"] == "memory-packet-assembly"
 
 
 def test_resume_at_next_prompt():

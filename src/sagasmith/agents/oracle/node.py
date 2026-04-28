@@ -6,6 +6,9 @@ oracle-skills.md §2.3.
 
 from __future__ import annotations
 
+from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
+    assemble_memory_packet_stub,
+)
 from sagasmith.graph.activation_log import get_current_activation
 from sagasmith.schemas.narrative import SceneBrief
 
@@ -22,14 +25,21 @@ _FIRST_SLICE_STUB_SCENE_BRIEF = SceneBrief(
 
 
 def oracle_node(state, services):
-    """Populate scene_brief with a canned stub when absent."""
+    """Ensure memory context, then populate scene_brief with a canned stub when absent."""
     if services._call_recorder is not None:
         services._call_recorder.append("oracle")
+    updates = {}
+    if state.get("memory_packet") is None:
+        memory_packet = assemble_memory_packet_stub(
+            state,
+            conn=getattr(services, "transcript_conn", None),
+        )
+        updates["memory_packet"] = memory_packet.model_dump()
     activation = get_current_activation()
     if state["scene_brief"] is None:
         if activation is not None:
             store = services.skill_store
             if store is not None and store.find(name="scene-brief-composition", agent_scope="oracle") is not None:
                 activation.set_skill("scene-brief-composition")
-        return {"scene_brief": _FIRST_SLICE_STUB_SCENE_BRIEF.model_dump()}
-    return {}
+        updates["scene_brief"] = _FIRST_SLICE_STUB_SCENE_BRIEF.model_dump()
+    return updates

@@ -6,18 +6,28 @@ safety post-gate.
 
 from __future__ import annotations
 
+from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
+    assemble_memory_packet_stub,
+)
 from sagasmith.graph.activation_log import get_current_activation
 
 _FIRST_SLICE_NARRATION = "You take a moment to assess the scene."
 
 
 def orator_node(state, services):
-    """Append one fixed narration line when scene_brief is present."""
+    """Ensure memory context, then append one fixed narration line when scene_brief is present."""
     if services._call_recorder is not None:
         services._call_recorder.append("orator")
+    updates = {}
+    if state.get("memory_packet") is None:
+        memory_packet = assemble_memory_packet_stub(
+            state,
+            conn=getattr(services, "transcript_conn", None),
+        )
+        updates["memory_packet"] = memory_packet.model_dump()
     activation = get_current_activation()
     if activation is not None:
         activation.set_skill("scene-rendering")
     if state["scene_brief"] is not None:
-        return {"pending_narration": state["pending_narration"] + [_FIRST_SLICE_NARRATION]}
-    return {}
+        updates["pending_narration"] = state["pending_narration"] + [_FIRST_SLICE_NARRATION]
+    return updates

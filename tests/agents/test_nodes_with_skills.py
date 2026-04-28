@@ -215,7 +215,7 @@ class TestOratorSetSkill:
 
 class TestArchivistSetSkill:
     def test_archivist_skill_name_logged(self, production_skill_store):
-        """Test 5: archivist node sets turn-close-persistence skill."""
+        """Test 5: archivist node sets memory-packet-assembly skill."""
         conn = _make_conn()
         apply_migrations(conn)
         _insert_campaign_and_turn(conn)
@@ -242,7 +242,7 @@ class TestArchivistSetSkill:
         rows = AgentSkillLogRepository(conn).list_for_turn("turn_000001")
         arch_rows = [r for r in rows if r.agent_name == "archivist"]
         assert len(arch_rows) == 1
-        assert arch_rows[0].skill_name == "turn-close-persistence"
+        assert arch_rows[0].skill_name == "memory-packet-assembly"
 
 
 class TestOnboardingSetSkill:
@@ -382,7 +382,7 @@ class TestEndToEndFirstSliceOnly:
         assert skill_by_agent.get("oracle") == "scene-brief-composition"
         assert skill_by_agent.get("rules_lawyer") == "skill-check-resolution"
         assert skill_by_agent.get("orator") == "scene-rendering"
-        assert skill_by_agent.get("archivist") == "turn-close-persistence"
+        assert skill_by_agent.get("archivist") == "memory-packet-assembly"
 
-        # memory-packet-assembly is excluded from first-slice store
-        assert store.find(name="memory-packet-assembly", agent_scope="archivist") is None
+        # Phase 6 memory-packet-assembly is first-slice safe and provider-free.
+        assert store.find(name="memory-packet-assembly", agent_scope="archivist") is not None

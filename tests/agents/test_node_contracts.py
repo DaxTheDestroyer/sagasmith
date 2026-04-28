@@ -79,6 +79,7 @@ class TestOracleNode:
         state = make_valid_saga_state(scene_brief=None).model_dump()
         result = oracle_node(state, services)
         assert result.get("scene_brief") is not None
+        assert result.get("memory_packet") is not None
         assert result.get("pending_narration") is None
 
     def test_returns_empty_when_scene_brief_present(self, services) -> None:
@@ -96,7 +97,8 @@ class TestOracleNode:
         )
         state = make_valid_saga_state(scene_brief=brief).model_dump()
         result = oracle_node(state, services)
-        assert result == {}
+        assert result.get("memory_packet") is not None
+        assert "scene_brief" not in result
 
 
 class TestRulesLawyerNode:
@@ -157,7 +159,8 @@ class TestOratorNode:
             pending_narration=[],
         ).model_dump()
         result = orator_node(state, services)
-        assert result == {"pending_narration": ["You take a moment to assess the scene."]}
+        assert result["pending_narration"] == ["You take a moment to assess the scene."]
+        assert result["memory_packet"] is not None
 
     def test_leaves_unchanged_when_scene_brief_none(self, services) -> None:
         state = make_valid_saga_state(
@@ -165,7 +168,8 @@ class TestOratorNode:
             pending_narration=[],
         ).model_dump()
         result = orator_node(state, services)
-        assert result == {}
+        assert result.get("memory_packet") is not None
+        assert "pending_narration" not in result
 
     def test_preserves_existing_narration(self, services) -> None:
         from sagasmith.schemas.narrative import SceneBrief
@@ -189,6 +193,7 @@ class TestOratorNode:
             "existing line",
             "You take a moment to assess the scene.",
         ]
+        assert result["memory_packet"] is not None
 
 
 class TestArchivistNode:
@@ -204,6 +209,7 @@ class TestArchivistNode:
         assert isinstance(session_state, dict)
         assert session_state["turn_count"] == 4
         assert result["pending_player_input"] is None
+        assert result["memory_packet"] is not None
         # Phase 4: pending_narration preserved for TUI sync (Phase 7 will clear after persist)
         assert result["pending_narration"] == ["line one"]
 

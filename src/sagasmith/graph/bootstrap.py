@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -23,6 +24,7 @@ class AgentServices:
     safety: object | None = None
     llm: object | None = None
     skill_store: SkillStore | None = None
+    transcript_conn: sqlite3.Connection | None = None
     # test-only hook: if non-None, nodes append their name to this list on entry.
     # Used by graph tests to verify execution order without polluting production code.
     _call_recorder: list[str] | None = None
@@ -48,6 +50,7 @@ class GraphBootstrap:
         safety: object | None = None,
         llm: object | None = None,
         skill_store: SkillStore | None = None,
+        transcript_conn: sqlite3.Connection | None = None,
         _call_recorder: list[str] | None = None,
     ) -> GraphBootstrap:
         # Lazy default: only build a SkillStore when None is explicitly passed
@@ -61,6 +64,7 @@ class GraphBootstrap:
             safety=safety,
             llm=llm,
             skill_store=skill_store,
+            transcript_conn=transcript_conn,
             _call_recorder=_call_recorder,
         )
         from sagasmith.agents.archivist.node import archivist_node
