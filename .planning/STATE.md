@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-04-28T11:15:21Z"
-last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-02 first-slice combat engine
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-04-28T11:21:52Z"
+last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-03 RulesLawyer graph wiring and combat routing
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 23
-  completed_plans: 20
-  percent: 55
+  completed_plans: 21
+  percent: 58
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Current Position
 
 Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — IN PROGRESS
-Plan: 2 of 5 in current phase
-Status: Ready for 05-03
-Last activity: 2026-04-28 -- Completed 05-02 deterministic first-slice combat engine for initiative, actions, positions, Strikes, HP deltas, and completion
+Plan: 3 of 5 in current phase
+Status: Ready for 05-04
+Last activity: 2026-04-28 -- Completed 05-03 deterministic RulesLawyer graph behavior, combat routing, and TUI pregen sheet seeding
 
-Progress: [██████░░░░] 55%
+Progress: [██████░░░░] 58%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 21 min
 - Total execution time: ~2.9 hours
 
@@ -48,12 +48,12 @@ Progress: [██████░░░░] 55%
 | 2. Deterministic Trust Services | 6 | 6 | -- |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
-| 5. Rules-First PF2e Vertical Slice | 2 | 7 min | 4 min |
+| 5. Rules-First PF2e Vertical Slice | 3 | 12 min | 4 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 04-03 (35 min), 04-04 (60 min), 04-05 (10 min), 05-01 (3 min), 05-02 (4 min)
-- Trend: Phase 5 mechanics foundation is progressing quickly; deterministic rules data and combat engine are ready for graph wiring.
+- Last 5 plans: 04-04 (60 min), 04-05 (10 min), 05-01 (3 min), 05-02 (4 min), 05-03 (5 min)
+- Trend: Phase 5 mechanics foundation is progressing quickly; deterministic rules data, combat engine, and graph wiring are ready for TUI rendering.
 
 *Updated after each plan completion*
 
@@ -84,7 +84,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Continue Phase 5 with `05-03-PLAN.md` deterministic RulesLawyer graph behavior and combat routing.
+- Continue Phase 5 with `05-04-PLAN.md` TUI sheet, dice detail, and combat status output.
 
 ### Blockers/Concerns
 
@@ -109,6 +109,9 @@ Recent decisions affecting current work:
 - [05-01]: CombatantState carries defaulted first-slice enemy mechanics fields so enemy data validates as typed models while existing callers remain compatible.
 - [05-02]: CombatEngine returns both Strike CheckResult and optional damage RollResult so downstream roll-log persistence can store the attack and exactly one damage roll_id.
 - [05-02]: First-slice melee targeting validates target position and fails before action consumption or rolling when range is invalid.
+- [05-03]: RulesLawyer accepts only anchored first-slice command forms and returns deterministic `Rules error:` narration for unsupported input rather than silent `{}`.
+- [05-03]: Combat phase routes to RulesLawyer and the compiled graph START branch includes `rules_lawyer` as a destination.
+- [05-03]: TUI play-state construction seeds the first-slice pregen only when no sheet exists, preserving live HP/combat mutations.
 
 ## Deferred Items
 
@@ -120,6 +123,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T11:15:21Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-04-28T11:21:52Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None
