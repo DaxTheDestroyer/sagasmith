@@ -69,15 +69,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **RULE-01**: System computes PF2e degree of success from natural d20 value, total, and DC, including natural 1 and natural 20 adjustment rules.
 - [x] **RULE-02**: System rolls dice through a seeded deterministic DiceService that records seed, inputs, natural value, modifier, total, DC, and timestamp.
 - [x] **RULE-03**: System reproduces identical roll results when replaying the same seed and ordered roll inputs.
-- [ ] **RULE-04**: User can inspect one valid level-1 pregenerated martial `CharacterSheet` with `/sheet`.
-- [ ] **RULE-05**: System resolves a skill or Perception check against a fixed DC and emits a validated `CheckResult`.
+- [x] **RULE-04**: User can inspect one valid level-1 pregenerated martial `CharacterSheet` with `/sheet`.
+- [x] **RULE-05**: System resolves a skill or Perception check against a fixed DC and emits a validated `CheckResult`.
 - [ ] **RULE-06**: System resolves Perception initiative and persists initiative order through checkpoints.
 - [ ] **RULE-07**: System resolves Strike actions against target AC and applies hit, miss, critical hit, damage, and HP state deltas.
 - [ ] **RULE-08**: System tracks three actions and one reaction per combatant per round in simple combat.
 - [ ] **RULE-09**: System applies theater-of-mind position tags `close`, `near`, `far`, and `behind_cover` for movement and targeting constraints.
 - [ ] **RULE-10**: User can complete one simple combat encounter with no more than two enemies.
-- [ ] **RULE-11**: System logs every mechanical check and roll in an auditable roll log.
-- [ ] **RULE-12**: System prevents LLM agents from directly inventing modifiers, DCs, damage, HP changes, action counts, or degree-of-success outcomes.
+- [x] **RULE-11**: System logs every mechanical check and roll in an auditable roll log.
+- [x] **RULE-12**: System prevents LLM agents from directly inventing modifiers, DCs, damage, HP changes, action counts, or degree-of-success outcomes.
 
 ### Graph Runtime and Turn Flow
 
@@ -144,7 +144,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **QA-01**: User can retcon the last completed turn after confirmation for simple state and vault changes.
 - [ ] **QA-02**: System excludes retconned turns from canonical replay, summaries, and vault rebuilds.
-- [ ] **QA-03**: Test suite covers PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
+- [x] **QA-03**: Test suite covers PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
 - [x] **QA-04**: Test suite verifies API keys and auth headers never appear in logs, vaults, transcripts, checkpoints, or generated artifacts.
 - [ ] **QA-05**: Test suite verifies configured hard-limit content does not appear in player-facing prose across a regression scenario.
 - [ ] **QA-06**: Test suite verifies player-vault projection contains no GM-only fields, comments, or pages.
@@ -266,17 +266,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SKILL-03 | Phase 4 | Complete |
 | SKILL-04 | Phase 4 | Complete |
 | SKILL-05 | Phase 4 | Complete |
-| RULE-04 | Phase 5 | Pending |
-| RULE-05 | Phase 5 | Pending |
+| RULE-04 | Phase 5 | Complete |
+| RULE-05 | Phase 5 | Complete |
 | RULE-06 | Phase 5 | Pending |
 | RULE-07 | Phase 5 | Pending |
 | RULE-08 | Phase 5 | Pending |
 | RULE-09 | Phase 5 | Pending |
 | RULE-10 | Phase 5 | Pending |
-| RULE-11 | Phase 5 | Pending |
-| RULE-12 | Phase 5 | Pending |
+| RULE-11 | Phase 5 | Complete |
+| RULE-12 | Phase 5 | Complete |
 | TUI-07 | Phase 5 | Pending |
-| QA-03 | Phase 5 | Pending |
+| QA-03 | Phase 5 | Complete |
 | AI-01 | Phase 6 | Pending |
 | AI-02 | Phase 6 | Pending |
 | AI-03 | Phase 6 | Pending |
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after Phase 1 completion*
+*Last updated: 2026-04-28 after Phase 5 Plan 05-01 completion*

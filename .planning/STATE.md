@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-stopped_at: Phase 5 plans revised from cross-AI reviews
-last_updated: "2026-04-28T01:45:59Z"
-last_activity: 2026-04-27 -- Phase 5 plans revised from cross-AI reviews; 5 executable plans remain ready for rules-first PF2e vertical slice
+status: in_progress
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-28T11:09:07Z"
+last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-01 deterministic first-slice rules data and check resolution
 progress:
   total_phases: 8
   completed_phases: 4
-  total_plans: 18
-  completed_plans: 18
-  percent: 50
+  total_plans: 23
+  completed_plans: 19
+  percent: 52
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 5 plans revised — ready to execute Rules-First PF2e Vertical Slice
+**Current focus:** Phase 5 execution — Rules-First PF2e Vertical Slice
 
 ## Current Position
 
-Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — READY TO EXECUTE
-Plan: 0 of 5 in current phase
-Status: Ready to execute
-Last activity: 2026-04-27 -- Phase 5 plans revised from review feedback: damage auditability, parser/error UX, live sheet state, reveal behavior, combat edge cases, and QA-03 behavior coverage
+Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — IN PROGRESS
+Plan: 1 of 5 in current phase
+Status: Ready for 05-02
+Last activity: 2026-04-28 -- Completed 05-01 deterministic first-slice pregen/enemy data and RulesEngine skill/Perception check resolution
 
-Progress: [██████░░░░] 50%
+Progress: [██████░░░░] 52%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 22 min
 - Total execution time: ~2.8 hours
 
@@ -48,11 +48,12 @@ Progress: [██████░░░░] 50%
 | 2. Deterministic Trust Services | 6 | 6 | -- |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
+| 5. Rules-First PF2e Vertical Slice | 1 | 3 min | 3 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 04-01 (35 min), 04-02 (40 min), 04-03 (35 min), 04-04 (60 min), 04-05 (10 min)
-- Trend: Phase 5 planning revised after cross-AI review; 5 plans cover deterministic rules foundation, combat, graph wiring, TUI surfaces, and QA-03 verification.
+- Last 5 plans: 04-02 (40 min), 04-03 (35 min), 04-04 (60 min), 04-05 (10 min), 05-01 (3 min)
+- Trend: Phase 5 execution started; first-slice rules data and deterministic check resolution are ready for combat engine work.
 
 *Updated after each plan completion*
 
@@ -83,7 +84,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 5 (Rules-First PF2e Vertical Slice): `/gsd-execute-phase 5`
+- Continue Phase 5 with `05-02-PLAN.md` first-slice combat engine.
 
 ### Blockers/Concerns
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [04-04]: Deterministic scan order via `sorted(Path.rglob("SKILL.md"))`.
 - [04-05]: _default_skill_store() raises loud on production scan errors at startup.
 - [04-05]: ContextVar handoff pattern: nodes call `get_current_activation().set_skill(...)` when activation is present.
+- [05-01]: RulesEngine rejects unsupported stat names before rolling so player input cannot trigger hidden fields or unsupported mechanics.
+- [05-01]: CombatantState carries defaulted first-slice enemy mechanics fields so enemy data validates as typed models while existing callers remain compatible.
 
 ## Deferred Items
 
@@ -115,6 +118,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-27T20:03:34-06:00
-Stopped at: Phase 5 planning revised after reviews
-Resume file: .planning/phases/05-rules-first-pf2e-vertical-slice/05-01-PLAN.md
+Last session: 2026-04-28T11:09:07Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None
