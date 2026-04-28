@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import suppress
 from typing import TYPE_CHECKING, ClassVar
 
 from textual.app import App, ComposeResult
@@ -299,10 +300,8 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             last_rolls=last_rolls,
             combat_state=combat_state,
         )
-        try:
+        with suppress(Exception):
             self.query_one(StatusPanel).snapshot = self.state.status
-        except Exception:
-            pass
 
     def on_unmount(self) -> None:
         """Close the long-lived service connection deterministically on TUI exit.

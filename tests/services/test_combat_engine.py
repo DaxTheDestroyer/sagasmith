@@ -13,7 +13,6 @@ from sagasmith.services.combat_engine import CombatEngine
 from sagasmith.services.dice import DiceService
 from sagasmith.services.rules_engine import RulesEngine
 
-
 _ALLOWED_POSITIONS = {"close", "near", "far", "behind_cover"}
 
 

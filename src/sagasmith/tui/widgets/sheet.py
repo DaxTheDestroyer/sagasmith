@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from sagasmith.schemas.mechanics import CharacterSheet
 
-
 _TRAINED_SKILL_ORDER = ("athletics", "intimidation", "survival", "acrobatics")
 _SAVE_ORDER = ("fortitude", "reflex", "will")
 

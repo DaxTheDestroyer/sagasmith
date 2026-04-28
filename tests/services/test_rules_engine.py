@@ -12,7 +12,6 @@ from sagasmith.services.dice import DiceService
 from sagasmith.services.pf2e import compute_degree
 from sagasmith.services.rules_engine import RulesEngine
 
-
 _FIXED_TIME = datetime(2026, 4, 28, 12, 0, 0, tzinfo=UTC)
 
 
