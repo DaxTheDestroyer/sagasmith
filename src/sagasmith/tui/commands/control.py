@@ -5,10 +5,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError
+
+from sagasmith.rules.first_slice import make_first_slice_character
+from sagasmith.schemas.mechanics import CharacterSheet
+
 if TYPE_CHECKING:
     from sagasmith.tui.app import SagaSmithApp
 
 from sagasmith.tui.widgets.narration import NarrationArea
+from sagasmith.tui.widgets.sheet import render_character_sheet
 
 
 def _write(app: SagaSmithApp, line: str) -> None:
@@ -42,12 +48,22 @@ class SheetCommand:
     description: str = "Show character sheet."
 
     def handle(self, app: SagaSmithApp, args: tuple[str, ...]) -> None:
-        snap = app.state.status
-        hp = snap.format_hp()
-        _write(
-            app,
-            f"[system] /sheet (stub — Phase 5 PF2e vertical slice wires the full CharacterSheet). Current: {hp}.",
-        )
+        sheet = _resolve_character_sheet(app)
+        for line in render_character_sheet(sheet).splitlines():
+            _write(app, line)
+
+
+def _resolve_character_sheet(app: SagaSmithApp) -> CharacterSheet:
+    if app.graph_runtime is not None:
+        snapshot = app.graph_runtime.graph.get_state(app.graph_runtime.thread_config)
+        values = getattr(snapshot, "values", {}) or {}
+        live_sheet = values.get("character_sheet")
+        if live_sheet is not None:
+            try:
+                return CharacterSheet.model_validate(live_sheet)
+            except ValidationError:
+                pass
+    return make_first_slice_character()
 
 
 @dataclass(frozen=True)
