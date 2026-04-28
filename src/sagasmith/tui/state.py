@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from sagasmith.schemas.mechanics import CombatState
+
 
 @dataclass(frozen=True)
 class StatusSnapshot:
@@ -17,6 +19,7 @@ class StatusSnapshot:
     clock_day: int | None = None
     clock_hhmm: str | None = None  # "HH:MM"
     last_rolls: tuple[str, ...] = ()  # up to 3 short strings
+    combat_state: CombatState | None = None
 
     def format_hp(self) -> str:
         if self.hp_current is None or self.hp_max is None:

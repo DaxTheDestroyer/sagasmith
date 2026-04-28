@@ -1,4 +1,4 @@
-"""StatusPanel widget \u2014 renders a StatusSnapshot dataclass."""
+"""StatusPanel widget — renders a StatusSnapshot dataclass."""
 
 from __future__ import annotations
 
@@ -6,7 +6,42 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
+from sagasmith.schemas.mechanics import CombatState
 from sagasmith.tui.state import StatusSnapshot
+
+
+def format_combat_status(combat_state: CombatState | None) -> list[str]:
+    """Format deterministic combat state as plain status-panel text."""
+
+    if combat_state is None:
+        return ["Combat: —"]
+
+    active_id = combat_state.active_combatant_id
+    combatants_by_id = {combatant.id: combatant for combatant in combat_state.combatants}
+    active = combatants_by_id.get(active_id)
+    defeated_suffix = " (defeated)" if active is not None and active.current_hp == 0 else ""
+    remaining_actions = combat_state.action_counts.get(active_id, 0)
+    reaction = "available" if combat_state.reaction_available.get(active_id, False) else "spent"
+    positions = ", ".join(
+        f"{combatant_id}={position}" for combatant_id, position in sorted(combat_state.positions.items())
+    )
+    enemies = [combatant for combatant in combat_state.combatants if combatant.id != "pc"]
+    if not enemies:
+        enemy_line = "Enemies: none"
+    else:
+        rendered_enemies = [
+            f"{enemy.id} HP {enemy.current_hp}/{enemy.max_hp}" for enemy in enemies[:2]
+        ]
+        enemy_line = "Enemies: " + "; ".join(rendered_enemies)
+
+    return [
+        f"Round: {combat_state.round_number}",
+        f"Active combatant: {active_id}{defeated_suffix}",
+        f"Actions: {remaining_actions}/3 for {active_id}",
+        f"Reaction: {reaction}",
+        f"Positions: {positions or '—'}",
+        enemy_line,
+    ]
 
 
 class StatusPanel(Widget):
@@ -28,11 +63,12 @@ class StatusPanel(Widget):
     def _format_snapshot(self, s: StatusSnapshot) -> str:
         lines = [
             s.format_hp(),
-            "Conditions: " + (", ".join(s.conditions) if s.conditions else "\u2014"),
-            f"Quest: {s.active_quest or '\u2014'}",
-            f"Location: {s.location or '\u2014'}",
+            "Conditions: " + (", ".join(s.conditions) if s.conditions else "—"),
+            f"Quest: {s.active_quest or '—'}",
+            f"Location: {s.location or '—'}",
             s.format_clock(),
             "Last rolls:",
-            *[f"  {r}" for r in (s.last_rolls or ("\u2014",))[:3]],
+            *[f"  {r}" for r in (s.last_rolls or ("—",))[:3]],
+            *format_combat_status(s.combat_state),
         ]
         return "\n".join(lines)
