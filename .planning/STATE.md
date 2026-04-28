@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Phase 6 verification passed
-last_updated: "2026-04-28T18:25:00Z"
-last_activity: 2026-04-28 -- Phase 6 verification passed, AI GM Story Loop complete
+stopped_at: Phase 6 complete; 06-08 integration testing deferred; Phase 7 planning next
+last_updated: "2026-04-28T19:30:00Z"
+last_activity: 2026-04-28 -- Phase 6 complete (06-07 safety services, 06-06 narration recovery); 06-08 deferred
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 31
-  completed_plans: 27
+  completed_plans: 28
   percent: 93
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 6 in progress — AI GM Story Loop
+**Current focus:** Phase 7 planning — Memory Vault and Search
 
 ## Current Position
 
-Phase: 6 of 8 (AI GM Story Loop) — COMPLETE
-Plan: 7 of 8 completed in current phase (all core plans complete)
+Phase: 6 of 8 (AI GM Story Loop) — COMPLETE (06-08 integration testing deferred)
+Plan: 7 of 8 executed; 06-08 (full-turn-flow + safety-enforcement integration tests) deferred to Deferred Items
 Status: Ready for Phase 7 planning
-Last activity: 2026-04-28 -- Completed 06-04 Orator scene rendering with safety gates
+Last activity: 2026-04-28 -- Completed 06-07 safety services and 06-06 narration recovery; 06-08 deferred
 
 Progress: [██████████░] 93%
 
@@ -38,7 +38,7 @@ Progress: [██████████░] 93%
 
 - Total plans completed: 28
 - Average duration: 22 min
-- Total execution time: ~3.9 hours
+- Total execution time: ~5.8 hours
 
 **By Phase:**
 
@@ -49,12 +49,12 @@ Progress: [██████████░] 93%
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
-| 6. AI GM Story Loop | 5 | 60 min | 12 min |
+| 6. AI GM Story Loop | 7 | ~115 min | ~16 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 06-05 (8 min), 06-01 (9 min), 06-03 (7 min), 06-02 (11 min), 06-04 (25 min)
-- Trend: Phase 6 now has provider-free memory context, Oracle world/seed generation, RulesLawyer intent routing, Oracle scene planning with beat-ID lifecycle routing, and Orator buffered stream-after-classify narration with safety gates.
+- Last 5 plans: 06-07 (35 min), 06-06 (20 min), 06-04 (25 min), 06-02 (11 min), 06-03 (7 min)
+- Trend: Phase 6 complete with provider-free memory context, Oracle world/seed generation, RulesLawyer intent routing, Oracle scene planning with beat-ID lifecycle routing, Orator buffered stream-after-classify narration with safety gates, narration recovery (retry/discard), and dual-layer safety services.
 
 *Updated after each plan completion*
 
@@ -85,11 +85,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Continue remaining Phase 6 plans in dependency order: 06-06, 06-07 (already completed), 06-08.
+- Begin Phase 7 planning (Memory Vault and Search).
 
 ### Blockers/Concerns
 
-- None currently. Remaining Phase 6 plans are ready for execution.
+- None currently. Phase 6 core work is complete; 06-08 integration tests are deferred.
 
 ### Decisions (continued from Phase 4)
 
@@ -143,10 +143,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| Integration | 06-08: full-turn-flow + safety-enforcement integration tests (`test_full_turn_flow.py`, `test_safety_enforcement.py`) | Deferred | 2026-04-28 (Phase 6) |
 
 ## Session Continuity
 
-Last session: 2026-04-28T18:25:00Z
-Stopped at: Completed 06-04-PLAN.md
+Last session: 2026-04-28T19:30:00Z
+Stopped at: Phase 6 complete; 06-08 deferred; Phase 7 planning next
 Resume file: None

@@ -74,6 +74,8 @@ overrides_applied: 0
 
 Step 7b: SKIPPED (requires LLM client and running TUI, no entry points for isolated checks)
 
+**Note:** Full Oracle→RulesLawyer→Orator pipeline behavioral spot-checks are deferred to 06-08 (see Deferred Items in STATE.md). Verification coverage is code-analysis only for this phase.
+
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
@@ -99,12 +101,17 @@ Step 7b: SKIPPED (requires LLM client and running TUI, no entry points for isola
 
 | File | Line | Pattern | Severity | Impact |
 | ---- | ---- | ------- | -------- | ------ |
-
-No anti-patterns detected in scanned files.
+| `src/sagasmith/graph/runtime.py` | `_rewind_to_checkpoint` | Missing `checkpoint_ns: ""` in rewind config | HIGH — runtime crash | `KeyError: 'checkpoint_ns'` in `SqliteSaver.put_writes`; narration retry and discard both fail. **Fixed post-verification in commit following 06-06-SUMMARY.** |
 
 ### Human Verification Required
 
 None - all truths verified programmatically through code analysis.
+
+### Post-Verification Fixes
+
+| Fix | File | Commit | Description |
+| --- | ---- | ------ | ----------- |
+| checkpoint_ns missing from rewind config | `src/sagasmith/graph/runtime.py` | `fix(06-06): add checkpoint_ns to LangGraph rewind config` | `SqliteSaver.put_writes` requires `checkpoint_ns` in config; its absence caused `KeyError` on every retry/discard call. Originally recorded as committed in 6f13e15 but was not present; committed separately after review. |
 
 ---
 
