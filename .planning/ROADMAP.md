@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls. (completed 2026-04-27)
 - [x] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure. (completed 2026-04-27)
 - [x] **Phase 5: Rules-First PF2e Vertical Slice** - User can inspect a pregen PC and complete deterministic skill/combat mechanics with auditable rolls. (completed 2026-04-28)
-- [ ] **Phase 6: AI GM Story Loop** - User can play AI-planned, AI-narrated turns while rules, safety, cost, and narration boundaries hold.
+- [x] **Phase 6: AI GM Story Loop** - User can play AI-planned, AI-narrated turns while rules, safety, cost, and narration boundaries hold. (completed 2026-04-28)
 - [ ] **Phase 7: Memory, Vault, and Resume Differentiator** - User gets durable spoiler-safe campaign memory, repairable vaults, recap, and later-process resume.
 - [ ] **Phase 8: Retcon, Repair, and Release Hardening** - User can safely retcon the last turn and the release gate proves the MVP smoke flow.
 
