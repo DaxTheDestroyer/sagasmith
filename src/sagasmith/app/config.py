@@ -15,6 +15,8 @@ from sagasmith.services.errors import TrustServiceError
 
 T = TypeVar("T", bound=BaseModel)
 
+DEFAULT_WORLDGEN_MAX_USD = 0.50
+
 
 @dataclass(frozen=True)
 class SettingsRepository:

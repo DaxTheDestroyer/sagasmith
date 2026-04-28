@@ -21,6 +21,8 @@ class SagaGraphState(TypedDict):
     player_profile: object | None
     content_policy: object | None
     house_rules: object | None
+    world_bible: object | None
+    campaign_seed: object | None
     character_sheet: object | None
     session_state: object
     combat_state: object | None

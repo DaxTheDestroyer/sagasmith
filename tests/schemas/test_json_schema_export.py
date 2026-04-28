@@ -13,6 +13,7 @@ from sagasmith.schemas.export import export_all_schemas
 
 EXPECTED_SCHEMA_NAMES = {
     "CampaignManifest",
+    "CampaignSeed",
     "ProviderSettings",
     "SagaState",
     "PlayerProfile",
@@ -39,6 +40,7 @@ EXPECTED_SCHEMA_NAMES = {
     "CheckpointRef",
     "TranscriptEntry",
     "StateDeltaRecord",
+    "WorldBible",
 }
 
 

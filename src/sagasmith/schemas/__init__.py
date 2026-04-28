@@ -1,6 +1,7 @@
 """Pydantic domain, runtime, provider, and agent schemas."""
 
 from .campaign import CampaignManifest, ProviderSettings, generate_campaign_id
+from .campaign_seed import CampaignSeed, PlotHook, SeedArc, SeedCharacter
 from .common import (
     AttackProfile,
     BudgetPolicy,
@@ -61,6 +62,14 @@ from .provider import (
 )
 from .safety_cost import CostState, SafetyEvent
 from .saga_state import SagaState
+from .world import (
+    MagicRulesContext,
+    WorldBible,
+    WorldConflict,
+    WorldFaction,
+    WorldLocation,
+    WorldNpc,
+)
 
 __all__ = [
     "AgentSkillLogRecord",
@@ -71,6 +80,7 @@ __all__ = [
     "CampaignLength",
     "CampaignLength",
     "CampaignManifest",
+    "CampaignSeed",
     "CanonConflict",
     "CanonConflict",
     "CharacterMode",
@@ -104,6 +114,7 @@ __all__ = [
     "LLMRequest",
     "LLMResponse",
     "LLMStreamEvent",
+    "MagicRulesContext",
     "MechanicalTrigger",
     "MemoryEntityRef",
     "MemoryPacket",
@@ -112,6 +123,7 @@ __all__ = [
     "PacingTarget",
     "Phase",
     "PlayerProfile",
+    "PlotHook",
     "PositionTag",
     "ProficiencyRank",
     "ProviderConfig",
@@ -123,6 +135,8 @@ __all__ = [
     "SafetyEventRecord",
     "SagaState",
     "SceneBrief",
+    "SeedArc",
+    "SeedCharacter",
     "SessionState",
     "StateDelta",
     "StateDeltaRecord",
@@ -132,5 +146,10 @@ __all__ = [
     "TranscriptEntry",
     "TurnRecord",
     "UsageUpdateEvent",
+    "WorldBible",
+    "WorldConflict",
+    "WorldFaction",
+    "WorldLocation",
+    "WorldNpc",
     "generate_campaign_id",
 ]

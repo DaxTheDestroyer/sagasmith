@@ -11,12 +11,14 @@ from typing import Any, Literal
 
 from pydantic import Field
 
+from .campaign_seed import CampaignSeed
 from .common import SchemaModel
 from .deltas import CanonConflict, StateDelta
 from .mechanics import CharacterSheet, CheckResult, CombatState
 from .narrative import MemoryPacket, SceneBrief, SessionState
 from .player import ContentPolicy, HouseRules, PlayerProfile
 from .safety_cost import CostState, SafetyEvent
+from .world import WorldBible
 
 
 class SagaState(SchemaModel):
@@ -29,6 +31,8 @@ class SagaState(SchemaModel):
     player_profile: PlayerProfile | None
     content_policy: ContentPolicy | None
     house_rules: HouseRules | None
+    world_bible: WorldBible | None = None
+    campaign_seed: CampaignSeed | None = None
     character_sheet: CharacterSheet | None
     session_state: SessionState
     combat_state: CombatState | None

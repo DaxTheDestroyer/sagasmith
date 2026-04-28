@@ -38,6 +38,8 @@ _EXPECTED_SURFACE: dict[str, str] = {
     "safety-redline-check": "deterministic",
     "command-dispatch": "deterministic",
     "scene-brief-composition": "prompted",
+    "world-bible-generation": "prompted",
+    "campaign-seed-generation": "prompted",
     "player-choice-branching": "prompted",
     "content-policy-routing": "hybrid",
     "inline-npc-creation": "prompted",

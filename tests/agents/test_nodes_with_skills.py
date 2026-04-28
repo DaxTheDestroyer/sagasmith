@@ -83,6 +83,8 @@ def _play_state(**overrides):
         "player_profile": None,
         "content_policy": None,
         "house_rules": None,
+        "world_bible": None,
+        "campaign_seed": None,
         "character_sheet": None,
         "session_state": {
             "current_scene_id": None,

@@ -114,5 +114,5 @@ class TestJsonSchemaExport:
         assert "pending_narration" in schema.get("properties", {})
 
     def test_boundary_model_count(self) -> None:
-        """Boundary model count is 27 (unchanged — pending_narration is a field, not a model)."""
-        assert len(LLM_BOUNDARY_AND_PERSISTED_MODELS) == 27
+        """Boundary model count includes Phase 6 worldgen LLM-boundary schemas."""
+        assert len(LLM_BOUNDARY_AND_PERSISTED_MODELS) == 29
