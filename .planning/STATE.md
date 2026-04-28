@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-04-28T11:28:01Z"
-last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-04 TUI mechanics surfaces
+stopped_at: Completed 05-05-PLAN.md
+last_updated: "2026-04-28T12:23:08Z"
+last_activity: 2026-04-28 -- Completed Phase 5 Plan 05-05 rules-first vertical-slice QA
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 23
-  completed_plans: 22
-  percent: 61
+  completed_plans: 23
+  percent: 64
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 5 execution — Rules-First PF2e Vertical Slice
+**Current focus:** Phase 5 complete — ready for Phase 6 planning
 
 ## Current Position
 
-Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — IN PROGRESS
-Plan: 4 of 5 in current phase
-Status: Ready for 05-05
-Last activity: 2026-04-28 -- Completed 05-04 live /sheet rendering, reveal dice audit text, and combat-aware status output
+Phase: 5 of 8 (Rules-First PF2e Vertical Slice) — COMPLETE
+Plan: 5 of 5 in current phase
+Status: Ready for Phase 6 planning
+Last activity: 2026-04-28 -- Completed 05-05 no-paid-call vertical-slice integration and QA-03 verification gates
 
-Progress: [██████░░░░] 61%
+Progress: [██████░░░░] 64%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 22
-- Average duration: 21 min
-- Total execution time: ~2.9 hours
+- Total plans completed: 23
+- Average duration: 22 min
+- Total execution time: ~3.8 hours
 
 **By Phase:**
 
@@ -48,12 +48,12 @@ Progress: [██████░░░░] 61%
 | 2. Deterministic Trust Services | 6 | 6 | -- |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4 | 4 | -- |
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
-| 5. Rules-First PF2e Vertical Slice | 4 | 16 min | 4 min |
+| 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
 
 **Recent Trend:**
 
-- Last 5 plans: 04-05 (10 min), 05-01 (3 min), 05-02 (4 min), 05-03 (5 min), 05-04 (4 min)
-- Trend: Phase 5 mechanics foundation is progressing quickly; deterministic rules data, combat engine, graph wiring, and TUI mechanics surfaces are ready for vertical-slice QA.
+- Last 5 plans: 05-01 (3 min), 05-02 (4 min), 05-03 (5 min), 05-04 (4 min), 05-05 (53 min)
+- Trend: Phase 5 is complete; deterministic first-slice rules, combat, TUI mechanics surfaces, no-paid-call integration, and QA-03 gates are all executable.
 
 *Updated after each plan completion*
 
@@ -84,7 +84,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Continue Phase 5 with `05-05-PLAN.md` no-paid-call vertical-slice integration and QA-03 verification gates.
+- Plan Phase 6 (AI GM Story Loop) after Phase 5 verification.
 
 ### Blockers/Concerns
 
@@ -115,6 +115,9 @@ Recent decisions affecting current work:
 - [05-04]: `/sheet` reads live graph `character_sheet` state first and falls back to the first-slice factory only when live data is absent or invalid.
 - [05-04]: Reveal-mode dice details are transcript-rendered from existing `CheckResult` values and omit modal pre-prompts/dismissal hints in Phase 5.
 - [05-04]: Combat status rendering uses typed `CombatState` and handles zero, one, or two enemies without fixed encounter assumptions.
+- [05-05]: Sequential Textual rules inputs preserve graph mechanics state so `/sheet`, skill checks, combat start, turn advancement, and Strikes can be regression-tested without paid calls.
+- [05-05]: QA-03 coverage is scenario-driven through deterministic services rather than a hardcoded label-set assertion.
+- [05-05]: Smoke harness registration uses a provider-free `rules_first_vertical_slice` check for sheet, skill, initiative, and Strike mechanics.
 
 ## Deferred Items
 
@@ -126,6 +129,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-28T11:28:01Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-04-28T12:23:08Z
+Stopped at: Completed 05-05-PLAN.md
 Resume file: None

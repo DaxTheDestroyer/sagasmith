@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Deterministic Trust Services** - Rules math, provider/cost handling, SQLite turn records, and privacy checks exist before paid gameplay. (completed 2026-04-26)
 - [x] **Phase 3: CLI Setup, Onboarding, and TUI Controls** - User can create/configure a campaign, complete the player contract, and see responsive play controls. (completed 2026-04-27)
 - [x] **Phase 4: Graph Runtime and Agent Skills** - LangGraph coordinates compact state, checkpoints, interrupts, and progressive skill disclosure. (completed 2026-04-27)
-- [ ] **Phase 5: Rules-First PF2e Vertical Slice** - User can inspect a pregen PC and complete deterministic skill/combat mechanics with auditable rolls.
+- [x] **Phase 5: Rules-First PF2e Vertical Slice** - User can inspect a pregen PC and complete deterministic skill/combat mechanics with auditable rolls. (completed 2026-04-28)
 - [ ] **Phase 6: AI GM Story Loop** - User can play AI-planned, AI-narrated turns while rules, safety, cost, and narration boundaries hold.
 - [ ] **Phase 7: Memory, Vault, and Resume Differentiator** - User gets durable spoiler-safe campaign memory, repairable vaults, recap, and later-process resume.
 - [ ] **Phase 8: Retcon, Repair, and Release Hardening** - User can safely retcon the last turn and the release gate proves the MVP smoke flow.
@@ -120,7 +120,7 @@ Plans:
 - [x] 05-02-PLAN.md — Implement first-slice combat engine for initiative, action economy, positions, Strikes, HP deltas, and encounter completion (RULE-06, RULE-07, RULE-08, RULE-09, RULE-10, RULE-11, RULE-12, QA-03).
 - [x] 05-03-PLAN.md — Wire deterministic RulesLawyer graph behavior and combat routing so play/combat inputs use rules services, not LLM-authored math (RULE-05 through RULE-12).
 - [x] 05-04-PLAN.md — Replace TUI stubs with `/sheet`, reveal-mode dice detail rendering, and combat-aware status output (RULE-04, RULE-06 through RULE-11, TUI-07).
-- [ ] 05-05-PLAN.md — Add no-paid-call vertical-slice integration and QA-03 verification gates for sheet, checks, reveal audit, and simple combat (RULE-04 through RULE-12, TUI-07, QA-03).
+- [x] 05-05-PLAN.md — Add no-paid-call vertical-slice integration and QA-03 verification gates for sheet, checks, reveal audit, and simple combat (RULE-04 through RULE-12, TUI-07, QA-03).
 **UI hint**: yes
 
 ### Phase 6: AI GM Story Loop
@@ -181,7 +181,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 2. Deterministic Trust Services | 6/6 | Complete | 2026-04-26 |
 | 3. CLI Setup, Onboarding, and TUI Controls | 4/4 | Complete | 2026-04-27 |
 | 4. Graph Runtime and Agent Skills | 5/5 | Complete | 2026-04-27 |
-| 5. Rules-First PF2e Vertical Slice | 4/5 | In Progress | - |
+| 5. Rules-First PF2e Vertical Slice | 5/5 | Complete | 2026-04-28 |
 | 6. AI GM Story Loop | 0/TBD | Not started | - |
 | 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
 | 8. Retcon, Repair, and Release Hardening | 0/TBD | Not started | - |

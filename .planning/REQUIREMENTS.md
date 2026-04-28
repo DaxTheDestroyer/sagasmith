@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 5 Plan 05-04 completion*
+*Last updated: 2026-04-28 after Phase 5 Plan 05-05 completion*
