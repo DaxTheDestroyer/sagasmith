@@ -11,6 +11,7 @@ from sagasmith.tui.commands.control import (
     SheetCommand,
 )
 from sagasmith.tui.commands.help import HelpCommand
+from sagasmith.tui.commands.recovery import DiscardCommand, RetryCommand
 from sagasmith.tui.commands.registry import CommandRegistry, TUICommand
 from sagasmith.tui.commands.safety import LineCommand, PauseCommand
 from sagasmith.tui.commands.settings import SettingsCommand
@@ -19,6 +20,7 @@ __all__ = [
     "BudgetCommand",
     "ClockCommand",
     "CommandRegistry",
+    "DiscardCommand",
     "HelpCommand",
     "InventoryCommand",
     "LineCommand",
@@ -26,6 +28,7 @@ __all__ = [
     "PauseCommand",
     "RecapCommand",
     "RetconCommand",
+    "RetryCommand",
     "SaveCommand",
     "SettingsCommand",
     "SheetCommand",
