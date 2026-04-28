@@ -154,7 +154,14 @@ Plans:
   3. Archivist can resolve named entities, detect canon conflicts, and assemble bounded MemoryPackets from permitted search/retrieval sources.
   4. User can run `/recap`, quit from the TUI, resume after a later process start, and see prior NPCs, quests, events, and transcript context recalled correctly.
   5. User can run vault validation, player-vault sync, and derived-index rebuild commands when repair warnings or corruption are detected.
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+- [ ] 07-01-PLAN.md — Vault foundation, atomic writes, entity resolution (VAULT-01, VAULT-02, VAULT-06, PERS-03, AI-11)
+- [ ] 07-02-PLAN.md — Vault-page-upsert & turn-close persistence (VAULT-01, VAULT-02, VAULT-03, VAULT-04, VAULT-06, PERS-03, PERS-05, PERS-06, D-09)
+- [ ] 07-03-PLAN.md — Full memory-packet assembly with FTS5 & NetworkX (VAULT-07, AI-11, PERS-06)
+- [ ] 07-04-PLAN.md — Additional skills: visibility-promotion, rolling-summary-update, session-page-authoring, canon-conflict stub (VAULT-03, VAULT-05, VAULT-08, AI-11)
+- [ ] 07-05-PLAN.md — Player-vault sync, CLI repair commands, /recap, quit/resume integration (CLI-04, VAULT-03, VAULT-04, VAULT-05, VAULT-09, VAULT-10, TUI-08, PERS-05)
+- [ ] 07-06-PLAN.md — QA tests and release gate (QA-06, QA-08, QA-09)
 
 ### Phase 8: Retcon, Repair, and Release Hardening
 **Goal**: User can safely retcon the last completed turn and the MVP is protected by full smoke/release gates
