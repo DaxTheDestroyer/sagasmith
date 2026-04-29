@@ -10,7 +10,7 @@ SagaSmith is a Python CLI/TUI app that recreates the human-GM promise of *go any
 
 ## Status
 
-**Phase 7 of 8 — Memory, Vault, and Resume.** Roughly 93% of planned MVP work is complete. Not playable end-to-end yet; the AI GM story loop runs and deterministic mechanics work, but persistent memory, vault projection, and release hardening are still landing.
+**MVP feature-complete.** All 8 phases and all 35 plans are landed (35/35, 100%) as of 2026-04-29. The AI GM story loop, deterministic mechanics, two-vault memory, resume, retcon/repair, and the no-paid-call MVP smoke + release gate all work end to end. Public release hardening (canonical ORC license drop-in, iconic-name cleanup, packaging polish) is the remaining pre-1.0 work.
 
 | Phase | Theme | State |
 |------:|-------|-------|
@@ -20,8 +20,8 @@ SagaSmith is a Python CLI/TUI app that recreates the human-GM promise of *go any
 | 4 | LangGraph runtime + Agent Skills adapter | Complete |
 | 5 | Rules-first PF2e vertical slice | Complete |
 | 6 | AI GM story loop (Oracle / RulesLawyer / Orator / safety) | Complete |
-| 7 | Memory, vault, and resume | In progress |
-| 8 | Retcon, repair, and release hardening | Pending |
+| 7 | Memory, vault, and resume | Complete |
+| 8 | Retcon, repair, and release hardening | Complete |
 
 Live state lives in [.planning/STATE.md](.planning/STATE.md); the full roadmap is in [.planning/ROADMAP.md](.planning/ROADMAP.md).
 
@@ -85,7 +85,7 @@ uv run sagasmith play          # launch the Textual TUI
 uv run sagasmith demo          # provider-free demo path
 ```
 
-In-TUI commands include `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`. Stubbed commands name the phase that will replace them.
+In-TUI commands include `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`. `/retcon` lists eligible completed turns and requires a typed `RETCON {turn_id}` confirmation token before rollback.
 
 > **BYO LLM.** OpenRouter is the first supported provider; direct providers reuse the same `LLMClient` interface. You supply the key — SagaSmith never ships one.
 
