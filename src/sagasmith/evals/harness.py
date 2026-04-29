@@ -233,7 +233,9 @@ def _mvp_play_simple_combat(context: _MvpSmokeContext) -> str:
     dice = DiceService(campaign_seed=campaign_id, session_seed="mvp_smoke")
     rules = RulesEngine(dice=dice)
     combat = CombatEngine(dice=dice, rules=rules)
-    combat_state, initiative = combat.start_encounter(sheet, make_first_slice_enemies(), roll_index=1)
+    combat_state, initiative = combat.start_encounter(
+        sheet, make_first_slice_enemies(), roll_index=1
+    )
     while combat_state.active_combatant_id != sheet.id:
         combat_state = combat.end_turn(combat_state)
     combat_state, attack, damage = combat.resolve_strike(
