@@ -9,13 +9,14 @@ from typing import Annotated
 
 import typer
 
-from sagasmith.evals.harness import run_smoke
+from sagasmith.evals.harness import run_mvp_smoke, run_smoke
 
 
 class SmokeMode(StrEnum):
     """Supported smoke execution modes."""
 
     FAST = "fast"
+    MVP = "mvp"
     PYTEST = "pytest"
 
 
@@ -25,7 +26,7 @@ def smoke(
         typer.Option(
             "--mode",
             case_sensitive=False,
-            help="fast = in-process harness; pytest = `pytest -m smoke`.",
+            help="fast = in-process harness; mvp = full MVP smoke; pytest = `pytest -m smoke`.",
         ),
     ] = SmokeMode.FAST,
 ) -> None:
@@ -33,6 +34,13 @@ def smoke(
 
     if mode == SmokeMode.FAST:
         result = run_smoke()
+        typer.echo(result.format())
+        if not result.ok:
+            raise typer.Exit(code=1)
+        return
+
+    if mode == SmokeMode.MVP:
+        result = run_mvp_smoke()
         typer.echo(result.format())
         if not result.ok:
             raise typer.Exit(code=1)
