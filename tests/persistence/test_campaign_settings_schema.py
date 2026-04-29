@@ -18,9 +18,9 @@ def _make_conn() -> sqlite3.Connection:
 def test_migration_0002_creates_campaigns_and_settings() -> None:
     conn = _make_conn()
     applied = apply_migrations(conn)
-    # 0001-0007 should be applied on a fresh DB
-    assert applied == [1, 2, 3, 4, 5, 6, 7]
-    assert current_schema_version(conn) == 7
+    # 0001-0008 should be applied on a fresh DB
+    assert applied == [1, 2, 3, 4, 5, 6, 7, 8]
+    assert current_schema_version(conn) == 8
 
     # campaigns table should have 6 columns
     campaign_cols = conn.execute("PRAGMA table_info(campaigns)").fetchall()

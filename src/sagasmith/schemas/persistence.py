@@ -42,7 +42,14 @@ class TurnRecord(SchemaModel):
     turn_id: str
     campaign_id: str
     session_id: str
-    status: Literal["complete", "needs_vault_repair", "narrated", "discarded", "retried"]
+    status: Literal[
+        "complete",
+        "needs_vault_repair",
+        "narrated",
+        "discarded",
+        "retried",
+        "retconned",
+    ]
     started_at: str
     completed_at: str
     schema_version: int = Field(ge=1)
@@ -56,6 +63,28 @@ class CheckpointRef(SchemaModel):
     turn_id: str
     kind: Literal["pre_narration", "final"]
     created_at: str
+
+
+class RetconAuditRecord(SchemaModel):
+    """Audit record for a confirmed retcon that retains non-canonical rows."""
+
+    retcon_id: str
+    campaign_id: str
+    selected_turn_id: str
+    affected_turn_ids: list[str] = Field(min_length=1)
+    prior_checkpoint_id: str
+    confirmation_token: str
+    reason: str
+    created_at: str
+
+
+class VaultWriteAuditRecord(SchemaModel):
+    """Durable record of vault writes caused by a completed turn."""
+
+    turn_id: str
+    vault_path: str
+    operation: str
+    recorded_at: str
 
 
 class TranscriptEntry(SchemaModel):
