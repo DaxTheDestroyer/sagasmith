@@ -1,0 +1,22 @@
+SagaSmith
+Copyright 2026 SagaSmith contributors
+
+This product is dual-licensed:
+
+  * Software (source code, schemas, configuration, build tooling, tests,
+    documentation written by SagaSmith contributors) is licensed under the
+    Apache License, Version 2.0. See LICENSE.
+
+  * Tabletop game rules content (Pathfinder 2e Remaster mechanics — stat
+    blocks, condition definitions, degree-of-success tables, action
+    economies, monster data, and any other expression of game rules
+    incorporated from Paizo's Remaster releases) is licensed under the
+    ORC License v1.0 administered by Azora Law, Ltd. See LICENSE-ORC.md.
+
+The two licenses cover disjoint material. Software does not become ORC
+content by linking to or operating on rules data, and rules content does
+not become Apache-licensed by being represented in code or data files.
+
+This product includes software developed by third parties under their
+own licenses. See the dependency manifests (pyproject.toml, uv.lock) and
+each dependency's distribution for those terms.

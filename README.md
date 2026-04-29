@@ -163,4 +163,11 @@ API keys are never committed and never written to campaign files, vaults, transc
 
 ## License
 
-TBD.
+SagaSmith is dual-licensed:
+
+- **Source code, schemas, tooling, tests, and original documentation** are licensed under the **Apache License, Version 2.0**. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+- **Pathfinder 2e Remaster rules content** bundled with the project (mechanics, stat blocks, conditions, degree-of-success math, monster and equipment data) is licensed under the **ORC License v1.0** administered by Azora Law. See [LICENSE-ORC.md](LICENSE-ORC.md) for the Licensed Material and Reserved Material notices.
+
+The two licenses cover disjoint material — Apache 2.0 does not relicense ORC content, and ORC does not relicense Apache code. Downstream users must comply with both for the portions each one covers.
+
+SagaSmith is an independent product and is not published, endorsed, or specifically approved by Paizo Inc. Pathfinder is a registered trademark of Paizo Inc.
