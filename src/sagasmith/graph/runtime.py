@@ -26,7 +26,6 @@ from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind
 from sagasmith.persistence.repositories import CheckpointRefRepository, TurnRecordRepository
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
 from sagasmith.schemas.persistence import CheckpointRef, TurnRecord
-from sagasmith.vault import VaultService
 
 
 def thread_config_for(campaign_id: str) -> dict[str, Any]:

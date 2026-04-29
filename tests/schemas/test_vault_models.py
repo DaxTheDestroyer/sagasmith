@@ -4,14 +4,14 @@ import pytest
 
 from sagasmith.vault.page import (
     BaseVaultFrontmatter,
-    NpcFrontmatter,
-    LocationFrontmatter,
+    CallbackFrontmatter,
     FactionFrontmatter,
     ItemFrontmatter,
-    QuestFrontmatter,
-    CallbackFrontmatter,
-    SessionFrontmatter,
+    LocationFrontmatter,
     LoreFrontmatter,
+    NpcFrontmatter,
+    QuestFrontmatter,
+    SessionFrontmatter,
 )
 
 
