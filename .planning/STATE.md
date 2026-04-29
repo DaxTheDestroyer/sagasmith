@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 08-04-PLAN.md
-last_updated: "2026-04-29T17:13:35Z"
-last_activity: 2026-04-29 -- Completed Phase 8 Plan 04 MVP smoke and release gate
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-04-29T17:18:47Z"
+last_activity: 2026-04-29 -- Completed Phase 8 Plan 02 RetconService and runtime rollback
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 35
-  completed_plans: 33
-  percent: 94
+  completed_plans: 34
+  percent: 97
 ---
 
 # Project State
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 ## Current Position
 
-Phase: 8 of 8 (Retcon, Repair, and Release Hardening) — Plans 08-01 and 08-04 complete
-Plan: 08-02 and 08-03 remain; 08-04 ✅
-Status: MVP smoke and release gate implemented; retcon service/UI plans remain
-Last activity: 2026-04-29 -- Completed 08-04 layered MVP smoke, CLI smoke mode, and release-gate Make target
+Phase: 8 of 8 (Retcon, Repair, and Release Hardening) — Plans 08-01, 08-02, and 08-04 complete
+Plan: 08-03 remains; 08-04 ✅
+Status: Retcon service/runtime rollback and MVP smoke/release gate implemented; retcon UI plan remains
+Last activity: 2026-04-29 -- Completed 08-02 RetconService preview/confirm, GraphRuntime checkpoint rewind, derived rebuild, and canonical exclusion tests
 
-Progress: [█████████░] 94%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 33
+- Total plans completed: 34
 - Average duration: 22 min
 - Total execution time: ~5.9 hours
 
@@ -50,7 +50,7 @@ Progress: [█████████░] 94%
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
 | 6. AI GM Story Loop | 7 | ~115 min | ~16 min |
-| 8. Retcon, Repair, and Release Hardening | 2 | 13 min | ~7 min |
+| 8. Retcon, Repair, and Release Hardening | 3 | 16 min | ~5 min |
 
 *Updated after each plan completion*
 
@@ -80,7 +80,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 8 Plan 08-02 (RetconService and checkpoint-based rollback execution).
+- Execute Phase 8 Plan 08-03 (TUI retcon picker, preview, confirmation, and repair guidance).
 
 ### Blockers/Concerns
 
@@ -137,6 +137,9 @@ Recent decisions affecting current work:
 - [07-05]: `/recap` is deterministic and provider-free, reading graph rolling_summary plus SQLite transcript rows.
 - [08-01]: Retconned rows are retained for audit but excluded from canonical turn/transcript helpers by default.
 - [08-01]: Vault-write audit records are inserted only after successful master-vault writes.
+- [08-02]: Retcon preview blocks unless the selected turn is complete and a prior final checkpoint exists.
+- [08-02]: Retcon confirmation commits retconned statuses and audit rows before derived rebuild/sync so future canonical reads already exclude affected turns if repair is needed.
+- [08-02]: Runtime retcon completion messages reference only turn ids/counts and avoid removed canon details.
 - [08-04]: MVP smoke uses deterministic in-process services and fake provider configuration, never OpenRouter credentials.
 - [08-04]: Release-gate secret scanning uses the existing pre-commit gitleaks hook.
 
@@ -152,6 +155,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:13:35Z
-Stopped at: Completed 08-04-PLAN.md; Phase 8 08-02 and 08-03 remain
+Last session: 2026-04-29T17:18:47Z
+Stopped at: Completed 08-02-PLAN.md; Phase 8 08-03 remains
 Resume file: None
