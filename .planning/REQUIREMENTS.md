@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CLI-01**: User can run a first-time initialization command that creates a local campaign directory, SQLite campaign database, and player vault directory.
 - [x] **CLI-02**: User can choose or confirm campaign name and local campaign path during initialization.
 - [x] **CLI-03**: User can start or resume a campaign from the CLI without a hosted server.
-- [ ] **CLI-04**: User can run repair commands for vault validation, player-vault sync, and derived-index rebuild.
+- [x] **CLI-04**: User can run repair commands for vault validation, player-vault sync, and derived-index rebuild.
 - [x] **CLI-05**: User can run a demo or smoke mode that uses fixtures/mocks instead of paid provider calls.
 
 ### Provider, Secrets, and Cost
@@ -62,7 +62,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TUI-05**: User can open `/help` to view supported slash commands and descriptions.
 - [x] **TUI-06**: User can use `/save`, `/recap`, `/sheet`, `/inventory`, `/map`, `/clock`, `/budget`, `/pause`, `/line`, `/retcon`, `/settings`, and `/help`.
 - [x] **TUI-07**: User sees a dice overlay or equivalent modal for reveal-mode checks that shows DC, modifier, d20 result, total, and degree.
-- [ ] **TUI-08**: User can quit from the TUI and resume later at the last safe prompt.
+- [x] **TUI-08**: User can quit from the TUI and resume later at the last safe prompt.
 
 ### Deterministic Rules and Dice
 
@@ -118,18 +118,18 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PERS-02**: System performs turn-close SQLite writes in a transaction before writing vault files or derived indices.
 - [x] **PERS-03**: System writes master-vault pages with atomic file replacement and validates YAML frontmatter after write.
 - [x] **PERS-04**: System marks a turn complete only after turn-close persistence succeeds.
-- [ ] **PERS-05**: System surfaces a repair warning when player-vault sync or derived-index updates fail after a completed turn.
+- [x] **PERS-05**: System surfaces a repair warning when player-vault sync or derived-index updates fail after a completed turn.
 - [ ] **PERS-06**: System can rebuild derived indices from SQLite plus master vault after corruption or deletion.
 - [x] **VAULT-01**: System creates a master vault in app data and a player vault in the campaign directory.
 - [x] **VAULT-02**: System writes Obsidian-compatible markdown pages with YAML frontmatter and wikilinks for sessions, NPCs, locations, factions, items, quests, callbacks, lore, index, and log.
 - [x] **VAULT-03**: System enforces `gm_only`, `foreshadowed`, and `player_known` visibility states when projecting the player vault.
-- [ ] **VAULT-04**: System strips GM-only frontmatter fields and `<!-- gm: ... -->` blocks from player-vault projections.
+- [x] **VAULT-04**: System strips GM-only frontmatter fields and `<!-- gm: ... -->` blocks from player-vault projections.
 - [x] **VAULT-05**: System generates or refreshes player-vault `index.md` and `log.md` after sync.
 - [x] **VAULT-06**: System resolves incoming named entities by slug and aliases before creating a new vault page.
 - [ ] **VAULT-07**: System can assemble memory from exact search, graph neighborhoods, callbacks, summaries, and semantic retrieval interfaces without exceeding the configured token cap.
 - [x] **VAULT-08**: System detects canon conflicts and surfaces them rather than silently overwriting canonical facts.
-- [ ] **VAULT-09**: User can run `/recap` to receive a summary based on persisted transcript and canonical memory.
-- [ ] **VAULT-10**: User can resume a campaign after a later process start and see NPCs, quests, and prior events recalled correctly.
+- [x] **VAULT-09**: User can run `/recap` to receive a summary based on persisted transcript and canonical memory.
+- [x] **VAULT-10**: User can resume a campaign after a later process start and see NPCs, quests, and prior events recalled correctly.
 
 ### Safety and Control
 
@@ -293,22 +293,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-02 | Phase 6 | Pending |
 | SAFE-03 | Phase 6 | Pending |
 | QA-05 | Phase 6 | Pending |
-| CLI-04 | Phase 7 | Pending |
+| CLI-04 | Phase 7 | Complete |
 | PERS-03 | Phase 7 | Complete |
-| PERS-05 | Phase 7 | Pending |
+| PERS-05 | Phase 7 | Complete |
 | PERS-06 | Phase 7 | Pending |
 | VAULT-01 | Phase 7 | Complete |
 | VAULT-02 | Phase 7 | Complete |
 | VAULT-03 | Phase 7 | Complete |
-| VAULT-04 | Phase 7 | Pending |
+| VAULT-04 | Phase 7 | Complete |
 | VAULT-05 | Phase 7 | Complete |
 | VAULT-06 | Phase 7 | Complete |
 | VAULT-07 | Phase 7 | Pending |
 | VAULT-08 | Phase 7 | Complete |
-| VAULT-09 | Phase 7 | Pending |
-| VAULT-10 | Phase 7 | Pending |
+| VAULT-09 | Phase 7 | Complete |
+| VAULT-10 | Phase 7 | Complete |
 | AI-11 | Phase 7 | Complete |
-| TUI-08 | Phase 7 | Pending |
+| TUI-08 | Phase 7 | Complete |
 | QA-06 | Phase 7 | Pending |
 | QA-01 | Phase 8 | Pending |
 | QA-02 | Phase 8 | Pending |

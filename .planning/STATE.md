@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 07-04-PLAN.md
-last_updated: "2026-04-29T08:36:29Z"
-last_activity: 2026-04-29 -- Completed Phase 7 Plan 04 Archivist memory enrichment skills
+stopped_at: Completed 07-05-PLAN.md
+last_updated: "2026-04-29T08:46:02Z"
+last_activity: 2026-04-29 -- Completed Phase 7 Plan 05 player vault sync, recap, repair CLI, and resume warnings
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 31
-  completed_plans: 30
-  percent: 97
+  completed_plans: 31
+  percent: 100
 ---
 
 # Project State
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 ## Current Position
 
-Phase: 7 of 8 (Memory Vault and Resume) — Waves 1-4 complete
-Plan: 07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 next
-Status: Ready for Wave 5 (player-vault sync, repair commands, /recap, quit/resume)
-Last activity: 2026-04-29 -- Completed 07-04 visibility promotion, rolling summary, session authoring, and canon-conflict stub
+Phase: 7 of 8 (Memory Vault and Resume) — Waves 1-5 complete
+Plan: 07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 ✅, 07-06 next
+Status: Ready for Wave 6 QA (player-vault leakage, repair, quit/resume smoke)
+Last activity: 2026-04-29 -- Completed 07-05 player-vault sync, /recap, vault repair CLI, resumed session numbering, and sync warning display
 
-Progress: [██████████░] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 30
+- Total plans completed: 31
 - Average duration: 22 min
 - Total execution time: ~5.8 hours
 
@@ -51,18 +51,12 @@ Progress: [██████████░] 97%
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
 | 6. AI GM Story Loop | 7 | ~115 min | ~16 min |
 
-**Recent Trend:**
-
-- Last 5 plans: 06-07 (35 min), 06-06 (20 min), 06-04 (25 min), 06-02 (11 min), 06-03 (7 min)
-- Trend: Phase 6 complete with provider-free memory context, Oracle world/seed generation, RulesLawyer intent routing, Oracle scene planning with beat-ID lifecycle routing, Orator buffered stream-after-classify narration with safety gates, narration recovery (retry/discard), and dual-layer safety services.
-
 *Updated after each plan completion*
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - [Roadmap]: Standard granularity uses 8 phases to preserve clean SagaSmith delivery boundaries.
@@ -85,7 +79,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 7 Plan 07-05 (player-vault sync, repair commands, /recap, quit/resume).
+- Execute Phase 7 Plan 07-06 (QA tests and release gate for memory/vault/resume).
 
 ### Blockers/Concerns
 
@@ -138,6 +132,8 @@ Recent decisions affecting current work:
 - [06-04]: Two-rewrite budget shared between post-gate blocks/rewrites and mechanics audit failures.
 - [07-04]: Hyphenated Agent Skill directories wrap underscore Python packages so skill discovery names remain stable while imports remain valid.
 - [07-04]: Canon-conflict detection is a non-blocking warning stub until full extraction/routing is implemented.
+- [07-05]: Player-vault sync rebuilds the player projection from scratch to remove stale spoiler files.
+- [07-05]: `/recap` is deterministic and provider-free, reading graph rolling_summary plus SQLite transcript rows.
 
 ## Deferred Items
 
@@ -149,6 +145,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-29T08:36:29Z
-Stopped at: Completed 07-04-PLAN.md; Phase 7 07-05 next
+Last session: 2026-04-29T08:46:02Z
+Stopped at: Completed 07-05-PLAN.md; Phase 7 07-06 next
 Resume file: None
