@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import yaml
 
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
-    assemble_memory_packet_stub,
+    assemble_memory_packet,
 )
 from sagasmith.agents.archivist.skills.vault_page_upsert.logic import (
     vault_page_upsert,
@@ -16,7 +18,7 @@ from sagasmith.vault import VaultPage, VaultService
 from sagasmith.vault.page import LoreFrontmatter
 
 
-def archivist_node(state, services):
+def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
     """Assemble memory packet, persist entity pages to vault, and return vault writes."""
     if services._call_recorder is not None:
         services._call_recorder.append("archivist")
@@ -24,7 +26,7 @@ def archivist_node(state, services):
     if activation is not None:
         store = services.skill_store
         if store is not None:
-            for skill_name in ["vault-page-upsert", "memory-packet-assembly", "entity-resolution"]:
+            for skill_name in ["entity-resolution", "vault-page-upsert", "memory-packet-assembly"]:
                 if store.find(name=skill_name, agent_scope="archivist") is not None:
                     activation.set_skill(skill_name)
 
@@ -50,7 +52,9 @@ def archivist_node(state, services):
                 first_encountered=str(session_number),
                 category="world_bible",
             )
-            body = yaml.safe_dump(world_bible.model_dump(mode="json"), sort_keys=False, allow_unicode=True)
+            body = yaml.safe_dump(
+                world_bible.model_dump(mode="json"), sort_keys=False, allow_unicode=True
+            )
             page = VaultPage(frontmatter, body)
             vault_pending_writes.append(page)
 
@@ -65,26 +69,37 @@ def archivist_node(state, services):
                 first_encountered=str(session_number),
                 category="campaign_seed",
             )
-            body = yaml.safe_dump(campaign_seed.model_dump(mode="json"), sort_keys=False, allow_unicode=True)
+            body = yaml.safe_dump(
+                campaign_seed.model_dump(mode="json"), sort_keys=False, allow_unicode=True
+            )
             page = VaultPage(frontmatter, body)
             vault_pending_writes.append(page)
 
     # Process present entities from scene_brief: write new entity pages
-    scene_brief = state.get("scene_brief") or {}
-    present_entities = scene_brief.get("present_entities", [])
-    if vault_service is not None and isinstance(present_entities, list):
+    scene_brief_raw = state.get("scene_brief") or {}
+    scene_brief: dict[str, Any] = scene_brief_raw if isinstance(scene_brief_raw, dict) else {}
+    present_entities_raw = scene_brief.get("present_entities", [])
+    present_entities = (
+        [value for value in present_entities_raw if isinstance(value, str)]
+        if isinstance(present_entities_raw, list)
+        else []
+    )
+    if vault_service is not None and present_entities:
+        queued_names: set[str] = set()
         for entity_name in present_entities:
-            if not isinstance(entity_name, str):
+            normalized_name = entity_name.strip().casefold()
+            if not normalized_name or normalized_name in queued_names:
                 continue
+            queued_names.add(normalized_name)
             # Resolve to see if already exists
-            resolved = vault_service.resolver.resolve(entity_name, entity_type=None)
+            resolved = _resolve_known_entity(vault_service, entity_name)
             if resolved is not None:
                 # Already exists; skip writing (or could be updated later)
                 continue
             # Determine entity type: default to npc; later phases may infer from context
             entity_type = "npc"
             # Prepare minimal draft for NPC — required fields: species, role, status, disposition_to_pc
-            draft = {
+            draft: dict[str, object] = {
                 "name": entity_name,
                 "type": entity_type,
                 "species": "unknown",
@@ -95,15 +110,13 @@ def archivist_node(state, services):
             # Visibility: if entity is present in scene, it's player_known (they see it)
             visibility = "player_known"
             try:
-                _path, _action = vault_page_upsert(
+                result = vault_page_upsert(
                     vault_service=vault_service,
                     entity_draft=draft,
                     visibility=visibility,
                     session_number=session_number,
                 )
-                page = vault_service.resolver.resolve(entity_name, entity_type)
-                if page is not None:
-                    vault_pending_writes.append(page)
+                vault_pending_writes.append(result.page)
             except ValueError:
                 pass
 
@@ -123,9 +136,10 @@ def archivist_node(state, services):
         page = VaultPage(frontmatter, rolling_summary)
         vault_pending_writes.append(page)
 
-    memory_packet = assemble_memory_packet_stub(
+    memory_packet = assemble_memory_packet(
         state,
         conn=getattr(services, "transcript_conn", None),
+        vault_service=vault_service,
     )
     return {
         "session_state": session_state,
@@ -136,3 +150,12 @@ def archivist_node(state, services):
         # Phase 7 archivist will persist to transcript_entries before clearing.
         "pending_narration": state.get("pending_narration", []),
     }
+
+
+def _resolve_known_entity(vault_service: VaultService, entity_name: str) -> VaultPage | None:
+    """Resolve a scene entity without requiring aliases to exist."""
+    for entity_type in ("npc", "location", "faction", "item", "quest", "callback", "lore"):
+        resolved = vault_service.resolver.resolve(entity_name, entity_type=entity_type)
+        if resolved is not None:
+            return resolved
+    return vault_service.resolver.resolve(entity_name, entity_type=None)

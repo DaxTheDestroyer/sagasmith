@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 from sagasmith.vault import VaultPage, VaultService
@@ -32,16 +33,25 @@ _TYPE_MAP: dict[str, tuple[type[BaseVaultFrontmatter], str, str]] = {
 }
 
 
+@dataclass(frozen=True)
+class VaultPageUpsertResult:
+    """Validated vault page prepared for turn-close persistence."""
+
+    page: VaultPage
+    relative_path: Path
+    action: str
+
+
 def _find_unique_slug(base_slug: str, target_dir: Path, prefix: str) -> str:
-    """Find a unique filename by appending _2, _3, ... if needed, with prefix."""
+    """Find a unique page ID by appending _2, _3, ... if needed."""
     candidate = target_dir / f"{prefix}{base_slug}.md"
     if not candidate.exists():
-        return candidate.name
+        return f"{prefix}{base_slug}"
     counter = 2
     while True:
         candidate = target_dir / f"{prefix}{base_slug}_{counter}.md"
         if not candidate.exists():
-            return candidate.name
+            return f"{prefix}{base_slug}_{counter}"
         counter += 1
 
 
@@ -51,8 +61,8 @@ def vault_page_upsert(
     entity_draft: dict[str, object],
     visibility: str,
     session_number: int | str,
-) -> tuple[str, str]:
-    """Create or update a vault page atomically.
+) -> VaultPageUpsertResult:
+    """Prepare a validated vault page without touching the filesystem.
 
     Args:
         vault_service: VaultService instance with master vault path.
@@ -61,7 +71,7 @@ def vault_page_upsert(
         session_number: Session number to record in first_encountered.
 
     Returns:
-        (written_path, action) where action is "created" or "updated".
+        VaultPageUpsertResult containing the page, relative path, and action.
 
     Raises:
         ValueError: If required fields missing or frontmatter validation fails.
@@ -101,6 +111,7 @@ def vault_page_upsert(
 
     if existing_page is not None:
         # Update existing page at its known location
+        assert target_path_candidate is not None
         target_path = target_path_candidate
         action = "updated"
         # Merge draft into existing frontmatter fields
@@ -110,15 +121,15 @@ def vault_page_upsert(
         frontmatter_dict["visibility"] = visibility
         # Preserve original first_encountered
         frontmatter = frontmatter_cls.model_validate(frontmatter_dict)
+        page = VaultPage(frontmatter, body=existing_page.body)
     else:
         # Create new page — resolve slug collision
-        filename = _find_unique_slug(slug, target_dir, prefix)
-        target_path = target_dir / filename
+        page_id = _find_unique_slug(slug, target_dir, prefix)
+        target_path = target_dir / f"{page_id}.md"
 
         # Build frontmatter dict from draft with defaults
-        prefixed_id = f"{prefix}{slug}"
         frontmatter_dict: dict[str, object] = {
-            "id": prefixed_id,
+            "id": page_id,
             "type": entity_type,
             "name": name,
             "visibility": visibility,
@@ -131,12 +142,13 @@ def vault_page_upsert(
 
         frontmatter = _prepare_frontmatter(frontmatter_cls, frontmatter_dict)
         action = "created"
+        page = VaultPage(frontmatter, body="")
 
-    page = VaultPage(frontmatter, body="")
-    vault_service.write_page(page, target_path.relative_to(vault_service.master_path), is_master=True)
-    # Refresh resolver so subsequent lookups see the new/updated page
-    vault_service.resolver.refresh()
-    return str(target_path), action
+    return VaultPageUpsertResult(
+        page=page,
+        relative_path=target_path.relative_to(vault_service.master_path),
+        action=action,
+    )
 
 
 def _prepare_frontmatter(

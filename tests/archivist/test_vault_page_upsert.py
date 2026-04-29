@@ -10,7 +10,7 @@ from sagasmith.agents.archivist.skills.vault_page_upsert.logic import (
     vault_page_upsert,
 )
 from sagasmith.vault import VaultService
-from sagasmith.vault.page import NpcFrontmatter, VaultPage
+from sagasmith.vault.page import NpcFrontmatter
 
 
 @pytest.fixture
@@ -37,15 +37,16 @@ def test_vault_page_upsert_creates_npc_page(vault_service: VaultService, tmp_pat
         "status": "alive",
         "disposition_to_pc": "friendly",
     }
-    path, action = vault_page_upsert(
+    result = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft,
         visibility="player_known",
         session_number=1,
     )
-    assert action == "created"
-    assert Path(path).exists()
-    page = VaultPage.load_file(Path(path))
+    assert result.action == "created"
+    assert result.relative_path == Path("npcs") / "npc_test_character.md"
+    assert not (vault_service.master_path / result.relative_path).exists()
+    page = result.page
     assert isinstance(page.frontmatter, NpcFrontmatter)
     assert page.frontmatter.name == "test_character"
     assert page.frontmatter.visibility == "player_known"
@@ -63,35 +64,39 @@ def test_vault_page_upsert_slug_collision_adds_suffix(vault_service: VaultServic
         "disposition_to_pc": "friendly",
     }
     # First write
-    _, action1 = vault_page_upsert(
+    result1 = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft,
         visibility="gm_only",
         session_number=1,
     )
-    assert action1 == "created"
+    assert result1.action == "created"
+    vault_service.write_page(result1.page, result1.relative_path)
     # Second write with same name but different species triggers collision _2
     draft2 = dict(draft)
     draft2["species"] = "elf"
-    path2, action2 = vault_page_upsert(
+    result2 = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft2,
         visibility="gm_only",
         session_number=1,
     )
-    assert action2 == "created"
-    assert Path(path2).name == "npc_marcus_2.md"
+    assert result2.action == "created"
+    assert result2.relative_path.name == "npc_marcus_2.md"
+    assert result2.page.frontmatter.id == "npc_marcus_2"
+    vault_service.write_page(result2.page, result2.relative_path)
     # Third write same name → _3
     draft3 = dict(draft)
     draft3["species"] = "dwarf"
-    path3, action3 = vault_page_upsert(
+    result3 = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft3,
         visibility="gm_only",
         session_number=1,
     )
-    assert action3 == "created"
-    assert Path(path3).name == "npc_marcus_3.md"
+    assert result3.action == "created"
+    assert result3.relative_path.name == "npc_marcus_3.md"
+    assert result3.page.frontmatter.id == "npc_marcus_3"
 
 
 def test_vault_page_upsert_invalid_draft_raises(vault_service: VaultService) -> None:
@@ -125,12 +130,13 @@ def test_vault_page_upsert_update_existing(vault_service: VaultService) -> None:
         "status": "alive",
         "disposition_to_pc": "friendly",
     }
-    _ = vault_page_upsert(
+    result1 = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft,
         visibility="gm_only",
         session_number=1,
     )
+    vault_service.write_page(result1.page, result1.relative_path)
     # Update by providing the same slug as id (full prefixed)
     draft_update = {
         "id": "npc_orym",  # full prefixed id
@@ -141,15 +147,15 @@ def test_vault_page_upsert_update_existing(vault_service: VaultService) -> None:
         "status": "alive",
         "disposition_to_pc": "ally",
     }
-    path2, action = vault_page_upsert(
+    result2 = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft_update,
         visibility="player_known",
         session_number=2,
     )
-    assert action == "updated"
-    assert Path(path2).name == "npc_orym.md"
-    page = VaultPage.load_file(Path(path2))
+    assert result2.action == "updated"
+    assert result2.relative_path.name == "npc_orym.md"
+    page = result2.page
     assert page.frontmatter.name == "Orym the Brave"
     assert page.frontmatter.role == "champion"
     assert page.frontmatter.visibility == "player_known"
@@ -164,15 +170,15 @@ def test_vault_page_upsert_location(vault_service: VaultService) -> None:
         "region": "coastal",
         "status": "active",
     }
-    path, action = vault_page_upsert(
+    result = vault_page_upsert(
         vault_service=vault_service,
         entity_draft=draft,
         visibility="player_known",
         session_number=1,
     )
-    assert action == "created"
+    assert result.action == "created"
     from sagasmith.vault.page import LocationFrontmatter
 
-    page = VaultPage.load_file(Path(path))
+    page = result.page
     assert isinstance(page.frontmatter, LocationFrontmatter)
     assert page.frontmatter.settlement == "town"

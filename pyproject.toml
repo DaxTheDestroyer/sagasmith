@@ -19,6 +19,8 @@ dependencies = [
     "textual>=0.79,<1",
     "langgraph>=1,<2",
     "langgraph-checkpoint-sqlite>=3,<4",
+    "networkx>=3,<4",
+    "pyyaml>=6,<7",
 ]
 
 [project.scripts]

@@ -51,6 +51,7 @@ _EXPECTED_SURFACE: dict[str, str] = {
     "memory-packet-assembly": "hybrid",
     "turn-close-persistence": "deterministic",
     "onboarding-phase-wizard": "deterministic",
+    "entity-resolution": "deterministic",
 }
 
 

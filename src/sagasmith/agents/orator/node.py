@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import Any
 
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
-    assemble_memory_packet_stub,
+    assemble_memory_packet,
 )
 from sagasmith.graph.activation_log import get_current_activation
 from sagasmith.schemas.mechanics import CheckResult
@@ -41,9 +41,11 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
 
     # Ensure memory context
     if state.get("memory_packet") is None:
-        memory_packet = assemble_memory_packet_stub(
+        vault_service = getattr(services, "vault_service", None)
+        memory_packet = assemble_memory_packet(
             state,
             conn=getattr(services, "transcript_conn", None),
+            vault_service=vault_service,
         )
         updates["memory_packet"] = memory_packet.model_dump()
 

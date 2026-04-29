@@ -357,6 +357,9 @@ def make_valid_saga_state(**overrides: Any) -> SagaState:
         safety_events=[],
         cost_state=make_valid_cost_state(),
         last_interrupt=None,
+        vault_master_path="",
+        vault_player_path="",
+        rolling_summary=None,
     )
     return _with_overrides(instance, overrides)
 

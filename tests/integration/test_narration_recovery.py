@@ -92,6 +92,9 @@ def _play_state(*, turn_id: str = "turn_000001"):
             "hard_stopped": False,
         },
         "last_interrupt": None,
+        "vault_master_path": "",
+        "vault_player_path": "",
+        "rolling_summary": None,
     }
 
 

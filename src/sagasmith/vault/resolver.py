@@ -83,12 +83,21 @@ class EntityResolver:
         Returns:
             The matching VaultPage or None if no match found.
         """
-        # Try slug match first if we know the entity type
+        # Try slug match first if we know the entity type.
         if entity_type is not None:
             prefix = _TYPE_PREFIX.get(entity_type)
             if prefix:
                 candidate_id = f"{prefix}{slugify(name)}"
                 page = self._slug_index.get(candidate_id)
+                if page is not None:
+                    return page
+        else:
+            # Unknown type: try every supported filename prefix before aliases.
+            # This prevents duplicate pages when the canonical name matches but
+            # the page has no aliases yet.
+            slug = slugify(name)
+            for prefix in _TYPE_PREFIX.values():
+                page = self._slug_index.get(f"{prefix}{slug}")
                 if page is not None:
                     return page
         # Try alias match (case-insensitive)

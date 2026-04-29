@@ -2,7 +2,7 @@
 name: entity-resolution
 description: Resolve a named entity to its canonical vault page using slug and alias lookup. Returns the page if found or signals that a new page should be created.
 allowed_agents: [archivist]
-implementation_surface: pure
+implementation_surface: deterministic
 first_slice: true
 success_signal: Entity is found in ≥95% of correctly-named fixture cases; unknown names return None deterministically.
 ---

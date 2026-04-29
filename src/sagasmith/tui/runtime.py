@@ -5,6 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from sagasmith.app.campaign import open_campaign
+
+# Phase 7: warm the NetworkX graph cache on startup
+from sagasmith.memory.graph import warm_vault_graph
 from sagasmith.onboarding.store import OnboardingStore
 from sagasmith.persistence.db import open_campaign_db
 from sagasmith.services.cost import CostGovernor
@@ -72,6 +75,8 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
         vault_service = VaultService(
             campaign_id=manifest.campaign_id, player_vault_root=paths.player_vault
         )
+        # Phase 7: warm the NetworkX graph cache from master vault
+        warm_vault_graph(vault_service.master_path)
         bootstrap = GraphBootstrap.from_services(
             dice=dice_service,
             cost=app.cost_governor,

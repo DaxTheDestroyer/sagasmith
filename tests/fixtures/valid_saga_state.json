@@ -138,5 +138,8 @@
     "turn_count": 0
   },
   "state_deltas": [],
-  "turn_id": "turn-0000"
+  "turn_id": "turn-0000",
+  "vault_master_path": "",
+  "vault_player_path": "",
+  "rolling_summary": null
 }

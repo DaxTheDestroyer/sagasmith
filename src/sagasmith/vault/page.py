@@ -7,15 +7,17 @@ its required fields and sets the `type` constant.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 from ..schemas.common import SchemaModel
 
 
 class BaseVaultFrontmatter(SchemaModel):
     """Common frontmatter for all vault pages."""
+
+    model_config = ConfigDict(extra="allow", strict=True, frozen=False)
 
     id: str = Field(..., description="Slug identifier, unique within its type.")
     type: str  # set by subclass as a const
@@ -29,7 +31,7 @@ class BaseVaultFrontmatter(SchemaModel):
     )
     # GM-only fields; stripped from player vault projection
     gm_notes: str | None = None
-    secrets: dict[str, object] | None = None
+    secrets: object | None = None
 
 
 class NpcFrontmatter(BaseVaultFrontmatter):
@@ -40,6 +42,9 @@ class NpcFrontmatter(BaseVaultFrontmatter):
     role: str
     status: str
     disposition_to_pc: str
+    voice: str | None = None
+    location_current: str | None = None
+    factions: list[str] = Field(default_factory=list)
 
 
 class LocationFrontmatter(BaseVaultFrontmatter):
@@ -71,7 +76,7 @@ class ItemFrontmatter(BaseVaultFrontmatter):
     held_by: str | None = None
     given_by: str | None = None
     given_in: str | None = None
-    pf2e_ref: dict[str, object] | None = None
+    pf2e_ref: object | None = None
 
 
 class QuestFrontmatter(BaseVaultFrontmatter):
@@ -163,7 +168,10 @@ class VaultPage:
         text = path.read_text(encoding="utf-8")
         if text.startswith("---\n"):
             _, front_yaml, body = text.split("---\n", 2)
-            front_dict = yaml.safe_load(front_yaml)
+            loaded: Any = yaml.safe_load(front_yaml) or {}
+            front_dict: dict[str, Any] = (
+                {str(key): value for key, value in loaded.items()} if isinstance(loaded, dict) else {}
+            )
             # Determine concrete frontmatter class from 'type'
             ftype = front_dict.get("type")
             mapping = {
@@ -176,7 +184,7 @@ class VaultPage:
                 "session": SessionFrontmatter,
                 "lore": LoreFrontmatter,
             }
-            cls_type = mapping.get(ftype)
+            cls_type = mapping.get(ftype) if isinstance(ftype, str) else None
             if cls_type is None:
                 raise ValueError(f"Unknown vault page type: {ftype!r}")
             frontmatter = cls_type.model_validate(front_dict)

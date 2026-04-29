@@ -10,7 +10,19 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .page import BaseVaultFrontmatter, VaultPage
+from .page import (
+    NPC_PAGE_TYPES,
+    BaseVaultFrontmatter,
+    CallbackFrontmatter,
+    FactionFrontmatter,
+    ItemFrontmatter,
+    LocationFrontmatter,
+    LoreFrontmatter,
+    NpcFrontmatter,
+    QuestFrontmatter,
+    SessionFrontmatter,
+    VaultPage,
+)
 from .paths import ensure_player_vault_path, get_master_vault_path
 from .resolver import EntityResolver
 from .writer import atomic_write
@@ -111,29 +123,8 @@ class VaultService:
                 gm_keys = {"secrets", "gm_notes"} | {k for k in front_dict if k.startswith("gm_")}
                 for k in gm_keys:
                     front_dict.pop(k, None)
-                # Rebuild a minimal BaseVaultFrontmatter (type-specific info lost? Should keep known non-gm fields)
-                # Actually we want to keep all non-GM type-specific fields. So build model from filtered dict.
-                # Determine class from type
-                type_str = front_dict.get("type")
-                if type_str == "npc":
-                    from .page import NpcFrontmatter as TargetCls
-                elif type_str == "location":
-                    from .page import LocationFrontmatter as TargetCls
-                elif type_str == "faction":
-                    from .page import FactionFrontmatter as TargetCls
-                elif type_str == "item":
-                    from .page import ItemFrontmatter as TargetCls
-                elif type_str == "quest":
-                    from .page import QuestFrontmatter as TargetCls
-                elif type_str == "callback":
-                    from .page import CallbackFrontmatter as TargetCls
-                elif type_str == "session":
-                    from .page import SessionFrontmatter as TargetCls
-                elif type_str == "lore":
-                    from .page import LoreFrontmatter as TargetCls
-                else:
-                    TargetCls = BaseVaultFrontmatter
-                clean_front = TargetCls.model_validate(front_dict)
+                target_cls = _frontmatter_type_for(front_dict.get("type"))
+                clean_front = target_cls.model_validate(front_dict)
                 # Strip body GM comments
                 clean_body = _strip_gm_comments(page.body)
                 clean_page = VaultPage(clean_front, clean_body)
@@ -152,3 +143,17 @@ def _strip_gm_comments(body: str) -> str:
     # Regex matches <!-- gm: ... --> possibly spanning newlines (non-greedy)
     pattern = re.compile(r"<!--\s*gm:.*?-->", re.DOTALL)
     return pattern.sub("", body)
+
+
+def _frontmatter_type_for(type_name: object) -> type[BaseVaultFrontmatter]:
+    mapping: dict[str, type[BaseVaultFrontmatter]] = {
+        "npc": NpcFrontmatter,
+        "location": LocationFrontmatter,
+        "faction": FactionFrontmatter,
+        "item": ItemFrontmatter,
+        "quest": QuestFrontmatter,
+        "callback": CallbackFrontmatter,
+        "session": SessionFrontmatter,
+        "lore": LoreFrontmatter,
+    }
+    return mapping.get(type_name, BaseVaultFrontmatter) if isinstance(type_name, str) else BaseVaultFrontmatter

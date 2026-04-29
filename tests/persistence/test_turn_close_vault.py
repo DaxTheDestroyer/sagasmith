@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from sagasmith.memory.fts5 import FTS5Index
 from sagasmith.persistence.db import campaign_db
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import TurnRecordRepository
@@ -231,3 +232,50 @@ def test_close_turn_without_vault_service_skips_vault_operations(tmp_path: Path)
         # vault_service=None should work fine; no vault ops
         result = close_turn(conn, bundle, vault_service=None)
         assert result.status == "complete"
+
+
+def test_close_turn_does_not_index_gm_only_pages(tmp_path: Path) -> None:
+    path = _db(tmp_path)
+    with campaign_db(path) as conn:
+        apply_migrations(conn)
+
+        vault_service = VaultService(
+            campaign_id="c1",
+            player_vault_root=tmp_path / "player_vault",
+        )
+        vault_service.ensure_master_path()
+        vault_service.ensure_player_vault()
+
+        frontmatter = LoreFrontmatter(
+            id="secret_lore",
+            type="lore",
+            name="Secret Lore",
+            aliases=[],
+            visibility="gm_only",
+            first_encountered="1",
+            category="test",
+        )
+        page = VaultPage(frontmatter, body="Hidden guild blackmail evidence")
+        bundle = TurnCloseBundle(
+            turn_record=TurnRecord(
+                turn_id="t1",
+                campaign_id="c1",
+                session_id="s1",
+                status="complete",
+                started_at="2026-04-26T12:00:00Z",
+                completed_at="2026-04-26T12:00:00Z",
+                schema_version=1,
+            ),
+            transcript_entries=[],
+            roll_results=[],
+            provider_logs=[],
+            state_deltas=[],
+            cost_logs=[],
+            checkpoint_refs=[],
+            vault_pages=[page],
+            rolling_summary=None,
+        )
+
+        close_turn(conn, bundle, vault_service=vault_service)
+
+        assert FTS5Index(conn).query("blackmail") == []

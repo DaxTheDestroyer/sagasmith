@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -18,7 +19,7 @@ from sagasmith.schemas.persistence import (
 )
 from sagasmith.schemas.provider import ProviderLogRecord
 from sagasmith.services.errors import TrustServiceError
-from sagasmith.vault import VaultService, VaultPage
+from sagasmith.vault import VaultPage, VaultService
 from sagasmith.vault.page import BaseVaultFrontmatter
 
 from .repositories import (
@@ -32,6 +33,7 @@ from .repositories import (
 )
 
 # Mapping from vault page type to subfolder (matches resolver _TYPE_PREFIX)
+logger = logging.getLogger(__name__)
 _TYPE_MAP: dict[str, tuple[type[BaseVaultFrontmatter] | None, str]] = {
     "npc": (None, "npcs"),
     "pc": (None, "pcs"),
@@ -56,7 +58,7 @@ class TurnCloseBundle:
     state_deltas: list[StateDeltaRecord]
     cost_logs: list[CostLogRecord]
     checkpoint_refs: list[CheckpointRef]
-    vault_pages: list[VaultPage] = None
+    vault_pages: list[VaultPage] | None = None
     rolling_summary: str | None = None
 
     def __post_init__(self):
@@ -107,7 +109,7 @@ def close_turn(
     8. Upsert turn record with status='complete'
     9. COMMIT
     10. Write vault pages (if provided)
-    11. Update derived indices (skipped in MVP; Plan 07-03)
+    11. Update derived indices (FTS5 incremental, NetworkX graph cache)
     12. Sync player vault (if vault_service provided)
 
     If any vault write fails, update turn status to "needs_vault_repair" and skip
@@ -164,13 +166,7 @@ def close_turn(
     if vault_service is not None and bundle.vault_pages:
         try:
             for page in bundle.vault_pages:
-                page_type = page.frontmatter.type
-                slug = page.frontmatter.id
-                type_info = _TYPE_MAP.get(page_type)
-                if type_info is None:
-                    raise ValueError(f"Unknown vault page type: {page_type}")
-                _, subfolder = type_info
-                rel_path = Path(subfolder) / f"{slug}.md"
+                rel_path = _relative_path_for_page(page)
                 vault_service.write_page(page, rel_path, is_master=True)
             vault_service.resolver.refresh()
         except Exception as exc:
@@ -189,8 +185,8 @@ def close_turn(
             conn.commit()
             raise TrustServiceError(f"vault write failed after SQLite commit: {exc}") from exc
 
-        # Derived indices update (deferred to Plan 07-03)
-        # ...
+        # Derived indices update (FTS5 + NetworkX graph)
+        _update_derived_indices(conn, vault_service, bundle.vault_pages)
 
         # Player-vault sync
         try:
@@ -204,3 +200,57 @@ def close_turn(
             conn.commit()
 
     return completed_record
+
+
+def _update_derived_indices(
+    conn: sqlite3.Connection, vault_service: VaultService, pages: list[VaultPage]
+) -> None:
+    """Update FTS5 index and NetworkX graph cache after vault writes.
+
+    Failures here are non-fatal: indices are rebuildable from the vault.
+    """
+    # FTS5 incremental update
+    try:
+        from sagasmith.memory.fts5 import FTS5Index
+
+        fts = FTS5Index(conn)
+        for page in pages:
+            vault_path = _relative_path_for_page(page).as_posix()
+            if page.frontmatter.visibility == "gm_only":
+                fts.remove_page(vault_path)
+                continue
+            fts.index_page(vault_path, page.body)
+    except Exception:
+        logger.debug("FTS5 index update failed (non-fatal, rebuildable)", exc_info=True)
+
+    # NetworkX graph incremental update
+    try:
+        from sagasmith.memory.graph import get_vault_graph
+
+        graph = get_vault_graph()
+        for page in pages:
+            if page.frontmatter.visibility == "gm_only":
+                continue
+            graph.update_page(
+                page_id=page.frontmatter.id,
+                body=page.body,
+                frontmatter=page.frontmatter.model_dump(mode="json"),
+            )
+    except Exception:
+        logger.debug("NetworkX graph update failed (non-fatal, rebuildable)", exc_info=True)
+
+
+def _relative_path_for_page(page: VaultPage) -> Path:
+    page_type = page.frontmatter.type
+    page_id = page.frontmatter.id
+    if page_type == "lore" and getattr(page.frontmatter, "category", None) in {
+        "world_bible",
+        "campaign_seed",
+        "rolling_summary",
+    }:
+        return Path("meta") / f"{page_id}.md"
+    type_info = _TYPE_MAP.get(page_type)
+    if type_info is None:
+        raise ValueError(f"Unknown vault page type: {page_type}")
+    _, subfolder = type_info
+    return Path(subfolder) / f"{page_id}.md"

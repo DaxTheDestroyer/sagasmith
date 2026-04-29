@@ -4,9 +4,9 @@ from pathlib import Path
 
 import pytest
 
-from sagasmith.vault.page import VaultPage, BaseVaultFrontmatter, NpcFrontmatter
-from sagasmith.vault.writer import atomic_write
+from sagasmith.vault.page import BaseVaultFrontmatter, NpcFrontmatter, VaultPage
 from sagasmith.vault.resolver import EntityResolver, slugify
+from sagasmith.vault.writer import atomic_write
 
 
 class SimplePage(VaultPage):
@@ -117,3 +117,56 @@ def test_resolver_type_filter(tmp_path: Path):
     resolver = EntityResolver(master)
     assert resolver.resolve("Orym", entity_type="npc") is not None
     assert resolver.resolve("Orym", entity_type="location") is None
+
+
+def test_resolver_unknown_type_finds_slug_without_alias(tmp_path: Path):
+    master = tmp_path / "master"
+    master.mkdir()
+    npc = master / "npc_marcus.md"
+    fm = NpcFrontmatter(
+        id="npc_marcus",
+        name="Marcus",
+        species="human",
+        role="innkeeper",
+        status="alive",
+        disposition_to_pc="friendly",
+        visibility="player_known",
+    )
+    atomic_write(VaultPage(fm, body=""), npc)
+    resolver = EntityResolver(master)
+
+    found = resolver.resolve("Marcus", entity_type=None)
+
+    assert found is not None
+    assert found.frontmatter.id == "npc_marcus"
+
+
+def test_load_spec_complete_npc_keeps_extra_schema_fields(tmp_path: Path):
+    path = tmp_path / "npc_marcus.md"
+    path.write_text(
+        "---\n"
+        "id: npc_marcus\n"
+        "type: npc\n"
+        "name: Marcus\n"
+        "aliases: []\n"
+        "species: Human\n"
+        "role: Innkeeper\n"
+        "status: alive\n"
+        "disposition_to_pc: friendly\n"
+        "voice: weary\n"
+        "location_current: loc_tavern\n"
+        "factions:\n"
+        "  - fac_guild\n"
+        "visibility: player_known\n"
+        "secrets:\n"
+        "  - owes guild debt\n"
+        "---\n\n"
+        "Marcus runs the tavern.",
+        encoding="utf-8",
+    )
+
+    page = VaultPage.load_file(path)
+
+    assert isinstance(page.frontmatter, NpcFrontmatter)
+    assert page.frontmatter.location_current == "loc_tavern"
+    assert page.frontmatter.factions == ["fac_guild"]

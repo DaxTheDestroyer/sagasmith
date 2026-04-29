@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from pathlib import Path
 
 import pytest
 
@@ -17,11 +18,13 @@ from sagasmith.evals.fixtures import (
     make_valid_house_rules,
     make_valid_player_profile,
     make_valid_saga_state,
+    make_valid_scene_brief,
     make_valid_session_state,
 )
 from sagasmith.graph.bootstrap import AgentServices
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.dice import DiceService
+from sagasmith.vault import VaultService
 
 
 @pytest.fixture
@@ -212,6 +215,28 @@ class TestArchivistNode:
         assert result["memory_packet"] is not None
         # Phase 4: pending_narration preserved for TUI sync (Phase 7 will clear after persist)
         assert result["pending_narration"] == ["line one"]
+
+    def test_prepares_vault_pages_without_writing(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        import sagasmith.vault.paths as vp
+
+        monkeypatch.setattr(vp, "DEFAULT_MASTER_OPTS", tmp_path / ".ttrpg" / "vault")
+        vault_service = VaultService("cmp_001", tmp_path / "player_vault")
+        services = AgentServices(
+            dice=DiceService(campaign_seed="test", session_seed="s1"),
+            cost=CostGovernor(session_budget_usd=1.0),
+            safety=None,
+            llm=None,
+            vault_service=vault_service,
+        )
+        state = make_valid_saga_state().model_dump()
+        state["scene_brief"] = make_valid_scene_brief(present_entities=["Marcus"]).model_dump()
+
+        result = archivist_node(state, services)
+
+        pending = result["vault_pending_writes"]
+        assert len(pending) == 1
+        assert pending[0].frontmatter.id == "npc_marcus"
+        assert not (vault_service.master_path / "npcs" / "npc_marcus.md").exists()
 
 
 class TestOnboardingNode:

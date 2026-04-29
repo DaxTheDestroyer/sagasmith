@@ -72,6 +72,9 @@ def make_saga_state(**overrides: object) -> SagaState:
             "warnings_sent": [],
             "hard_stopped": False,
         },
+        "vault_master_path": "",
+        "vault_player_path": "",
+        "rolling_summary": None,
     }
     data.update(overrides)
     return SagaState(**data)
