@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-04-29T17:18:47Z"
-last_activity: 2026-04-29 -- Completed Phase 8 Plan 02 RetconService and runtime rollback
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-04-29T17:35:00Z"
+last_activity: 2026-04-29 -- Completed Phase 8 Plan 03 TUI retcon picker/preview/confirmation
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 35
-  completed_plans: 34
-  percent: 97
+  completed_plans: 35
+  percent: 100
 ---
 
 # Project State
@@ -25,20 +25,20 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 ## Current Position
 
-Phase: 8 of 8 (Retcon, Repair, and Release Hardening) — Plans 08-01, 08-02, and 08-04 complete
-Plan: 08-03 remains; 08-04 ✅
-Status: Retcon service/runtime rollback and MVP smoke/release gate implemented; retcon UI plan remains
-Last activity: 2026-04-29 -- Completed 08-02 RetconService preview/confirm, GraphRuntime checkpoint rewind, derived rebuild, and canonical exclusion tests
+Phase: 8 of 8 (Retcon, Repair, and Release Hardening) — All plans complete (08-01, 08-02, 08-03, 08-04)
+Plan: All complete
+Status: Phase 8 complete — retcon audit/persistence, RetconService/runtime rollback, TUI retcon UI, and MVP smoke/release gate implemented
+Last activity: 2026-04-29 -- Completed 08-03 TUI retcon picker/preview/confirmation with typed confirmation and sync-after-retcon
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 34
+- Total plans completed: 35
 - Average duration: 22 min
-- Total execution time: ~5.9 hours
+- Total execution time: ~6.1 hours
 
 **By Phase:**
 
@@ -50,7 +50,8 @@ Progress: [██████████] 97%
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
 | 6. AI GM Story Loop | 7 | ~115 min | ~16 min |
-| 8. Retcon, Repair, and Release Hardening | 3 | 16 min | ~5 min |
+| 7. Memory, Vault, and Resume Differentiator | 1 | -- | -- |
+| 8. Retcon, Repair, and Release Hardening | 4 | 28 min | ~7 min |
 
 *Updated after each plan completion*
 
@@ -80,11 +81,11 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 8 Plan 08-03 (TUI retcon picker, preview, confirmation, and repair guidance).
+- None — all Phase 8 plans (08-01 through 08-04) are complete. All 35 plans across all 8 phases are done.
 
 ### Blockers/Concerns
 
-- None currently. Phase 6 core work is complete; 06-08 integration tests are deferred.
+- None currently. All Phase 8 plans are complete.
 
 ### Decisions (continued from Phase 4)
 
@@ -142,6 +143,10 @@ Recent decisions affecting current work:
 - [08-02]: Runtime retcon completion messages reference only turn ids/counts and avoid removed canon details.
 - [08-04]: MVP smoke uses deterministic in-process services and fake provider configuration, never OpenRouter credentials.
 - [08-04]: Release-gate secret scanning uses the existing pre-commit gitleaks hook.
+- [08-03]: /retcon no-arg lists recent eligible completed turns; never silently targets latest turn.
+- [08-03]: Confirmation uses exact turn-specific token `RETCON {turn_id}` parsed from joined command args.
+- [08-03]: sync_after_retcon() resyncs narration and mechanics after successful retcon without exiting the app.
+- [08-03]: Both success and blocked messages restrict output to turn ids/counts and repair guidance; never expose removed transcript content.
 
 ## Deferred Items
 
@@ -155,6 +160,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:18:47Z
-Stopped at: Completed 08-02-PLAN.md; Phase 8 08-03 remains
+Last session: 2026-04-29T17:35:00Z
+Stopped at: Completed 08-03-PLAN.md; all Phase 8 plans (08-01 through 08-04) complete
 Resume file: None
