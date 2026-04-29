@@ -15,9 +15,11 @@ from .narrative import MemoryPacket, SceneBrief, SessionState
 from .persistence import (
     CheckpointRef,
     CostLogRecord,
+    RetconAuditRecord,
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
+    VaultWriteAuditRecord,
 )
 from .player import ContentPolicy, HouseRules, PlayerProfile
 from .provider import (
@@ -60,8 +62,10 @@ LLM_BOUNDARY_AND_PERSISTED_MODELS: list[SchemaModelClass] = [
     CostLogRecord,
     TurnRecord,
     CheckpointRef,
+    RetconAuditRecord,
     TranscriptEntry,
     StateDeltaRecord,
+    VaultWriteAuditRecord,
 ]
 
 

@@ -155,8 +155,8 @@ def test_persistence_schemas_round_trip() -> None:
 def test_schema_export_count_is_25(tmp_path: Path) -> None:
     out = tmp_path / "schemas"
     paths = export_all_schemas(out)
-    # Phase 6 Plan 01 added WorldBible and CampaignSeed (total: 29).
-    assert len(paths) == 29
+    # Phase 8 Plan 01 added RetconAuditRecord and VaultWriteAuditRecord (total: 31).
+    assert len(paths) == 31
     names = {p.name.removesuffix(".schema.json") for p in paths}
     assert {
         "CostLogRecord",
@@ -166,4 +166,6 @@ def test_schema_export_count_is_25(tmp_path: Path) -> None:
         "StateDeltaRecord",
         "CampaignManifest",
         "ProviderSettings",
+        "RetconAuditRecord",
+        "VaultWriteAuditRecord",
     } <= names
