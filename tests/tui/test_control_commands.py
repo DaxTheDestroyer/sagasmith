@@ -7,6 +7,9 @@ from pathlib import Path
 import pytest
 
 from sagasmith.app.campaign import init_campaign, open_campaign
+from sagasmith.persistence.db import open_campaign_db
+from sagasmith.persistence.repositories import TranscriptRepository
+from sagasmith.schemas.persistence import TranscriptEntry
 from sagasmith.services.cost import CostGovernor
 from sagasmith.tui.app import SagaSmithApp
 from sagasmith.tui.commands.control import (
@@ -40,11 +43,25 @@ def _make_app(tmp_path: Path) -> SagaSmithApp:
 
 _STUB_CASES = [
     (SaveCommand(), "/save", "Phase 4"),
-    (RecapCommand(), "/recap", "Phase 7"),
     (InventoryCommand(), "/inventory", "Phase 5"),
     (MapCommand(), "/map", "Phase 5"),
     (RetconCommand(), "/retcon", "Phase 8"),
 ]
+
+
+class _FakeSnapshot:
+    def __init__(self) -> None:
+        self.values = {"rolling_summary": "Mara guided the hero through the river fog."}
+
+
+class _FakeGraph:
+    def get_state(self, thread_config: object) -> _FakeSnapshot:
+        return _FakeSnapshot()
+
+
+class _FakeGraphRuntime:
+    graph = _FakeGraph()
+    thread_config: dict[str, object] = {}
 
 
 @pytest.mark.asyncio
@@ -77,6 +94,45 @@ async def test_clock_command_renders_state_default(tmp_path: Path) -> None:
         logged = app.query_one(NarrationArea).logged_lines[:]
 
     assert any("Clock: \u2014" in line for line in logged), f"Expected 'Clock: —' in {logged}"
+
+
+@pytest.mark.asyncio
+async def test_recap_command_renders_summary_and_recent_transcript(tmp_path: Path) -> None:
+    """RecapCommand renders rolling_summary followed by recent transcript rows."""
+    app = _make_app(tmp_path)
+    conn = open_campaign_db(app.paths.db)
+    app.bind_service_connection(conn)
+    app.graph_runtime = _FakeGraphRuntime()  # type: ignore[assignment]
+    repo = TranscriptRepository(conn)
+    for index, (kind, content) in enumerate(
+        [
+            ("player_input", "I look for Mara."),
+            ("narration_final", "You find tracks by the dock."),
+            ("player_input", "I follow them."),
+            ("narration_final", "Mara steps from the fog."),
+        ]
+    ):
+        repo.append(
+            TranscriptEntry(
+                turn_id=f"turn_{index:06d}",
+                kind=kind,
+                content=content,
+                sequence=index,
+                created_at="2026-04-29T00:00:00Z",
+            )
+        )
+    conn.commit()
+
+    logged: list[str] = []
+    async with app.run_test():
+        RecapCommand().handle(app, ())
+        logged = app.query_one(NarrationArea).logged_lines[:]
+
+    combined = "\n".join(logged)
+    assert "=== RECAP ===" in combined
+    assert "Mara guided the hero through the river fog." in combined
+    assert "> I look for Mara." in combined
+    assert "Mara steps from the fog." in combined
 
 
 @pytest.mark.asyncio
