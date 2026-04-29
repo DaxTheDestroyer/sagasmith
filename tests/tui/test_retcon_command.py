@@ -1,10 +1,12 @@
-"""Tests for /retcon command: no-graph-unavailable, candidate picker, preview, and block paths."""
+"""Tests for /retcon command: no-graph-unavailable, candidate picker, preview,
+confirmation, completion/block messaging, and post-retcon resync."""
 
 from __future__ import annotations
 
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -213,3 +215,99 @@ async def test_preview_blocked_error_prints_blocked_and_repair(tmp_path: Path) -
     assert "not complete" in combined
     assert "[system] repair:" in combined
     assert "completed canonical turn" in combined
+
+
+# ---------------------------------------------------------------------------
+# Task 2 tests: typed confirmation and completion/block messaging
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_confirmation_with_correct_token_calls_confirm_retcon(tmp_path: Path) -> None:
+    """Test 1: /retcon turn_000003 RETCON turn_000003 calls confirm_retcon with
+    the selected turn id and exact token, and prints a success message without
+    transcript content."""
+    app = _make_app(tmp_path)
+    runtime = _RecordingRuntime()
+    app.graph_runtime = runtime  # type: ignore[assignment]
+    logged: list[str] = []
+    async with app.run_test():
+        RetconCommand().handle(app, ("turn_000003", "RETCON", "turn_000003"))
+        logged = app.query_one(NarrationArea).logged_lines[:]
+
+    combined = "\n".join(logged)
+    # confirm_retcon was called with correct args.
+    assert runtime.confirm_calls == [("turn_000003", "RETCON turn_000003")]
+    # Success message uses only turn id, never transcript body.
+    assert "[system] Retcon complete: returned to checkpoint before turn_000003" in combined
+    assert "audit-retained" in combined
+    # Must NOT include removed canon transcript excerpts.
+    assert "narration_final" not in combined
+
+
+@pytest.mark.asyncio
+async def test_wrong_token_prints_blocked_guidance(tmp_path: Path) -> None:
+    """Test 2: Wrong confirmation token prints blocked guidance without
+    exposing removed canon details."""
+    from sagasmith.persistence.retcon import RetconBlockedError
+
+    app = _make_app(tmp_path)
+    runtime = _RecordingRuntime()
+    blocked = RetconBlockedError(
+        "Confirmation token for turn turn_000003 did not match.",
+        "Repair by typing the exact token: RETCON turn_000003",
+    )
+    runtime._confirm_result = blocked
+    app.graph_runtime = runtime  # type: ignore[assignment]
+    logged: list[str] = []
+    async with app.run_test():
+        RetconCommand().handle(app, ("turn_000003", "WRONG", "token"))
+        logged = app.query_one(NarrationArea).logged_lines[:]
+
+    combined = "\n".join(logged)
+    assert "[system] /retcon blocked:" in combined
+    assert "did not match" in combined
+    assert "[system] repair:" in combined
+    assert "exact token" in combined
+    # No removed canon details in the blocked message.
+    assert "transcript" not in combined.lower()
+    assert "narration" not in combined.lower()
+
+
+@pytest.mark.asyncio
+async def test_successful_retcon_calls_sync_after_retcon(tmp_path: Path) -> None:
+    """Test 3: After a successful retcon confirmation, the app calls
+    sync_after_retcon() which invokes graph syncs without exiting."""
+    app = _make_app(tmp_path)
+    runtime = _RecordingRuntime()
+    app.graph_runtime = runtime  # type: ignore[assignment]
+
+    # Patch sync_after_retcon to track calls.
+    sync_calls: list[list] = []
+    app.sync_after_retcon = lambda: sync_calls.append([])
+
+    async with app.run_test():
+        RetconCommand().handle(app, ("turn_000003", "RETCON", "turn_000003"))
+
+    # confirm_retcon was called.
+    assert runtime.confirm_calls == [("turn_000003", "RETCON turn_000003")]
+    # sync_after_retcon was called after successful retcon.
+    assert len(sync_calls) == 1, "sync_after_retcon should be called after successful retcon"
+
+
+@pytest.mark.asyncio
+async def test_retcon_completion_message_excludes_removed_canon(tmp_path: Path) -> None:
+    """Test 4: Both success and blocked messages never include transcript
+    content from a removed turn."""
+    app = _make_app(tmp_path)
+    runtime = _RecordingRuntime()
+    app.graph_runtime = runtime  # type: ignore[assignment]
+    success_logged: list[str] = []
+    async with app.run_test():
+        RetconCommand().handle(app, ("turn_000003", "RETCON", "turn_000003"))
+        success_logged = app.query_one(NarrationArea).logged_lines[:]
+
+    success_combined = "\n".join(success_logged)
+    # Success message must never include actual transcript excerpts.
+    assert "narration_final" not in success_combined
+    assert "story content" not in success_combined.lower()
