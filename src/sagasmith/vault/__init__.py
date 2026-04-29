@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Iterable
 
 from .page import (
     NPC_PAGE_TYPES,
@@ -33,10 +34,15 @@ __all__ = [
     "EntityResolver",
     "VaultPage",
     "VaultService",
+    "VaultSyncError",
     "atomic_write",
     "ensure_player_vault_path",
     "get_master_vault_path",
 ]
+
+
+class VaultSyncError(RuntimeError):
+    """Raised when the player-vault projection cannot be completed safely."""
 
 
 class VaultService:
@@ -89,53 +95,107 @@ class VaultService:
         - player_known: write full page with GM-only fields stripped from
           frontmatter and body (comments between <!-- gm: ... --> removed).
 
-        Atomic writes per file; failures raise ValueError.
+        Atomic writes per file; failures raise :class:`VaultSyncError`.
         """
-        self.ensure_player_vault()
-        # Walk master vault; skip meta/ (master-only)
-        for md_file in self.master_path.rglob("*.md"):
+        try:
+            self.ensure_player_vault()
+            projected_pages = self._project_visible_pages()
+            self._clear_player_markdown_projection()
+            for rel, page in projected_pages:
+                atomic_write(page, self.player_vault_root / rel)
+            self._regenerate_index(projected_pages)
+            self._regenerate_log(projected_pages)
+        except VaultSyncError:
+            raise
+        except OSError as exc:
+            raise VaultSyncError(f"player vault sync failed: {exc}") from exc
+        except ValueError as exc:
+            raise VaultSyncError(f"player vault sync failed: {exc}") from exc
+
+    def rebuild_indices(self, conn: object | None = None) -> dict[str, int]:
+        """Rebuild derived read layers from the master vault.
+
+        Returns counts for CLI reporting. FTS5 is rebuilt when a SQLite
+        connection is supplied; the NetworkX graph cache is always warmed from
+        the master vault. LanceDB remains future-scoped for this MVP slice.
+        """
+        counts: dict[str, int] = {"graph_pages": 0, "fts5_pages": 0}
+        from sagasmith.memory.graph import warm_vault_graph
+
+        graph = warm_vault_graph(self.master_path)
+        counts["graph_pages"] = len(graph.get_all_node_ids())
+        if conn is not None:
+            import sqlite3
+
+            if isinstance(conn, sqlite3.Connection):
+                from sagasmith.memory.fts5 import FTS5Index
+
+                counts["fts5_pages"] = FTS5Index(conn).rebuild_all(self.master_path)
+        return counts
+
+    def _project_visible_pages(self) -> list[tuple[Path, VaultPage]]:
+        projected: list[tuple[Path, VaultPage]] = []
+        for md_file in sorted(self.master_path.rglob("*.md")):
             rel = md_file.relative_to(self.master_path)
             if rel.parts and rel.parts[0] == "meta":
-                # meta pages are master-only; never projected
                 continue
             page = VaultPage.load_file(md_file)
             visibility = page.frontmatter.visibility
             if visibility == "gm_only":
                 continue
             if visibility == "foreshadowed":
-                # Create stub: only id, type, name, aliases
-                stub_front = BaseVaultFrontmatter(
-                    id=page.frontmatter.id,
-                    type=page.frontmatter.type,
-                    name=page.frontmatter.name,
-                    aliases=page.frontmatter.aliases or [],
-                    visibility="foreshadowed",
-                    first_encountered=page.frontmatter.first_encountered,
-                )
-                stub_page = VaultPage(stub_front, body="")
-                target = self.player_vault_root / rel
-                target.parent.mkdir(parents=True, exist_ok=True)
-                atomic_write(stub_page, target)
+                projected.append((rel, _foreshadowed_stub(page)))
             elif visibility == "player_known":
-                # Strip gm fields and inline comments; write full content
-                front_dict = page.frontmatter.model_dump(mode="json")
-                # Remove GM-only keys
-                gm_keys = {"secrets", "gm_notes"} | {k for k in front_dict if k.startswith("gm_")}
-                for k in gm_keys:
-                    front_dict.pop(k, None)
-                target_cls = _frontmatter_type_for(front_dict.get("type"))
-                clean_front = target_cls.model_validate(front_dict)
-                # Strip body GM comments
-                clean_body = _strip_gm_comments(page.body)
-                clean_page = VaultPage(clean_front, clean_body)
-                target = self.player_vault_root / rel
-                target.parent.mkdir(parents=True, exist_ok=True)
-                atomic_write(clean_page, target)
-            else:
-                # Unknown visibility: skip to be safe
+                projected.append((rel, _strip_player_known_page(page)))
+        return projected
+
+    def _clear_player_markdown_projection(self) -> None:
+        if not self.player_vault_root.exists():
+            return
+        for md_file in self.player_vault_root.rglob("*.md"):
+            md_file.unlink()
+
+    def _regenerate_index(self, projected_pages: Iterable[tuple[Path, VaultPage]]) -> None:
+        pages = sorted(projected_pages, key=lambda item: (item[1].frontmatter.type, item[1].frontmatter.name))
+        lines = ["# World Overview", "", "*Auto-generated from known campaign facts.*", ""]
+        grouped: dict[str, list[tuple[Path, VaultPage]]] = {}
+        for rel, page in pages:
+            grouped.setdefault(page.frontmatter.type, []).append((rel, page))
+        headings = {
+            "npc": "NPCs",
+            "location": "Locations",
+            "faction": "Factions",
+            "item": "Items",
+            "quest": "Quests",
+            "callback": "Callbacks",
+            "session": "Sessions",
+            "lore": "Lore",
+        }
+        for page_type, title in headings.items():
+            entries = grouped.get(page_type, [])
+            if not entries:
                 continue
-                # Regenerate index.md and log.md (simplified stub: not implemented in first slice)
-                # Plan 07-05 will flesh out index and log.
+            lines.extend([f"## {title}", ""])
+            for rel, page in entries:
+                stem = rel.with_suffix("").as_posix()
+                lines.append(f"- [[{stem}|{page.frontmatter.name}]]")
+            lines.append("")
+        _write_generated_page(
+            self.player_vault_root / "index.md",
+            "# World Overview",
+            "\n".join(lines).rstrip() + "\n",
+        )
+
+    def _regenerate_log(self, projected_pages: Iterable[tuple[Path, VaultPage]]) -> None:
+        pages = sorted(projected_pages, key=lambda item: item[1].frontmatter.id)
+        lines = ["# Campaign Log", "", "*Auto-generated from visible vault pages.*", ""]
+        for _rel, page in pages:
+            lines.append(f"## visible | {page.frontmatter.id} — {page.frontmatter.name}")
+        _write_generated_page(
+            self.player_vault_root / "log.md",
+            "# Campaign Log",
+            "\n".join(lines).rstrip() + "\n",
+        )
 
 
 def _strip_gm_comments(body: str) -> str:
@@ -143,6 +203,45 @@ def _strip_gm_comments(body: str) -> str:
     # Regex matches <!-- gm: ... --> possibly spanning newlines (non-greedy)
     pattern = re.compile(r"<!--\s*gm:.*?-->", re.DOTALL)
     return pattern.sub("", body)
+
+
+def _foreshadowed_stub(page: VaultPage) -> VaultPage:
+    stub_front = BaseVaultFrontmatter(
+        id=page.frontmatter.id,
+        type=page.frontmatter.type,
+        name=page.frontmatter.name,
+        aliases=page.frontmatter.aliases or [],
+        visibility="foreshadowed",
+        first_encountered=page.frontmatter.first_encountered,
+    )
+    return VaultPage(
+        stub_front,
+        body="*Unknown - you have heard this name but know little more.*",
+    )
+
+
+def _strip_player_known_page(page: VaultPage) -> VaultPage:
+    front_dict = page.frontmatter.model_dump(mode="json")
+    gm_keys = {"secrets", "gm_notes"} | {k for k in front_dict if k.startswith("gm_")}
+    for key in gm_keys:
+        front_dict.pop(key, None)
+    clean_front = _frontmatter_type_for(front_dict.get("type")).model_validate(front_dict)
+    return VaultPage(clean_front, _strip_gm_comments(page.body).strip())
+
+
+def _write_generated_page(target: Path, title: str, body: str) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(".tmp")
+    try:
+        tmp.write_text(body, encoding="utf-8")
+        tmp.replace(target)
+    except Exception as exc:
+        try:
+            if tmp.exists():
+                tmp.unlink()
+        except OSError:
+            pass
+        raise VaultSyncError(f"failed to write generated {title}: {exc}") from exc
 
 
 def _frontmatter_type_for(type_name: object) -> type[BaseVaultFrontmatter]:
