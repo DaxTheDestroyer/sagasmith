@@ -9,6 +9,7 @@ import yaml
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet,
 )
+from sagasmith.agents.archivist.skills.visibility_promotion.logic import promote_visibility
 from sagasmith.agents.archivist.skills.vault_page_upsert.logic import (
     vault_page_upsert,
 )
@@ -26,7 +27,12 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
     if activation is not None:
         store = services.skill_store
         if store is not None:
-            for skill_name in ["entity-resolution", "vault-page-upsert", "memory-packet-assembly"]:
+            for skill_name in [
+                "entity-resolution",
+                "vault-page-upsert",
+                "memory-packet-assembly",
+                "visibility-promotion",
+            ]:
                 if store.find(name=skill_name, agent_scope="archivist") is not None:
                     activation.set_skill(skill_name)
 
@@ -94,7 +100,15 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             # Resolve to see if already exists
             resolved = _resolve_known_entity(vault_service, entity_name)
             if resolved is not None:
-                # Already exists; skip writing (or could be updated later)
+                _promote_existing_page(
+                    vault_service=vault_service,
+                    page=resolved,
+                    context={
+                        "scene_brief": scene_brief,
+                        "player_input": state.get("pending_player_input"),
+                        "pending_narration": state.get("pending_narration", []),
+                    },
+                )
                 continue
             # Determine entity type: default to npc; later phases may infer from context
             entity_type = "npc"
@@ -136,6 +150,16 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
         page = VaultPage(frontmatter, rolling_summary)
         vault_pending_writes.append(page)
 
+    if vault_pending_writes:
+        vault_pending_writes = _promote_pending_pages(
+            vault_pending_writes,
+            context={
+                "scene_brief": scene_brief,
+                "player_input": state.get("pending_player_input"),
+                "pending_narration": state.get("pending_narration", []),
+            },
+        )
+
     memory_packet = assemble_memory_packet(
         state,
         conn=getattr(services, "transcript_conn", None),
@@ -159,3 +183,47 @@ def _resolve_known_entity(vault_service: VaultService, entity_name: str) -> Vaul
         if resolved is not None:
             return resolved
     return vault_service.resolver.resolve(entity_name, entity_type=None)
+
+
+def _promote_pending_pages(pages: list[VaultPage], *, context: dict[str, Any]) -> list[VaultPage]:
+    promoted: list[VaultPage] = []
+    for page in pages:
+        new_visibility = promote_visibility(page, context)
+        if new_visibility != page.frontmatter.visibility:
+            promoted.append(
+                VaultPage(
+                    page.frontmatter.model_copy(update={"visibility": new_visibility}),
+                    page.body,
+                )
+            )
+        else:
+            promoted.append(page)
+    return promoted
+
+
+def _promote_existing_page(
+    *, vault_service: VaultService, page: VaultPage, context: dict[str, Any]
+) -> None:
+    new_visibility = promote_visibility(page, context)
+    if new_visibility == page.frontmatter.visibility:
+        return
+    promoted = VaultPage(page.frontmatter.model_copy(update={"visibility": new_visibility}), page.body)
+    relative_path = _vault_relative_path(promoted)
+    vault_service.write_page(promoted, relative_path)
+
+
+def _vault_relative_path(page: VaultPage) -> Any:
+    from pathlib import Path
+
+    folder_by_type = {
+        "npc": "npcs",
+        "location": "locations",
+        "faction": "factions",
+        "item": "items",
+        "quest": "quests",
+        "callback": "callbacks",
+        "session": "sessions",
+        "lore": "lore",
+    }
+    folder = folder_by_type.get(page.frontmatter.type, "lore")
+    return Path(folder) / f"{page.frontmatter.id}.md"
