@@ -52,5 +52,15 @@ def test_recent_transcript_context_returns_newest_rows_in_chronological_order() 
     ]
 
 
+def test_recent_transcript_context_excludes_retconned_turns_by_default() -> None:
+    conn = _conn_with_transcript()
+    conn.execute("UPDATE turn_records SET status = 'retconned' WHERE turn_id = ?", ("turn_000002",))
+    conn.commit()
+
+    entries = get_recent_transcript_context(conn, campaign_id="cmp_001", limit=3)
+
+    assert [entry.turn_id for entry in entries] == ["turn_000000", "turn_000001"]
+
+
 def test_recent_transcript_context_degrades_to_empty_without_sqlite() -> None:
     assert get_recent_transcript_context(None, campaign_id="cmp_001") == []
