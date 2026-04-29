@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal
 
 from sagasmith.schemas.player import ContentPolicy
 
@@ -61,7 +61,16 @@ class Blocked(PreGateVerdict):
 
 _POLICY_SYNONYMS: dict[str, tuple[str, ...]] = {
     "graphic_sexual_content": ("sexual assault", "explicit sex", "graphic sexual"),
-    "harm_to_children": ("harm a child", "children are harmed", "child corpse", "injured child", "child harmed", "harmed child", "children harmed", "harming children"),
+    "harm_to_children": (
+        "harm a child",
+        "children are harmed",
+        "child corpse",
+        "injured child",
+        "child harmed",
+        "harmed child",
+        "children harmed",
+        "harming children",
+    ),
     "graphic_violence": ("gore", "dismember", "graphic violence", "viscera"),
 }
 
@@ -117,7 +126,7 @@ class SafetyPreGate:
     _soft_limit_patterns: list[tuple[str, re.Pattern[str]]] = field(default_factory=list)
     _soft_limit_actions: dict[str, str] = field(default_factory=dict)
 
-    def __init__(self, policy: ContentPolicy | dict | None = None) -> None:
+    def __init__(self, policy: ContentPolicy | dict[str, Any] | None = None) -> None:
         if policy is None:
             object.__setattr__(self, "_hard_limit_patterns", [])
             object.__setattr__(self, "_soft_limit_patterns", [])
@@ -173,6 +182,8 @@ class SafetyPreGate:
             routed = _redact_text(routed, term)
 
         if routed != text:
-            return Rerouted(routed, reason="soft limit adjusted", policy_ref=warnings[0] if warnings else None)
+            return Rerouted(
+                routed, reason="soft limit adjusted", policy_ref=warnings[0] if warnings else None
+            )
 
         return Allowed(text, content_warnings=tuple(warnings))

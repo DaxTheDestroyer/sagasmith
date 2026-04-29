@@ -91,7 +91,9 @@ def parse_frontmatter(text: str) -> tuple[dict[str, object], str]:
         if not stripped or stripped.startswith("#"):
             continue
         if line.startswith(" ") or line.startswith("\t"):
-            raise FrontmatterError(f"unsupported YAML feature: indented continuation in line {line!r}")
+            raise FrontmatterError(
+                f"unsupported YAML feature: indented continuation in line {line!r}"
+            )
         if stripped.startswith("- "):
             raise FrontmatterError("unsupported YAML feature: block-style list")
         m = _KEY_VAL_RE.match(stripped)

@@ -22,31 +22,31 @@ from sagasmith.schemas.persistence import (
 def test_apply_migrations_creates_tables(tmp_path: Path) -> None:
     path = tmp_path / "test.db"
     with campaign_db(path) as conn:
-            applied = apply_migrations(conn)
-            # 0001_initial.sql (v1), 0002_campaign_and_settings.sql (v2),
-            # 0003_onboarding_records.sql (v3), 0004_safety_events.sql (v4),
-            # 0005_agent_skill_log.sql (v5), 0006_turn_record_status.sql (v6),
-            # 0007_vault_sync_warning.sql (v7), 0008_retcon_audit.sql (v8)
-            # are all applied on a fresh DB.
-            assert applied == [1, 2, 3, 4, 5, 6, 7, 8]
-            tables = {
-                row[0]
-                for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-            }
-            assert {
-                "schema_version",
-                "turn_records",
-                "transcript_entries",
-                "roll_logs",
-                "provider_logs",
-                "cost_logs",
-                "state_deltas",
-                "checkpoint_refs",
-                "campaigns",
-                "settings",
-                "retcon_audit",
-                "vault_write_audit",
-            } <= tables
+        applied = apply_migrations(conn)
+        # 0001_initial.sql (v1), 0002_campaign_and_settings.sql (v2),
+        # 0003_onboarding_records.sql (v3), 0004_safety_events.sql (v4),
+        # 0005_agent_skill_log.sql (v5), 0006_turn_record_status.sql (v6),
+        # 0007_vault_sync_warning.sql (v7), 0008_retcon_audit.sql (v8)
+        # are all applied on a fresh DB.
+        assert applied == [1, 2, 3, 4, 5, 6, 7, 8]
+        tables = {
+            row[0]
+            for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        }
+        assert {
+            "schema_version",
+            "turn_records",
+            "transcript_entries",
+            "roll_logs",
+            "provider_logs",
+            "cost_logs",
+            "state_deltas",
+            "checkpoint_refs",
+            "campaigns",
+            "settings",
+            "retcon_audit",
+            "vault_write_audit",
+        } <= tables
 
 
 def test_apply_migrations_is_idempotent(tmp_path: Path) -> None:

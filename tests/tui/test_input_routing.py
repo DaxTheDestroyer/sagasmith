@@ -78,14 +78,25 @@ async def test_freeform_input_echoes_to_narration(tmp_path: Path) -> None:
 async def test_scrollback_loads_on_mount(tmp_path: Path) -> None:
     """TUI-03: transcript_entries persisted before mount appear in narration."""
     root = _init_campaign_root(tmp_path, name="Resume Campaign")
-    paths, _manifest = open_campaign(root)
+    paths, manifest = open_campaign(root)
 
     # Manually insert 3 transcript rows (one of each kind).
     conn = open_campaign_db(paths.db)
     try:
         with conn:
-            # We need a turn_id; use a placeholder (no FK on transcript_entries to turns).
             turn_id = "t-0001"
+            conn.execute(
+                "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    turn_id,
+                    manifest.campaign_id,
+                    "session_001",
+                    "complete",
+                    "2026-01-01T00:00:00",
+                    "2026-01-01T00:00:03",
+                    1,
+                ),
+            )
             conn.execute(
                 "INSERT INTO transcript_entries (turn_id, kind, content, sequence, created_at) VALUES (?, ?, ?, ?, ?)",
                 (turn_id, "player_input", "the player said", 1, "2026-01-01T00:00:00"),
@@ -131,11 +142,23 @@ async def test_scrollback_loads_on_mount(tmp_path: Path) -> None:
 async def test_rich_markup_in_transcript_renders_as_plain_text(tmp_path: Path) -> None:
     """T-03-17: [red]ATTACK[/red] in transcript is displayed literally, not styled."""
     root = _init_campaign_root(tmp_path, name="Markup Test")
-    paths, _manifest = open_campaign(root)
+    paths, manifest = open_campaign(root)
 
     conn = open_campaign_db(paths.db)
     try:
         with conn:
+            conn.execute(
+                "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    "t-0001",
+                    manifest.campaign_id,
+                    "session_001",
+                    "complete",
+                    "2026-01-01T00:00:00",
+                    "2026-01-01T00:00:01",
+                    1,
+                ),
+            )
             conn.execute(
                 "INSERT INTO transcript_entries (turn_id, kind, content, sequence, created_at) VALUES (?, ?, ?, ?, ?)",
                 ("t-0001", "narration_final", "[red]ATTACK[/red]", 1, "2026-01-01T00:00:00"),

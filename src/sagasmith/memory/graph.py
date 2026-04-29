@@ -184,7 +184,11 @@ def _parse_frontmatter_body(text: str) -> tuple[Frontmatter, str]:
         if len(parts) >= 3:
             try:
                 loaded = yaml.safe_load(parts[1]) or {}
-                fm = {str(key): value for key, value in loaded.items()} if isinstance(loaded, dict) else {}
+                fm = (
+                    {str(key): value for key, value in loaded.items()}
+                    if isinstance(loaded, dict)
+                    else {}
+                )
             except yaml.YAMLError:
                 fm = {}
             return fm, parts[2].strip()

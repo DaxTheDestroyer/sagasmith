@@ -113,7 +113,7 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
     app.commands = registry
 
     # Load recent transcript for scrollback (TUI-03).
-    app.initial_scrollback = _load_scrollback(paths.db)
+    app.initial_scrollback = _load_scrollback(paths.db, campaign_id=manifest.campaign_id)
     return app
 
 
@@ -133,8 +133,8 @@ def _next_session_number(conn, campaign_id: str) -> int:  # type: ignore[no-unty
     return max_num + 1 if max_num else 1
 
 
-def _load_scrollback(db_path: Path) -> list[str]:
-    """Return last SCROLLBACK_LIMIT rendered lines from transcript_entries.
+def _load_scrollback(db_path: Path, *, campaign_id: str) -> list[str]:
+    """Return last SCROLLBACK_LIMIT rendered canonical transcript lines.
 
     Rendering rule:
       - kind='player_input'    → f"> {content}"
@@ -148,12 +148,15 @@ def _load_scrollback(db_path: Path) -> list[str]:
     try:
         rows = conn.execute(
             """
-            SELECT kind, content
-              FROM transcript_entries
-             ORDER BY id DESC
+            SELECT te.kind, te.content
+              FROM transcript_entries AS te
+              JOIN turn_records AS tr ON tr.turn_id = te.turn_id
+             WHERE tr.campaign_id = ?
+               AND tr.status = 'complete'
+             ORDER BY tr.completed_at DESC, te.sequence DESC
              LIMIT ?
             """,
-            (SCROLLBACK_LIMIT,),
+            (campaign_id, SCROLLBACK_LIMIT),
         ).fetchall()
     finally:
         conn.close()

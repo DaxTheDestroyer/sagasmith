@@ -96,6 +96,7 @@ def test_wizard_build_records_yields_valid_triple() -> None:
 
     # Pillar weights: {combat:3, exploration:3, social:3, puzzle:1} → normalize
     import pytest as _pytest
+
     assert profile.pillar_weights == {
         "combat": _pytest.approx(0.3),
         "exploration": _pytest.approx(0.3),

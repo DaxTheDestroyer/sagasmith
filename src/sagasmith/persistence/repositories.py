@@ -79,11 +79,11 @@ class TranscriptRepository:
         limit: int = 8,
         include_retconned: bool = False,
     ) -> list[TranscriptEntry]:
-        """Return recent campaign transcript rows, excluding retconned turns by default."""
+        """Return recent canonical transcript rows for completed turns by default."""
 
         if limit <= 0:
             return []
-        status_filter = "" if include_retconned else "AND tr.status != 'retconned'"
+        status_filter = "" if include_retconned else "AND tr.status = 'complete'"
         rows = self.conn.execute(
             f"""
             SELECT te.turn_id, te.kind, te.content, te.sequence, te.created_at
@@ -644,9 +644,14 @@ class SafetyEventRepository:
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                record.event_id, record.campaign_id, record.turn_id,
-                record.kind, record.policy_ref, record.action_taken,
-                record.timestamp, record.visibility,
+                record.event_id,
+                record.campaign_id,
+                record.turn_id,
+                record.kind,
+                record.policy_ref,
+                record.action_taken,
+                record.timestamp,
+                record.visibility,
             ),
         )
         return record.event_id
@@ -664,9 +669,14 @@ class SafetyEventRepository:
         ).fetchall()
         return [
             SafetyEventRecord(
-                event_id=row[0], campaign_id=row[1], turn_id=row[2],
-                kind=row[3], policy_ref=row[4], action_taken=row[5],
-                timestamp=row[6], visibility=row[7],
+                event_id=row[0],
+                campaign_id=row[1],
+                turn_id=row[2],
+                kind=row[3],
+                policy_ref=row[4],
+                action_taken=row[5],
+                timestamp=row[6],
+                visibility=row[7],
             )
             for row in rows
         ]

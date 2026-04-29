@@ -36,9 +36,15 @@ class TestScan:
         (root / "c-skill" / "SKILL.md").parent.mkdir(parents=True)
         (root / "a-skill" / "SKILL.md").parent.mkdir(parents=True)
         (root / "b-skill" / "SKILL.md").parent.mkdir(parents=True)
-        (root / "c-skill" / "SKILL.md").write_text("---\nname: c-skill\ndescription: c\nallowed_agents: [o]\nimplementation_surface: prompted\n---\n")
-        (root / "a-skill" / "SKILL.md").write_text("---\nname: a-skill\ndescription: a\nallowed_agents: [o]\nimplementation_surface: prompted\n---\n")
-        (root / "b-skill" / "SKILL.md").write_text("---\nname: b-skill\ndescription: b\nallowed_agents: [o]\nimplementation_surface: prompted\n---\n")
+        (root / "c-skill" / "SKILL.md").write_text(
+            "---\nname: c-skill\ndescription: c\nallowed_agents: [o]\nimplementation_surface: prompted\n---\n"
+        )
+        (root / "a-skill" / "SKILL.md").write_text(
+            "---\nname: a-skill\ndescription: a\nallowed_agents: [o]\nimplementation_surface: prompted\n---\n"
+        )
+        (root / "b-skill" / "SKILL.md").write_text(
+            "---\nname: b-skill\ndescription: b\nallowed_agents: [o]\nimplementation_surface: prompted\n---\n"
+        )
         store = SkillStore(roots=[root])
         store.scan()
         names = [r.name for r in store.skills.get("_shared", [])]
@@ -113,10 +119,7 @@ class TestScan:
     def test_agent_star_rejected(self):
         store = SkillStore(roots=[AGENTS_ROOT, SHARED_ROOT])
         store.scan()
-        star_errors = [
-            msg for p, msg in store.errors
-            if "agent-star-reject" in str(p)
-        ]
+        star_errors = [msg for p, msg in store.errors if "agent-star-reject" in str(p)]
         assert len(star_errors) == 1
         assert "agent-scoped skills must not declare allowed_agents: ['*']" in star_errors[0]
 

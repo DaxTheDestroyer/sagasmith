@@ -25,10 +25,10 @@ _POST_GATE_SYSTEM_PROMPT = (
     "You are a content safety classifier for a tabletop RPG. "
     "Given a piece of narration text and a list of hard-limit and soft-limit policy terms, "
     "determine whether the text violates any policy. "
-    "Respond with JSON: {\"verdict\": \"pass\" | \"rewrite\" | \"block_fallback\", \"reason\": string|null, \"violated_term\": string|null}. "
-    "Use \"pass\" if no policy term is present. "
-    "Use \"rewrite\" if a soft-limit term is present and can be redacted. "
-    "Use \"block_fallback\" if a hard-limit term is present or redaction would not suffice."
+    'Respond with JSON: {"verdict": "pass" | "rewrite" | "block_fallback", "reason": string|null, "violated_term": string|null}. '
+    'Use "pass" if no policy term is present. '
+    'Use "rewrite" if a soft-limit term is present and can be redacted. '
+    'Use "block_fallback" if a hard-limit term is present or redaction would not suffice.'
 )
 
 
@@ -52,7 +52,9 @@ class Pass(PostGateVerdict):
 class Rewrite(PostGateVerdict):
     """Prose needs rewriting — soft-limit or borderline content detected."""
 
-    def __init__(self, *, reason: str, violated_term: str, redacted_prose: str | None = None) -> None:
+    def __init__(
+        self, *, reason: str, violated_term: str, redacted_prose: str | None = None
+    ) -> None:
         super().__init__("rewrite", reason, violated_term, redacted_prose)
 
 
@@ -69,7 +71,16 @@ class BlockFallback(PostGateVerdict):
 
 _INLINE_SYNONYMS: dict[str, tuple[str, ...]] = {
     "graphic_sexual_content": ("sexual assault", "explicit sex", "graphic sexual"),
-    "harm_to_children": ("harm a child", "children are harmed", "child corpse", "injured child", "child harmed", "harmed child", "children harmed", "harming children"),
+    "harm_to_children": (
+        "harm a child",
+        "children are harmed",
+        "child corpse",
+        "injured child",
+        "child harmed",
+        "harmed child",
+        "children harmed",
+        "harming children",
+    ),
     "graphic_violence": ("gore", "dismember", "graphic violence", "viscera"),
 }
 
@@ -125,7 +136,11 @@ class SafetyPostGate:
     llm_client: LLMClient | None
     cheap_model: str
 
-    def scan(self, prose: str, policy: ContentPolicy | dict | None = None) -> PostGateVerdict:
+    def scan(
+        self,
+        prose: str,
+        policy: ContentPolicy | dict[str, Any] | None = None,
+    ) -> PostGateVerdict:
         """Scan ``prose`` against content policy.
 
         1. Inline hard-limit keyword scan (free).
@@ -201,10 +216,12 @@ def _llm_classify(
             Message(role="system", content=_POST_GATE_SYSTEM_PROMPT),
             Message(
                 role="user",
-                content=json.dumps({
-                    "narration": prose[:2000],  # cap input for cheap model
-                    "policy": policy_terms,
-                }),
+                content=json.dumps(
+                    {
+                        "narration": prose[:2000],  # cap input for cheap model
+                        "policy": policy_terms,
+                    }
+                ),
             ),
         ],
         response_format="json_schema",
@@ -228,7 +245,7 @@ def _llm_classify(
         # LLM failure → fall back to inline scan
         return _soft_limit_inline_scan(prose, policy)
 
-    parsed = response.parsed_json or {}
+    parsed = response.parsed_json if isinstance(response.parsed_json, dict) else {}
     verdict_str = parsed.get("verdict", "pass")
     reason = parsed.get("reason")
     violated_term = parsed.get("violated_term")

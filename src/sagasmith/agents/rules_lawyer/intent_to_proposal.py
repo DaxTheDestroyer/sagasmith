@@ -58,7 +58,11 @@ def proposals_from_candidates(
 
     proposals: list[CheckProposal] = []
     for candidate in candidates:
-        if candidate.action == "skill_check" and candidate.stat is not None and candidate.dc is not None:
+        if (
+            candidate.action == "skill_check"
+            and candidate.stat is not None
+            and candidate.dc is not None
+        ):
             proposals.append(
                 rules_engine.build_check_proposal(
                     character_sheet,
@@ -69,7 +73,9 @@ def proposals_from_candidates(
                 )
             )
         elif candidate.action == "strike" and combat_state is not None:
-            proposal = _attack_proposal(candidate, character_sheet, combat_state, roll_index + len(proposals))
+            proposal = _attack_proposal(
+                candidate, character_sheet, combat_state, roll_index + len(proposals)
+            )
             if proposal is not None:
                 proposals.append(proposal)
         elif candidate.action == "start_combat":
@@ -88,8 +94,12 @@ def _attack_proposal(
 ) -> CheckProposal | None:
     if candidate.target_id is None or candidate.attack_id is None:
         return None
-    attack = next((item for item in character_sheet.attacks if item.id == candidate.attack_id), None)
-    target = next((item for item in combat_state.combatants if item.id == candidate.target_id), None)
+    attack = next(
+        (item for item in character_sheet.attacks if item.id == candidate.attack_id), None
+    )
+    target = next(
+        (item for item in combat_state.combatants if item.id == candidate.target_id), None
+    )
     if attack is None or target is None:
         return None
     dc = target.armor_class + (2 if combat_state.positions.get(target.id) == "behind_cover" else 0)

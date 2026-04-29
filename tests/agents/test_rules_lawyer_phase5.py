@@ -65,7 +65,9 @@ def test_supported_skill_and_perception_checks_append_one_result(services: Agent
         assert result["check_results"][0]["proposal_id"].startswith(expected)
 
 
-def test_unsupported_input_returns_visible_rules_error_without_roll(services: AgentServices) -> None:
+def test_unsupported_input_returns_visible_rules_error_without_roll(
+    services: AgentServices,
+) -> None:
     result = rules_lawyer_node(_state("roll arcana dc 15"), services)
 
     assert result["check_results"] == []
@@ -79,12 +81,18 @@ def test_start_combat_creates_state_and_initiative_results(services: AgentServic
     combat_state = result["combat_state"]
     assert combat_state["encounter_id"] == "enc_first_slice"
     assert len(combat_state["combatants"]) == 3
-    enemies = [combatant for combatant in combat_state["combatants"] if combatant["id"].startswith("enemy_")]
+    enemies = [
+        combatant
+        for combatant in combat_state["combatants"]
+        if combatant["id"].startswith("enemy_")
+    ]
     assert len(enemies) <= 2
     assert len(result["check_results"]) == 3
 
 
-def test_strike_resolves_through_combat_engine_and_records_damage_roll_id(services: AgentServices) -> None:
+def test_strike_resolves_through_combat_engine_and_records_damage_roll_id(
+    services: AgentServices,
+) -> None:
     started = rules_lawyer_node(_state("start combat"), services)
     state = _state(
         "strike enemy_weak_melee with longsword",

@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-04-29T17:35:00Z"
-last_activity: 2026-04-29 -- Completed Phase 8 Plan 03 TUI retcon picker/preview/confirmation
+stopped_at: Phase 8 review fixes complete
+last_updated: "2026-04-29T19:20:00Z"
+last_activity: 2026-04-29 -- Fixed Phase 8 review issues and restored release-gate component checks
 progress:
   total_phases: 8
   completed_phases: 7
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 Phase: 8 of 8 (Retcon, Repair, and Release Hardening) — All plans complete (08-01, 08-02, 08-03, 08-04)
 Plan: All complete
 Status: Phase 8 complete — retcon audit/persistence, RetconService/runtime rollback, TUI retcon UI, and MVP smoke/release gate implemented
-Last activity: 2026-04-29 -- Completed 08-03 TUI retcon picker/preview/confirmation with typed confirmation and sync-after-retcon
+Last activity: 2026-04-29 -- Fixed Phase 8 review issues: canonical retcon transcript reads, stale docs/tests, typecheck, formatting, full tests, MVP smoke, and secret scan
 
 Progress: [██████████] 100%
 
@@ -161,5 +161,5 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-04-29T17:35:00Z
-Stopped at: Completed 08-03-PLAN.md; all Phase 8 plans (08-01 through 08-04) complete
+Stopped at: Phase 8 review fixes complete; all Phase 8 plans (08-01 through 08-04) complete
 Resume file: None

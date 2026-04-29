@@ -12,6 +12,7 @@ from sagasmith.services.cost import CostGovernor
 from sagasmith.services.dice import DiceService
 
 if TYPE_CHECKING:
+    from sagasmith.services.safety import SafetyEventService
     from sagasmith.skills_adapter.store import SkillStore
 
 
@@ -21,7 +22,7 @@ class AgentServices:
 
     dice: DiceService
     cost: CostGovernor
-    safety: object | None = None
+    safety: SafetyEventService | None = None
     llm: object | None = None
     skill_store: SkillStore | None = None
     transcript_conn: sqlite3.Connection | None = None
@@ -48,7 +49,7 @@ class GraphBootstrap:
         *,
         dice: DiceService,
         cost: CostGovernor,
-        safety: object | None = None,
+        safety: SafetyEventService | None = None,
         llm: object | None = None,
         skill_store: SkillStore | None = None,
         transcript_conn: sqlite3.Connection | None = None,

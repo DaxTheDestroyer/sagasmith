@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from typing import Any
+
 import pytest
 
 from sagasmith.providers.fake import DeterministicFakeClient
 from sagasmith.schemas.player import ContentPolicy
-from sagasmith.schemas.provider import LLMResponse, TokenUsage
+from sagasmith.schemas.provider import LLMRequest, LLMResponse, LLMStreamEvent, TokenUsage
 from sagasmith.services.safety_post_gate import (
     BlockFallback,
     Pass,
@@ -24,7 +27,11 @@ def default_policy() -> ContentPolicy:
     )
 
 
-def _fake_client(parsed_json: dict | None = None, *, agent: str = "safety_post_gate") -> DeterministicFakeClient:
+def _fake_client(
+    parsed_json: dict[str, Any] | None = None,
+    *,
+    agent: str = "safety_post_gate",
+) -> DeterministicFakeClient:
     response = LLMResponse(
         text="",
         parsed_json=parsed_json or {"verdict": "pass", "reason": None, "violated_term": None},
@@ -85,41 +92,52 @@ class TestLLMClassifier:
         assert isinstance(verdict, Pass)
 
     def test_hard_limit_blocked_via_llm(self, default_policy: ContentPolicy) -> None:
-        client = _fake_client({
-            "verdict": "block_fallback",
-            "reason": "hard limit found in prose",
-            "violated_term": "graphic_sexual_content",
-        })
+        client = _fake_client(
+            {
+                "verdict": "block_fallback",
+                "reason": "hard limit found in prose",
+                "violated_term": "graphic_sexual_content",
+            }
+        )
         gate = SafetyPostGate(llm_client=client, cheap_model="fake-cheap")
         verdict = gate.scan("Prose with violations.", default_policy)
         assert isinstance(verdict, BlockFallback)
         assert verdict.violated_term == "graphic_sexual_content"
 
     def test_soft_limit_rewrite_via_llm(self, default_policy: ContentPolicy) -> None:
-        client = _fake_client({
-            "verdict": "rewrite",
-            "reason": "soft limit violation",
-            "violated_term": "graphic_violence",
-        })
+        client = _fake_client(
+            {
+                "verdict": "rewrite",
+                "reason": "soft limit violation",
+                "violated_term": "graphic_violence",
+            }
+        )
         gate = SafetyPostGate(llm_client=client, cheap_model="fake-cheap")
         verdict = gate.scan("Prose with soft violation.", default_policy)
         assert isinstance(verdict, Rewrite)
 
     def test_llm_failure_falls_back_to_inline(self, default_policy: ContentPolicy) -> None:
         """If LLM call fails, fall back to inline scan."""
+
         class FailingClient:
             provider = "fake"
-            def complete(self, request):
+
+            def complete(self, request: LLMRequest) -> LLMResponse:
+                _ = request
                 raise RuntimeError("LLM unavailable")
-            def stream(self, request):
-                iter([])
+
+            def stream(self, request: LLMRequest) -> Iterator[LLMStreamEvent]:
+                _ = request
+                return iter(())
 
         gate = SafetyPostGate(llm_client=FailingClient(), cheap_model="fake-cheap")
         # Hard-limit text should still be caught by inline fallback
         verdict = gate.scan("graphic sexual content in the scene", default_policy)
         assert isinstance(verdict, BlockFallback)
 
-    def test_inline_hard_limit_takes_precedence_over_llm(self, default_policy: ContentPolicy) -> None:
+    def test_inline_hard_limit_takes_precedence_over_llm(
+        self, default_policy: ContentPolicy
+    ) -> None:
         """Inline scanner runs first — hard limits are caught before LLM call."""
         client = _fake_client({"verdict": "pass", "reason": None, "violated_term": None})
         gate = SafetyPostGate(llm_client=client, cheap_model="fake-cheap")

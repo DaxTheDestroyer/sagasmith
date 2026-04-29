@@ -48,14 +48,18 @@ def rules_lawyer_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             return _rules_error(check_results, _HELP_MESSAGE)
 
         if _looks_like_failed_mechanical_input(normalized):
-            deterministic = deterministic_intents(normalized, scene_context=_scene_context_from_state(state))
+            deterministic = deterministic_intents(
+                normalized, scene_context=_scene_context_from_state(state)
+            )
             if not deterministic:
                 return _rules_error(check_results, _HELP_MESSAGE)
 
         candidates = _resolve_player_intent(raw_input, normalized, state, services)
         if not candidates or candidates[0].action == "none":
             if candidates and candidates[0].source == "budget_fallback":
-                return _rules_error(check_results, "I didn't catch that — try `/check athletics 15`.")
+                return _rules_error(
+                    check_results, "I didn't catch that — try `/check athletics 15`."
+                )
             if _looks_like_failed_mechanical_input(normalized):
                 return _rules_error(check_results, _HELP_MESSAGE)
             return {}
@@ -92,7 +96,10 @@ def rules_lawyer_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             )
             return {
                 "combat_state": combat_state.model_dump(),
-                "check_results": [*check_results, *(result.model_dump() for result in initiative_results)],
+                "check_results": [
+                    *check_results,
+                    *(result.model_dump() for result in initiative_results),
+                ],
                 "phase": "combat",
             }
 
@@ -195,7 +202,9 @@ def _scene_context_from_state(state: dict[str, Any]) -> dict[str, Any]:
 
 
 def _looks_like_failed_mechanical_input(normalized: str) -> bool:
-    return normalized.startswith(("roll ", "check ", "strike ", "move ", "start combat", "end turn", "perception"))
+    return normalized.startswith(
+        ("roll ", "check ", "strike ", "move ", "start combat", "end turn", "perception")
+    )
 
 
 def _character_sheet_from_state(state: dict[str, Any]) -> CharacterSheet:
@@ -226,7 +235,10 @@ def _combat_update(
         result["pending_narration"] = pending_narration
     if combat_engine.is_encounter_complete(combat_state):
         result["phase"] = "play"
-        result["pending_narration"] = [*pending_narration, "Combat complete; returning to exploration."]
+        result["pending_narration"] = [
+            *pending_narration,
+            "Combat complete; returning to exploration.",
+        ]
     return result
 
 

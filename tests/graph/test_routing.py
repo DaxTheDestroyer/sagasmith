@@ -140,4 +140,4 @@ class TestJsonSchemaExport:
 
     def test_boundary_model_count(self) -> None:
         """Boundary model count includes Phase 6 worldgen LLM-boundary schemas."""
-        assert len(LLM_BOUNDARY_AND_PERSISTED_MODELS) == 29
+        assert len(LLM_BOUNDARY_AND_PERSISTED_MODELS) == 31

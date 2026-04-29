@@ -214,7 +214,15 @@ class TestSafetyEventServiceSchema:
         """Verify SafetyEventRecord accepts all Phase 6 event kinds."""
         from sagasmith.schemas.persistence import SafetyEventRecord
 
-        for kind in ("pause", "line", "soft_limit_fade", "post_gate_rewrite", "fallback", "pre_gate_reroute", "pre_gate_block"):
+        for kind in (
+            "pause",
+            "line",
+            "soft_limit_fade",
+            "post_gate_rewrite",
+            "fallback",
+            "pre_gate_reroute",
+            "pre_gate_block",
+        ):
             record = SafetyEventRecord(
                 event_id=f"test_{kind}",
                 campaign_id="camp-test",

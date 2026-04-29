@@ -134,6 +134,7 @@ def test_reload_raises_on_partial_state(fresh_campaign_conn: sqlite3.Connection)
 
     # Manually insert only the player_profile row (simulating interrupted commit)
     from datetime import UTC, datetime
+
     now = datetime.now(UTC).isoformat()
     fresh_campaign_conn.execute(
         "INSERT INTO onboarding_player_profile (campaign_id, profile_json, committed_at) "
@@ -263,5 +264,6 @@ def test_migration_0003_creates_three_tables(fresh_campaign_conn: sqlite3.Connec
 def test_migration_schema_version_reaches_3(fresh_campaign_conn: sqlite3.Connection) -> None:
     """After all migrations, schema_version should be at least 3."""
     from sagasmith.persistence.migrations import current_schema_version
+
     version = current_schema_version(fresh_campaign_conn)
     assert version >= 3

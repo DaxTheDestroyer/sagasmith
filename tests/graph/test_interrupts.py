@@ -38,7 +38,15 @@ def _insert_campaign_and_turn(conn: sqlite3.Connection, *, status: str = "comple
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) "
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_000001", "cmp_001", "sess_001", status, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 1),
+        (
+            "turn_000001",
+            "cmp_001",
+            "sess_001",
+            status,
+            "2026-01-01T00:00:00Z",
+            "2026-01-01T00:00:00Z",
+            1,
+        ),
     )
     conn.commit()
 
@@ -94,6 +102,7 @@ def _play_state():
 # Test 1: InterruptKind enum values
 # ---------------------------------------------------------------------------
 
+
 def test_interrupt_kind_values():
     assert InterruptKind.PAUSE == "pause"
     assert InterruptKind.LINE == "line"
@@ -105,6 +114,7 @@ def test_interrupt_kind_values():
 # ---------------------------------------------------------------------------
 # Test 2: InterruptEnvelope round-trip serialization
 # ---------------------------------------------------------------------------
+
 
 def test_interrupt_envelope_round_trip():
     envelope = InterruptEnvelope.build(
@@ -123,6 +133,7 @@ def test_interrupt_envelope_round_trip():
 # Test 3: RedactionCanary rejects secret-shaped payload
 # ---------------------------------------------------------------------------
 
+
 def test_envelope_rejects_secret_shaped_payload():
     with pytest.raises(TrustServiceError):
         InterruptEnvelope.build(
@@ -135,6 +146,7 @@ def test_envelope_rejects_secret_shaped_payload():
 # ---------------------------------------------------------------------------
 # Test 4: GraphRuntime.post_interrupt records envelope in state
 # ---------------------------------------------------------------------------
+
 
 def test_post_interrupt_records_in_graph_state():
     conn = _make_conn()
@@ -154,6 +166,7 @@ def test_post_interrupt_records_in_graph_state():
 # ---------------------------------------------------------------------------
 # Test 5: GraphRuntime.resume_after_interrupt clears and resumes
 # ---------------------------------------------------------------------------
+
 
 def test_resume_after_interrupt_clears_and_resumes():
     conn = _make_conn()
@@ -177,6 +190,7 @@ def test_resume_after_interrupt_clears_and_resumes():
 # Test 6: extract_pending_interrupt helper
 # ---------------------------------------------------------------------------
 
+
 def test_extract_pending_interrupt_returns_envelope_or_none():
     conn = _make_conn()
     apply_migrations(conn)
@@ -194,6 +208,7 @@ def test_extract_pending_interrupt_returns_envelope_or_none():
 # ---------------------------------------------------------------------------
 # Test 7: BudgetStopError → BUDGET_STOP interrupt translation
 # ---------------------------------------------------------------------------
+
 
 def test_invoke_turn_translates_budget_stop_error():
     """Simulate a node raising BudgetStopError; runtime translates to interrupt."""
@@ -213,6 +228,7 @@ def test_invoke_turn_translates_budget_stop_error():
 
     # Patch oracle on the bootstrap directly
     from dataclasses import replace
+
     patched = replace(bootstrap, oracle=raising_oracle)
 
     runtime = build_persistent_graph(patched, conn, campaign_id="cmp_001")
@@ -228,6 +244,7 @@ def test_invoke_turn_translates_budget_stop_error():
 
     # Verify the original oracle node code does NOT reference BudgetStopError
     import inspect
+
     oracle_obj = cast(Any, original_oracle)
     oracle_source = inspect.getsource(
         oracle_obj.func if hasattr(oracle_obj, "func") else oracle_obj
@@ -239,6 +256,7 @@ def test_invoke_turn_translates_budget_stop_error():
 # ---------------------------------------------------------------------------
 # Test 8: Single-slot overwrite semantics
 # ---------------------------------------------------------------------------
+
 
 def test_post_interrupt_overwrites_single_slot():
     conn = _make_conn()
@@ -259,6 +277,7 @@ def test_post_interrupt_overwrites_single_slot():
 # ---------------------------------------------------------------------------
 # Test 9: Session-end round-trip
 # ---------------------------------------------------------------------------
+
 
 def test_session_end_interrupt_round_trip():
     conn = _make_conn()

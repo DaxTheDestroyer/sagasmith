@@ -38,8 +38,10 @@ EXPECTED_SCHEMA_NAMES = {
     "CostLogRecord",
     "TurnRecord",
     "CheckpointRef",
+    "RetconAuditRecord",
     "TranscriptEntry",
     "StateDeltaRecord",
+    "VaultWriteAuditRecord",
     "WorldBible",
 }
 

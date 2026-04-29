@@ -71,7 +71,9 @@ def _print_status_line(campaign: Path) -> None:
 
     last_turn = row[0] if row else "none"
     session_number = _next_session_number(session_row[0] if session_row else None)
-    typer.echo(f"Campaign: {manifest.campaign_name} \u00b7 Session: {session_number} \u00b7 Last turn: {last_turn}")
+    typer.echo(
+        f"Campaign: {manifest.campaign_name} \u00b7 Session: {session_number} \u00b7 Last turn: {last_turn}"
+    )
 
 
 def _next_session_number(last_session_id: object) -> int:

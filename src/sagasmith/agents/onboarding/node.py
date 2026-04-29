@@ -21,7 +21,10 @@ def onboarding_node(state, services):
         activation = get_current_activation()
         if activation is not None:
             store = services.skill_store
-            if store is not None and store.find(name="onboarding-phase-wizard", agent_scope="onboarding") is not None:
+            if (
+                store is not None
+                and store.find(name="onboarding-phase-wizard", agent_scope="onboarding") is not None
+            ):
                 activation.set_skill("onboarding-phase-wizard")
         return {"phase": "onboarding"}
     return {}

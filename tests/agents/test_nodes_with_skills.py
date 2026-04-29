@@ -69,7 +69,15 @@ def _insert_campaign_and_turn(conn: sqlite3.Connection, *, status: str = "comple
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) "
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_000001", "cmp_001", "sess_001", status, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 1),
+        (
+            "turn_000001",
+            "cmp_001",
+            "sess_001",
+            status,
+            "2026-01-01T00:00:00Z",
+            "2026-01-01T00:00:00Z",
+            1,
+        ),
     )
     conn.commit()
 
@@ -246,7 +254,10 @@ class TestArchivistSetSkill:
         assert len(arch_rows) >= 1
         skill_names = {r.skill_name for r in arch_rows}
         # Archivist activates 3 skills; activation log records the last one
-        assert len(skill_names & {"vault-page-upsert", "memory-packet-assembly", "entity-resolution"}) >= 1
+        assert (
+            len(skill_names & {"vault-page-upsert", "memory-packet-assembly", "entity-resolution"})
+            >= 1
+        )
 
 
 class TestOnboardingSetSkill:

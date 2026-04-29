@@ -23,11 +23,25 @@ def _make_conn() -> sqlite3.Connection:
     )
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_prev", "cmp_001", "sess_001", "complete", "2026-01-01T00:00:00Z", "2026-01-01T00:00:10Z", 1),
+        (
+            "turn_prev",
+            "cmp_001",
+            "sess_001",
+            "complete",
+            "2026-01-01T00:00:00Z",
+            "2026-01-01T00:00:10Z",
+            1,
+        ),
     )
     conn.execute(
         "INSERT INTO transcript_entries (turn_id, kind, content, sequence, created_at) VALUES (?, ?, ?, ?, ?)",
-        ("turn_prev", "narration_final", "Marcus pointed toward Rivermouth Market.", 0, "2026-01-01T00:00:00Z"),
+        (
+            "turn_prev",
+            "narration_final",
+            "Marcus pointed toward Rivermouth Market.",
+            0,
+            "2026-01-01T00:00:00Z",
+        ),
     )
     conn.commit()
     return conn
@@ -67,4 +81,6 @@ def test_full_flow_makes_memory_packet_available_and_logs_archivist_skill() -> N
         )
     )
     rows = AgentSkillLogRepository(conn).list_for_turn("turn_000001")
-    assert any(row.agent_name == "archivist" and row.skill_name == "memory-packet-assembly" for row in rows)
+    assert any(
+        row.agent_name == "archivist" and row.skill_name == "memory-packet-assembly" for row in rows
+    )

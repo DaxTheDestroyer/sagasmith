@@ -170,7 +170,9 @@ class VaultPage:
             _, front_yaml, body = text.split("---\n", 2)
             loaded: Any = yaml.safe_load(front_yaml) or {}
             front_dict: dict[str, Any] = (
-                {str(key): value for key, value in loaded.items()} if isinstance(loaded, dict) else {}
+                {str(key): value for key, value in loaded.items()}
+                if isinstance(loaded, dict)
+                else {}
             )
             frontmatter = cls._frontmatter_from_dict(front_dict)
         else:
@@ -200,5 +202,9 @@ class VaultPage:
             "session": SessionFrontmatter,
             "lore": LoreFrontmatter,
         }
-        cls_type = mapping.get(ftype, BaseVaultFrontmatter) if isinstance(ftype, str) else BaseVaultFrontmatter
+        cls_type = (
+            mapping.get(ftype, BaseVaultFrontmatter)
+            if isinstance(ftype, str)
+            else BaseVaultFrontmatter
+        )
         return cls_type.model_validate(front_dict)

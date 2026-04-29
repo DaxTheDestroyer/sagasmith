@@ -5,7 +5,7 @@ from __future__ import annotations
 from sagasmith.agents.orator.dice_ux import prepare_dice_ux
 from sagasmith.agents.orator.skills.scene_rendering.logic import (
     RenderResult,
-    _detect_resolved_beats,
+    _detect_resolved_beats,  # pyright: ignore[reportPrivateUsage]
     render_scene,
 )
 from sagasmith.evals.fixtures import (
@@ -32,7 +32,10 @@ class TestDiceUX:
     def test_auto_mode_weaves_outcomes(self) -> None:
         ctx = prepare_dice_ux("auto", [])
         assert ctx.mode == "auto"
-        assert "naturally" in ctx.prompt_instruction.lower() or "vivid" in ctx.prompt_instruction.lower()
+        assert (
+            "naturally" in ctx.prompt_instruction.lower()
+            or "vivid" in ctx.prompt_instruction.lower()
+        )
 
     def test_reveal_mode_shows_dice_details(self) -> None:
         ctx = prepare_dice_ux("reveal", [])

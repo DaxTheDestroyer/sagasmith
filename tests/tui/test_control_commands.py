@@ -9,8 +9,8 @@ import pytest
 
 from sagasmith.app.campaign import init_campaign, open_campaign
 from sagasmith.persistence.db import open_campaign_db
-from sagasmith.persistence.repositories import TranscriptRepository
-from sagasmith.schemas.persistence import TranscriptEntry
+from sagasmith.persistence.repositories import TranscriptRepository, TurnRecordRepository
+from sagasmith.schemas.persistence import TranscriptEntry, TurnRecord
 from sagasmith.services.cost import CostGovernor
 from sagasmith.tui.app import SagaSmithApp
 from sagasmith.tui.commands.control import (
@@ -103,16 +103,29 @@ async def test_recap_command_renders_summary_and_recent_transcript(tmp_path: Pat
     app.bind_service_connection(conn)
     app.graph_runtime = _FakeGraphRuntime()  # type: ignore[assignment]
     repo = TranscriptRepository(conn)
+    turns = TurnRecordRepository(conn)
     entries: list[tuple[Literal["player_input", "narration_final", "system_note"], str]] = [
-            ("player_input", "I look for Mara."),
-            ("narration_final", "You find tracks by the dock."),
-            ("player_input", "I follow them."),
-            ("narration_final", "Mara steps from the fog."),
+        ("player_input", "I look for Mara."),
+        ("narration_final", "You find tracks by the dock."),
+        ("player_input", "I follow them."),
+        ("narration_final", "Mara steps from the fog."),
     ]
     for index, (kind, content) in enumerate(entries):
+        turn_id = f"turn_{index:06d}"
+        turns.upsert(
+            TurnRecord(
+                turn_id=turn_id,
+                campaign_id=app.manifest.campaign_id,
+                session_id="session_001",
+                status="complete",
+                started_at=f"2026-04-29T00:0{index}:00Z",
+                completed_at=f"2026-04-29T00:0{index}:30Z",
+                schema_version=1,
+            )
+        )
         repo.append(
             TranscriptEntry(
-                turn_id=f"turn_{index:06d}",
+                turn_id=turn_id,
                 kind=kind,
                 content=content,
                 sequence=index,
@@ -131,6 +144,51 @@ async def test_recap_command_renders_summary_and_recent_transcript(tmp_path: Pat
     assert "Mara guided the hero through the river fog." in combined
     assert "> I look for Mara." in combined
     assert "Mara steps from the fog." in combined
+
+
+@pytest.mark.asyncio
+async def test_recap_command_excludes_retconned_transcript(tmp_path: Path) -> None:
+    """RecapCommand must not display transcript rows from retconned turns."""
+    app = _make_app(tmp_path)
+    conn = open_campaign_db(app.paths.db)
+    app.bind_service_connection(conn)
+    app.graph_runtime = _FakeGraphRuntime()  # type: ignore[assignment]
+    turns = TurnRecordRepository(conn)
+    transcripts = TranscriptRepository(conn)
+    for turn_id, status, content in [
+        ("turn_000001", "complete", "Canonical event remains."),
+        ("turn_000002", "retconned", "Removed canon must stay hidden."),
+    ]:
+        turns.upsert(
+            TurnRecord(
+                turn_id=turn_id,
+                campaign_id=app.manifest.campaign_id,
+                session_id="session_001",
+                status=status,  # type: ignore[arg-type]
+                started_at="2026-04-29T00:00:00Z",
+                completed_at="2026-04-29T00:01:00Z",
+                schema_version=1,
+            )
+        )
+        transcripts.append(
+            TranscriptEntry(
+                turn_id=turn_id,
+                kind="narration_final",
+                content=content,
+                sequence=0,
+                created_at="2026-04-29T00:01:00Z",
+            )
+        )
+    conn.commit()
+
+    logged: list[str] = []
+    async with app.run_test():
+        RecapCommand().handle(app, ())
+        logged = app.query_one(NarrationArea).logged_lines[:]
+
+    combined = "\n".join(logged)
+    assert "Canonical event remains." in combined
+    assert "Removed canon must stay hidden." not in combined
 
 
 @pytest.mark.asyncio
@@ -156,7 +214,9 @@ async def test_budget_command_without_governor_says_no_session(tmp_path: Path) -
         BudgetCommand().handle(app, ())
         logged = app.query_one(NarrationArea).logged_lines[:]
 
-    assert any("no session governor" in line for line in logged), f"Expected no session governor msg; got: {logged}"
+    assert any("no session governor" in line for line in logged), (
+        f"Expected no session governor msg; got: {logged}"
+    )
 
 
 @pytest.mark.asyncio

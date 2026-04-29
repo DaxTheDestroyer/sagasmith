@@ -142,8 +142,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Retcon, Repair, and Quality Gates
 
-- [ ] **QA-01**: User can retcon the last completed turn after confirmation for simple state and vault changes.
-- [ ] **QA-02**: System excludes retconned turns from canonical replay, summaries, and vault rebuilds.
+- [x] **QA-01**: User can retcon the last completed turn after confirmation for simple state and vault changes.
+- [x] **QA-02**: System excludes retconned turns from canonical replay, summaries, and vault rebuilds.
 - [x] **QA-03**: Test suite covers PF2e degree boundaries, natural 1/20 adjustment, seeded replay, skill checks, Strike, initiative, HP damage, and roll log completeness.
 - [x] **QA-04**: Test suite verifies API keys and auth headers never appear in logs, vaults, transcripts, checkpoints, or generated artifacts.
 - [ ] **QA-05**: Test suite verifies configured hard-limit content does not appear in player-facing prose across a regression scenario.
@@ -310,8 +310,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AI-11 | Phase 7 | Complete |
 | TUI-08 | Phase 7 | Complete |
 | QA-06 | Phase 7 | Pending |
-| QA-01 | Phase 8 | Pending |
-| QA-02 | Phase 8 | Pending |
+| QA-01 | Phase 8 | Complete |
+| QA-02 | Phase 8 | Complete |
 | QA-08 | Phase 8 | Complete |
 | QA-09 | Phase 8 | Complete |
 

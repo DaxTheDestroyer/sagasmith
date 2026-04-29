@@ -33,6 +33,7 @@ pytestmark = pytest.mark.integration
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.execute("PRAGMA foreign_keys = ON")
@@ -109,7 +110,9 @@ def _make_turn_record(turn_id: str = "turn_000001") -> TurnRecord:
     )
 
 
-def _seed_turn(conn: sqlite3.Connection, turn_id: str = "turn_000001", status: str = "needs_vault_repair") -> None:
+def _seed_turn(
+    conn: sqlite3.Connection, turn_id: str = "turn_000001", status: str = "needs_vault_repair"
+) -> None:
     _insert_campaign(conn)
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) "
@@ -122,6 +125,7 @@ def _seed_turn(conn: sqlite3.Connection, turn_id: str = "turn_000001", status: s
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestDiscardIncompleteTurn:
     """discard_incomplete_turn rewinds to pre_narration and marks discarded."""
@@ -321,7 +325,9 @@ class TestDeterministicStability:
         runtime.invoke_turn(state)
 
         refs_before = CheckpointRefRepository(conn).list_for_turn("turn_000001")
-        pre_count_before = sum(1 for r in refs_before if r.kind == CheckpointKind.PRE_NARRATION.value)
+        pre_count_before = sum(
+            1 for r in refs_before if r.kind == CheckpointKind.PRE_NARRATION.value
+        )
 
         runtime.retry_narration("turn_000001")
 

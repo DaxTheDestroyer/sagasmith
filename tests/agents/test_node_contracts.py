@@ -162,7 +162,9 @@ class TestOratorNode:
         ).model_dump()
         result = orator_node(state, services)
         # Plan 06-04: No LLM client → deterministic fallback narration
-        assert result["pending_narration"] == ["The scene shifts. A new detail draws your attention."]
+        assert result["pending_narration"] == [
+            "The scene shifts. A new detail draws your attention."
+        ]
         assert result["memory_packet"] is not None
 
     def test_leaves_unchanged_when_scene_brief_none(self, services) -> None:
@@ -216,7 +218,9 @@ class TestArchivistNode:
         # Phase 4: pending_narration preserved for TUI sync (Phase 7 will clear after persist)
         assert result["pending_narration"] == ["line one"]
 
-    def test_prepares_vault_pages_without_writing(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_prepares_vault_pages_without_writing(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         import sagasmith.vault.paths as vp
 
         monkeypatch.setattr(vp, "DEFAULT_MASTER_OPTS", tmp_path / ".ttrpg" / "vault")

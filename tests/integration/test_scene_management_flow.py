@@ -35,9 +35,7 @@ def test_scene_brief_generation_flow_uses_llm_and_resets_resolved_beats() -> Non
     brief = make_valid_scene_brief(intent="Plan clue discovery at the old ford.")
     client = DeterministicFakeClient(
         scripted_responses={
-            "oracle.scene-brief-composition": make_fake_llm_response(
-                parsed_json=brief.model_dump()
-            )
+            "oracle.scene-brief-composition": make_fake_llm_response(parsed_json=brief.model_dump())
         }
     )
     conn = _make_conn()
@@ -65,7 +63,9 @@ def test_scene_brief_generation_flow_uses_llm_and_resets_resolved_beats() -> Non
     assert result["scene_brief"]["beat_ids"] == brief.beat_ids
     assert result["resolved_beat_ids"] == []
     rows = AgentSkillLogRepository(conn).list_for_turn("turn_000001")
-    assert any(row.agent_name == "oracle" and row.skill_name == "scene-brief-composition" for row in rows)
+    assert any(
+        row.agent_name == "oracle" and row.skill_name == "scene-brief-composition" for row in rows
+    )
 
 
 def test_scene_routing_skips_oracle_when_beats_unresolved() -> None:

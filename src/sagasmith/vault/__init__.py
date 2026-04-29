@@ -157,7 +157,9 @@ class VaultService:
             md_file.unlink()
 
     def _regenerate_index(self, projected_pages: Iterable[tuple[Path, VaultPage]]) -> None:
-        pages = sorted(projected_pages, key=lambda item: (item[1].frontmatter.type, item[1].frontmatter.name))
+        pages = sorted(
+            projected_pages, key=lambda item: (item[1].frontmatter.type, item[1].frontmatter.name)
+        )
         lines = ["# World Overview", "", "*Auto-generated from known campaign facts.*", ""]
         grouped: dict[str, list[tuple[Path, VaultPage]]] = {}
         for rel, page in pages:
@@ -258,4 +260,8 @@ def _frontmatter_type_for(type_name: object) -> type[BaseVaultFrontmatter]:
         "session": SessionFrontmatter,
         "lore": LoreFrontmatter,
     }
-    return mapping.get(type_name, BaseVaultFrontmatter) if isinstance(type_name, str) else BaseVaultFrontmatter
+    return (
+        mapping.get(type_name, BaseVaultFrontmatter)
+        if isinstance(type_name, str)
+        else BaseVaultFrontmatter
+    )

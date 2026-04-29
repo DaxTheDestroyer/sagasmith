@@ -33,14 +33,27 @@ def _seed_campaign(conn: sqlite3.Connection, manifest: CampaignManifest) -> None
     conn.execute(
         "INSERT INTO campaigns (campaign_id, campaign_name, campaign_slug, created_at, sagasmith_version, manifest_version) "
         "VALUES (?, ?, ?, ?, ?, ?)",
-        (manifest.campaign_id, manifest.campaign_name, manifest.campaign_slug,
-         datetime.now(UTC).isoformat(), "0.0.1", 1),
+        (
+            manifest.campaign_id,
+            manifest.campaign_name,
+            manifest.campaign_slug,
+            datetime.now(UTC).isoformat(),
+            "0.0.1",
+            1,
+        ),
     )
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) "
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_000001", manifest.campaign_id, "session_001", "needs_vault_repair",
-         datetime.now(UTC).isoformat(), datetime.now(UTC).isoformat(), 1),
+        (
+            "turn_000001",
+            manifest.campaign_id,
+            "session_001",
+            "needs_vault_repair",
+            datetime.now(UTC).isoformat(),
+            datetime.now(UTC).isoformat(),
+            1,
+        ),
     )
     conn.commit()
 
@@ -87,9 +100,7 @@ def wired_app(tmp_path):
         safety=app.safety_events,
         llm=None,
     )
-    app.graph_runtime = build_persistent_graph(
-        bootstrap, conn, campaign_id=manifest.campaign_id
-    )
+    app.graph_runtime = build_persistent_graph(bootstrap, conn, campaign_id=manifest.campaign_id)
 
     registry = CommandRegistry()
     registry.register(PauseCommand())
@@ -114,16 +125,14 @@ async def test_tui_input_drives_graph_to_pre_narration(wired_app):
         assert snapshot.next == ("orator",), f"Expected pause at orator, got next={snapshot.next}"
 
         # pre_narration checkpoint recorded
-        cur = conn.execute(
-            "SELECT kind FROM checkpoint_refs WHERE turn_id=?", ("turn_000001",)
-        )
+        cur = conn.execute("SELECT kind FROM checkpoint_refs WHERE turn_id=?", ("turn_000001",))
         kinds = [row[0] for row in cur.fetchall()]
         assert kinds == ["pre_narration"]
 
         # agent_skill_log has 2 rows (oracle, rules_lawyer)
         cur = conn.execute(
             "SELECT agent_name, outcome FROM agent_skill_log WHERE turn_id=? ORDER BY id",
-            ("turn_000001",)
+            ("turn_000001",),
         )
         rows = cur.fetchall()
         assert [r[0] for r in rows] == ["oracle", "rules_lawyer"]

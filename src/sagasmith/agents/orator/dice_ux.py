@@ -67,11 +67,13 @@ def prepare_dice_ux(
             for eff in cr.effects:
                 entry.setdefault("effects", [])
                 assert isinstance(entry["effects"], list)
-                entry["effects"].append({
-                    "kind": eff.kind,
-                    "description": eff.description,
-                    "target_id": eff.target_id,
-                })
+                entry["effects"].append(
+                    {
+                        "kind": eff.kind,
+                        "description": eff.description,
+                        "target_id": eff.target_id,
+                    }
+                )
         constraints.append(entry)
 
     if mode == "auto":

@@ -19,7 +19,9 @@ runner = CliRunner()
 def test_vault_sync_command_projects_player_vault(tmp_path: Path) -> None:
     root = tmp_path / "rivermouth"
     manifest = init_campaign(name="Rivermouth", root=root, provider="fake")
-    service = VaultService(campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault")
+    service = VaultService(
+        campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault"
+    )
     service.write_page(
         VaultPage(
             LoreFrontmatter(
@@ -49,7 +51,9 @@ def test_vault_sync_command_projects_player_vault(tmp_path: Path) -> None:
 def test_vault_rebuild_command_rebuilds_fts5(tmp_path: Path) -> None:
     root = tmp_path / "rivermouth"
     manifest = init_campaign(name="Rivermouth", root=root, provider="fake")
-    service = VaultService(campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault")
+    service = VaultService(
+        campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault"
+    )
     service.write_page(
         VaultPage(
             LoreFrontmatter(

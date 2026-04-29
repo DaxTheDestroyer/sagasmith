@@ -68,9 +68,13 @@ def test_first_play_turn_generates_world_and_seed_once_before_scene_brief() -> N
     second = runtime.invoke_turn(before_orator)
 
     assert before_orator["world_bible"]["theme"] == "Hopeful frontier mystery"
-    assert before_orator["campaign_seed"]["selected_arc"]["selected_hook_id"] == "hook_missing_barge"
+    assert (
+        before_orator["campaign_seed"]["selected_arc"]["selected_hook_id"] == "hook_missing_barge"
+    )
     assert before_orator["scene_brief"] is not None
     assert second["world_bible"] == before_orator["world_bible"]
     assert second["campaign_seed"] == before_orator["campaign_seed"]
     rows = AgentSkillLogRepository(conn).list_for_turn("turn_000001")
-    assert any(row.agent_name == "oracle" and row.skill_name == "campaign-seed-generation" for row in rows)
+    assert any(
+        row.agent_name == "oracle" and row.skill_name == "campaign-seed-generation" for row in rows
+    )

@@ -53,7 +53,16 @@ def test_safety_events_check_visibility_rejects_gm_only() -> None:
             "INSERT INTO safety_events "
             "(event_id, campaign_id, turn_id, kind, policy_ref, action_taken, timestamp, visibility) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            ("ev1", "camp-test", None, "pause", None, "player requested pause", "2026-01-01T00:00:00Z", "gm_only"),
+            (
+                "ev1",
+                "camp-test",
+                None,
+                "pause",
+                None,
+                "player requested pause",
+                "2026-01-01T00:00:00Z",
+                "gm_only",
+            ),
         )
         conn.commit()
 
@@ -75,7 +84,16 @@ def test_safety_events_check_kind_rejects_unknown() -> None:
             "INSERT INTO safety_events "
             "(event_id, campaign_id, turn_id, kind, policy_ref, action_taken, timestamp, visibility) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            ("ev2", "camp-test", None, "danger", None, "some action", "2026-01-01T00:00:00Z", "player_visible"),
+            (
+                "ev2",
+                "camp-test",
+                None,
+                "danger",
+                None,
+                "some action",
+                "2026-01-01T00:00:00Z",
+                "player_visible",
+            ),
         )
         conn.commit()
 
@@ -91,6 +109,15 @@ def test_safety_events_fk_to_campaigns() -> None:
             "INSERT INTO safety_events "
             "(event_id, campaign_id, turn_id, kind, policy_ref, action_taken, timestamp, visibility) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            ("ev3", "nonexistent-campaign", None, "pause", None, "player requested pause", "2026-01-01T00:00:00Z", "player_visible"),
+            (
+                "ev3",
+                "nonexistent-campaign",
+                None,
+                "pause",
+                None,
+                "player requested pause",
+                "2026-01-01T00:00:00Z",
+                "player_visible",
+            ),
         )
         conn.commit()

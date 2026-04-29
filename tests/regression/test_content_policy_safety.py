@@ -10,6 +10,7 @@ All tests use ``DeterministicFakeClient`` — no paid LLM calls.
 from __future__ import annotations
 
 import sqlite3
+from typing import Any
 
 import pytest
 from tests.fixtures.content_policy_violations import (
@@ -60,7 +61,7 @@ _HARD_VIOLENCE_POLICY = ContentPolicy(
 )
 
 
-def _make_conn() -> sqlite3.Connection:
+def _make_conn() -> sqlite3.Connection:  # pyright: ignore[reportUnusedFunction]
     conn = sqlite3.connect(":memory:")
     conn.execute("PRAGMA foreign_keys = ON")
     apply_migrations(conn)
@@ -73,7 +74,10 @@ def _make_conn() -> sqlite3.Connection:
     return conn
 
 
-def _fake_client_with_response(text: str, parsed_json: dict | None = None) -> object:
+def _fake_client_with_response(
+    text: str,
+    parsed_json: dict[str, Any] | None = None,
+) -> object:
     """Return a minimal fake-like object that returns the given text."""
     from sagasmith.providers.fake import DeterministicFakeClient
 
@@ -139,7 +143,10 @@ class TestPreGateSoftLimits:
             # Redacted text should not contain the original term
             for term in fixture.matching_terms:
                 normalized = term.replace("_", " ").lower()
-                assert normalized not in verdict.intent.lower() or "safety-aware" in verdict.intent.lower()
+                assert (
+                    normalized not in verdict.intent.lower()
+                    or "safety-aware" in verdict.intent.lower()
+                )
 
     def test_ask_first_blocks(self) -> None:
         """Soft limit with ask_first action should block, not reroute."""
@@ -280,8 +287,10 @@ class TestPostGateInlineHardLimits:
     @pytest.mark.parametrize(
         "fixture",
         [
-            f for f in HARD_LIMIT_FIXTURES
-            if f.expected_kind == "hard" and all(t in _DEFAULT_POLICY.hard_limits for t in f.matching_terms)
+            f
+            for f in HARD_LIMIT_FIXTURES
+            if f.expected_kind == "hard"
+            and all(t in _DEFAULT_POLICY.hard_limits for t in f.matching_terms)
         ],
         ids=lambda f: f.label,
     )
@@ -331,8 +340,7 @@ class TestSafetyIntegration:
                 verdict = gate.scan(fixture.text, _HARD_VIOLENCE_POLICY)
                 # For fixtures where the term is in hard_limits, must block
                 if any(
-                    term in _HARD_VIOLENCE_POLICY.hard_limits
-                    for term in fixture.matching_terms
+                    term in _HARD_VIOLENCE_POLICY.hard_limits for term in fixture.matching_terms
                 ):
                     assert isinstance(verdict, BlockFallback)
 

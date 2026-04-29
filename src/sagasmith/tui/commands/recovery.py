@@ -29,10 +29,7 @@ def _has_incomplete_narration(app: SagaSmithApp) -> bool:
         return False
     snapshot = app.graph_runtime.graph.get_state(app.graph_runtime.thread_config)
     values = getattr(snapshot, "values", {}) or {}
-    return (
-        snapshot.next == ("orator",)
-        and values.get("turn_id") == app.current_turn_id
-    )
+    return snapshot.next == ("orator",) and values.get("turn_id") == app.current_turn_id
 
 
 @dataclass(frozen=True)
@@ -44,15 +41,17 @@ class RetryCommand:
         if not _has_incomplete_narration(app):
             _write(app, "[system] /retry: no incomplete narration to retry.")
             return
+        runtime = app.graph_runtime
+        assert runtime is not None  # guarded above
         turn_id = app.current_turn_id
         assert turn_id is not None  # guarded above
         try:
-            result = app.graph_runtime.retry_narration(turn_id)
+            result = runtime.retry_narration(turn_id)
         except ValueError as exc:
             _write(app, f"[system] /retry failed: {exc}")
             return
         # Sync new narration from the retried turn.
-        app._sync_narration_from_graph()
+        app.sync_narration_from_graph()
         pending = result.get("pending_narration", [])
         if pending:
             _write(app, f"[system] Narration retried ({len(pending)} lines).")
@@ -67,10 +66,12 @@ class DiscardCommand:
         if not _has_incomplete_narration(app):
             _write(app, "[system] /discard: no incomplete narration to discard.")
             return
+        runtime = app.graph_runtime
+        assert runtime is not None  # guarded above
         turn_id = app.current_turn_id
         assert turn_id is not None  # guarded above
         try:
-            result = app.graph_runtime.discard_incomplete_turn(turn_id)
+            result = runtime.discard_incomplete_turn(turn_id)
         except ValueError as exc:
             _write(app, f"[system] /discard failed: {exc}")
             return

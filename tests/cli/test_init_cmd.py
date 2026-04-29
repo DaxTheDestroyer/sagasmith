@@ -16,7 +16,9 @@ runner = CliRunner()
 
 def test_init_creates_all_artifacts_with_args(tmp_path: Path) -> None:
     target = tmp_path / "rm"
-    result = runner.invoke(app, ["init", "--name", "Rivermouth", "--path", str(target), "--provider", "fake"])
+    result = runner.invoke(
+        app, ["init", "--name", "Rivermouth", "--path", str(target), "--provider", "fake"]
+    )
     assert result.exit_code == 0, result.output
     assert (target / "campaign.toml").is_file()
     assert (target / "campaign.sqlite").is_file()
@@ -36,7 +38,15 @@ def test_init_requires_name_in_non_interactive_mode(tmp_path: Path) -> None:
 def test_init_requires_api_key_env_for_openrouter_non_interactive(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
-        ["init", "--name", "Rivermouth", "--path", str(tmp_path / "rm"), "--provider", "openrouter"],
+        [
+            "init",
+            "--name",
+            "Rivermouth",
+            "--path",
+            str(tmp_path / "rm"),
+            "--provider",
+            "openrouter",
+        ],
     )
     assert result.exit_code == 2
 
@@ -47,10 +57,14 @@ def test_init_persists_provider_settings(tmp_path: Path) -> None:
         app,
         [
             "init",
-            "--name", "Rivermouth",
-            "--path", str(target),
-            "--provider", "openrouter",
-            "--api-key-env", "OPENROUTER_KEY",
+            "--name",
+            "Rivermouth",
+            "--path",
+            str(target),
+            "--provider",
+            "openrouter",
+            "--api-key-env",
+            "OPENROUTER_KEY",
         ],
     )
     assert result.exit_code == 0, result.output

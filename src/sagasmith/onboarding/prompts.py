@@ -286,9 +286,7 @@ ONBOARDING_PHASES: tuple[PhasePrompt, ...] = (
 RawAnswer = str | int | float | bool | list[object] | dict[str, object] | None
 
 
-def parse_answer(
-    field: PromptField, raw: object
-) -> tuple[object, list[str]]:
+def parse_answer(field: PromptField, raw: object) -> tuple[object, list[str]]:
     """Parse and validate a raw answer against a PromptField definition.
 
     Returns ``(parsed_value, errors)`` where *errors* is empty on success.
@@ -436,9 +434,7 @@ def _parse_soft_limit_map(field: PromptField, raw: object) -> tuple[object, list
             continue
         if val not in _VALID_SOFT_LIMIT_VALUES:
             allowed = ", ".join(sorted(_VALID_SOFT_LIMIT_VALUES))
-            errors.append(
-                f"soft_limits[{key!r}] value {val!r} must be one of {{{allowed}}}"
-            )
+            errors.append(f"soft_limits[{key!r}] value {val!r} must be one of {{{allowed}}}")
             continue
         validated[key.strip()] = val
 

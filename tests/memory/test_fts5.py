@@ -7,7 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from sagasmith.memory.fts5 import FTS5Index, _extract_body, _extract_visibility
+from sagasmith.memory.fts5 import (
+    FTS5Index,
+    _extract_body,  # pyright: ignore[reportPrivateUsage]
+    _extract_visibility,  # pyright: ignore[reportPrivateUsage]
+)
 
 
 @pytest.fixture
@@ -27,7 +31,7 @@ def fts(conn: sqlite3.Connection) -> FTS5Index:
 class TestFTS5Index:
     def test_create_table(self, fts: FTS5Index) -> None:
         """Virtual table is created without error."""
-        tables = fts._conn.execute(
+        tables = fts._conn.execute(  # pyright: ignore[reportPrivateUsage]
             "SELECT name FROM sqlite_master WHERE type='table' AND name='vault_fts'"
         ).fetchall()
         assert len(tables) == 1

@@ -123,8 +123,7 @@ class OnboardingStore:
         if found_count < 3:
             missing = [name for flag, name in present if not flag]
             raise TrustServiceError(
-                f"partial onboarding state for {campaign_id!r}: "
-                f"missing {missing}"
+                f"partial onboarding state for {campaign_id!r}: missing {missing}"
             )
 
         # All three rows present — deserialize

@@ -47,7 +47,9 @@ def _conn() -> sqlite3.Connection:
     return conn
 
 
-def test_author_session_writes_frontmatter_beats_and_roll_table(vault_service: VaultService) -> None:
+def test_author_session_writes_frontmatter_beats_and_roll_table(
+    vault_service: VaultService,
+) -> None:
     path = author_session(
         session_number=1,
         campaign_id="test_campaign",

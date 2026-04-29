@@ -10,7 +10,7 @@ from sagasmith.memory.graph import VaultGraph, reset_vault_graph_cache, warm_vau
 
 
 @pytest.fixture(autouse=True)
-def _clean_graph_cache():
+def _clean_graph_cache():  # pyright: ignore[reportUnusedFunction]
     """Ensure graph cache is clean before and after each test."""
     reset_vault_graph_cache()
     yield

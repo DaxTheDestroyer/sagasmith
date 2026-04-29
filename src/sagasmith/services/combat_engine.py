@@ -99,7 +99,9 @@ class CombatEngine:
         dc = target.armor_class
         if attack.range is None:
             if target_position != "close":
-                raise ValueError(f"{target_id} is {target_position}; this action requires close range")
+                raise ValueError(
+                    f"{target_id} is {target_position}; this action requires close range"
+                )
         elif target_position == "behind_cover":
             dc += 2
 
@@ -155,7 +157,9 @@ class CombatEngine:
             target_id,
             target.model_copy(update={"current_hp": new_hp}),
         )
-        updated_state = _set_action_count(updated_state, actor_id, state.action_counts[actor_id] - 1)
+        updated_state = _set_action_count(
+            updated_state, actor_id, state.action_counts[actor_id] - 1
+        )
         return (
             updated_state,
             CheckResult(
@@ -168,7 +172,9 @@ class CombatEngine:
             damage_roll,
         )
 
-    def move(self, state: CombatState, actor_id: str, new_position: PositionTagValue) -> CombatState:
+    def move(
+        self, state: CombatState, actor_id: str, new_position: PositionTagValue
+    ) -> CombatState:
         """Move a combatant to another first-slice position tag, consuming one action."""
 
         _find_combatant(state, actor_id)
@@ -298,13 +304,20 @@ def _damage_die_and_modifier(attack: AttackProfile) -> tuple[str, int]:
     raise ValueError(f"unsupported first-slice damage expression {attack.damage!r}")
 
 
-def _replace_combatant(state: CombatState, combatant_id: str, replacement: CombatantState) -> CombatState:
+def _replace_combatant(
+    state: CombatState, combatant_id: str, replacement: CombatantState
+) -> CombatState:
     return state.model_copy(
         update={
-            "combatants": [replacement if combatant.id == combatant_id else combatant for combatant in state.combatants]
+            "combatants": [
+                replacement if combatant.id == combatant_id else combatant
+                for combatant in state.combatants
+            ]
         }
     )
 
 
 def _set_action_count(state: CombatState, combatant_id: str, actions: int) -> CombatState:
-    return state.model_copy(update={"action_counts": {**state.action_counts, combatant_id: actions}})
+    return state.model_copy(
+        update={"action_counts": {**state.action_counts, combatant_id: actions}}
+    )

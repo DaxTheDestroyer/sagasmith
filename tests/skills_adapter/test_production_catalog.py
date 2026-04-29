@@ -25,8 +25,18 @@ _PRODUCTION_ROOTS = [Path("src/sagasmith/agents"), Path("src/sagasmith/skills")]
 # Required first-slice skills by scope (containment, not exact count)
 _REQUIRED_SET: dict[str, set[str]] = {
     "_shared": {"schema-validation", "safety-redline-check", "command-dispatch"},
-    "oracle": {"scene-brief-composition", "player-choice-branching", "content-policy-routing", "inline-npc-creation"},
-    "rules_lawyer": {"degree-of-success", "seeded-roll-resolution", "skill-check-resolution", "combat-resolution"},
+    "oracle": {
+        "scene-brief-composition",
+        "player-choice-branching",
+        "content-policy-routing",
+        "inline-npc-creation",
+    },
+    "rules_lawyer": {
+        "degree-of-success",
+        "seeded-roll-resolution",
+        "skill-check-resolution",
+        "combat-resolution",
+    },
     "orator": {"scene-rendering"},
     "archivist": {"turn-close-persistence"},
     "onboarding": {"onboarding-phase-wizard"},
@@ -116,9 +126,7 @@ class TestProductionScan:
         for _scope, records in store.skills.items():
             for rec in records:
                 dir_name = rec.path.parent.name
-                assert rec.name == dir_name, (
-                    f"{rec.name} != directory {dir_name} at {rec.path}"
-                )
+                assert rec.name == dir_name, f"{rec.name} != directory {dir_name} at {rec.path}"
 
     def test_description_length(self):
         """Test 7: every description is <= 256 chars."""

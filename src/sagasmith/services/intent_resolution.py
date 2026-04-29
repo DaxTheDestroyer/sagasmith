@@ -31,7 +31,9 @@ _STAT_PATTERN = r"(athletics|acrobatics|survival|intimidation|perception)"
 _ROLL_CHECK_RE = re.compile(rf"^(?:roll|check)\s+{_STAT_PATTERN}\s+dc\s+(\d+)$")
 _PERCEPTION_RE = re.compile(r"^perception\s+dc\s+(\d+)$")
 _START_COMBAT_RE = re.compile(r"^start\s+combat$")
-_STRIKE_RE = re.compile(r"^strike\s+(enemy_weak_melee|enemy_weak_ranged)\s+with\s+(longsword|shortbow)$")
+_STRIKE_RE = re.compile(
+    r"^strike\s+(enemy_weak_melee|enemy_weak_ranged)\s+with\s+(longsword|shortbow)$"
+)
 _MOVE_RE = re.compile(r"^move\s+(close|near|far|behind_cover)$")
 _END_TURN_RE = re.compile(r"^end\s+turn$")
 
@@ -114,14 +116,34 @@ def deterministic_intents(
     return _deterministic_candidates(_normalize(player_input), scene_context or {})
 
 
-def _deterministic_candidates(normalized: str, scene_context: dict[str, Any]) -> list[IntentCandidate]:
+def _deterministic_candidates(
+    normalized: str, scene_context: dict[str, Any]
+) -> list[IntentCandidate]:
     if match := _ROLL_CHECK_RE.match(normalized):
         stat = match.group(1)
-        return [_skill(stat=stat, dc=int(match.group(2)), confidence=0.99, reason="explicit check syntax")]
+        return [
+            _skill(
+                stat=stat, dc=int(match.group(2)), confidence=0.99, reason="explicit check syntax"
+            )
+        ]
     if match := _PERCEPTION_RE.match(normalized):
-        return [_skill(stat="perception", dc=int(match.group(1)), confidence=0.98, reason="explicit perception DC")]
+        return [
+            _skill(
+                stat="perception",
+                dc=int(match.group(1)),
+                confidence=0.98,
+                reason="explicit perception DC",
+            )
+        ]
     if _START_COMBAT_RE.match(normalized):
-        return [IntentCandidate(action="start_combat", confidence=0.99, reason="explicit combat start", source="deterministic")]
+        return [
+            IntentCandidate(
+                action="start_combat",
+                confidence=0.99,
+                reason="explicit combat start",
+                source="deterministic",
+            )
+        ]
     if match := _STRIKE_RE.match(normalized):
         return [
             IntentCandidate(
@@ -134,9 +156,24 @@ def _deterministic_candidates(normalized: str, scene_context: dict[str, Any]) ->
             )
         ]
     if match := _MOVE_RE.match(normalized):
-        return [IntentCandidate(action="move", confidence=0.99, reason="explicit movement", source="deterministic", position=match.group(1))]
+        return [
+            IntentCandidate(
+                action="move",
+                confidence=0.99,
+                reason="explicit movement",
+                source="deterministic",
+                position=match.group(1),
+            )
+        ]
     if _END_TURN_RE.match(normalized):
-        return [IntentCandidate(action="end_turn", confidence=0.99, reason="explicit end turn", source="deterministic")]
+        return [
+            IntentCandidate(
+                action="end_turn",
+                confidence=0.99,
+                reason="explicit end turn",
+                source="deterministic",
+            )
+        ]
     explicit_dc = _extract_dc(normalized)
     for pattern, stat, confidence in _NATURAL_SKILL_PATTERNS:
         if pattern.search(normalized):
@@ -166,7 +203,10 @@ def _llm_candidates(
     request = LLMRequest(
         agent_name="rules_lawyer.intent-resolution",
         model=model,
-        messages=[Message(role="system", content=prompt.SYSTEM_PROMPT), Message(role="user", content=user_prompt)],
+        messages=[
+            Message(role="system", content=prompt.SYSTEM_PROMPT),
+            Message(role="user", content=user_prompt),
+        ],
         response_format="json_schema",
         json_schema=prompt.JSON_SCHEMA,
         temperature=0.0,
@@ -191,14 +231,26 @@ def _llm_candidates(
         logger=logger or _noop_logger,
     )
     if cost_governor is not None:
-        cost_governor.record_usage(provider=_client_provider(llm_client), model=model, usage=response.usage)
+        cost_governor.record_usage(
+            provider=_client_provider(llm_client), model=model, usage=response.usage
+        )
     parsed = response.parsed_json if isinstance(response.parsed_json, dict) else {}
     raw_candidates = parsed.get("candidates", [])
-    candidates = [_sanitize_llm_candidate(item, scene_context) for item in raw_candidates if isinstance(item, dict)]
-    return sorted((candidate for candidate in candidates if candidate is not None), key=lambda c: c.confidence, reverse=True)
+    candidates = [
+        _sanitize_llm_candidate(item, scene_context)
+        for item in raw_candidates
+        if isinstance(item, dict)
+    ]
+    return sorted(
+        (candidate for candidate in candidates if candidate is not None),
+        key=lambda c: c.confidence,
+        reverse=True,
+    )
 
 
-def _sanitize_llm_candidate(item: dict[str, Any], scene_context: dict[str, Any]) -> IntentCandidate | None:
+def _sanitize_llm_candidate(
+    item: dict[str, Any], scene_context: dict[str, Any]
+) -> IntentCandidate | None:
     action = item.get("action")
     confidence = item.get("confidence")
     if not isinstance(action, str) or not isinstance(confidence, (int, float)):
@@ -221,19 +273,41 @@ def _sanitize_llm_candidate(item: dict[str, Any], scene_context: dict[str, Any])
         attack_id = item.get("attack_id")
         if target_id not in SUPPORTED_TARGETS or attack_id not in SUPPORTED_ATTACKS:
             return None
-        return IntentCandidate(action="strike", confidence=float(confidence), reason=reason, source="llm", target_id=target_id, attack_id=attack_id)
+        return IntentCandidate(
+            action="strike",
+            confidence=float(confidence),
+            reason=reason,
+            source="llm",
+            target_id=target_id,
+            attack_id=attack_id,
+        )
     if action == "move":
         position = item.get("position")
         if position not in SUPPORTED_POSITIONS:
             return None
-        return IntentCandidate(action="move", confidence=float(confidence), reason=reason, source="llm", position=position)
+        return IntentCandidate(
+            action="move",
+            confidence=float(confidence),
+            reason=reason,
+            source="llm",
+            position=position,
+        )
     if action in {"start_combat", "end_turn", "none"}:
-        return IntentCandidate(action=action, confidence=float(confidence), reason=reason, source="llm")
+        return IntentCandidate(
+            action=action, confidence=float(confidence), reason=reason, source="llm"
+        )
     return None
 
 
 def _skill(*, stat: str, dc: int, confidence: float, reason: str) -> IntentCandidate:
-    return IntentCandidate(action="skill_check", confidence=confidence, reason=reason, source="deterministic", stat=stat, dc=dc)
+    return IntentCandidate(
+        action="skill_check",
+        confidence=confidence,
+        reason=reason,
+        source="deterministic",
+        stat=stat,
+        dc=dc,
+    )
 
 
 def _context_dc(scene_context: dict[str, Any], stat: str) -> int:

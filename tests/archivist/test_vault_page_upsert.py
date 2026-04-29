@@ -156,10 +156,13 @@ def test_vault_page_upsert_update_existing(vault_service: VaultService) -> None:
     assert result2.action == "updated"
     assert result2.relative_path.name == "npc_orym.md"
     page = result2.page
+    assert isinstance(page.frontmatter, NpcFrontmatter)
     assert page.frontmatter.name == "Orym the Brave"
     assert page.frontmatter.role == "champion"
     assert page.frontmatter.visibility == "player_known"
-    assert page.frontmatter.first_encountered == "1"  # original first_encountered unchanged (not updated)
+    assert (
+        page.frontmatter.first_encountered == "1"
+    )  # original first_encountered unchanged (not updated)
 
 
 def test_vault_page_upsert_location(vault_service: VaultService) -> None:

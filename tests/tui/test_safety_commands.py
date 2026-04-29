@@ -125,7 +125,9 @@ async def test_line_without_args_prints_usage(tmp_path: Path) -> None:
         await pilot.pause()
         logged = app.query_one(NarrationArea).logged_lines[:]
 
-    assert any("/line requires a topic" in line for line in logged), f"Expected usage msg; got: {logged}"
+    assert any("/line requires a topic" in line for line in logged), (
+        f"Expected usage msg; got: {logged}"
+    )
 
     conn = open_campaign_db(app.paths.db, read_only=True)
     try:
@@ -170,7 +172,9 @@ async def test_pause_without_safety_service_does_not_crash(tmp_path: Path) -> No
         await pilot.pause()
         logged = app.query_one(NarrationArea).logged_lines[:]
 
-    assert any("No campaign bound" in line for line in logged), f"Expected 'No campaign bound'; got: {logged}"
+    assert any("No campaign bound" in line for line in logged), (
+        f"Expected 'No campaign bound'; got: {logged}"
+    )
 
 
 @pytest.mark.asyncio

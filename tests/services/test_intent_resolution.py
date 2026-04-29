@@ -79,11 +79,7 @@ def test_budget_stop_falls_back_to_deterministic_only_hint() -> None:
             raise BudgetStopError("blocked")
 
     client = DeterministicFakeClient(
-        {
-            "rules_lawyer.intent-resolution": make_fake_llm_response(
-                parsed_json={"candidates": []}
-            )
-        }
+        {"rules_lawyer.intent-resolution": make_fake_llm_response(parsed_json={"candidates": []})}
     )
 
     candidates = resolve_intents(

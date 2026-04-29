@@ -13,6 +13,7 @@ This file covers:
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 from sagasmith.app.campaign import init_campaign
 from sagasmith.evals.fixtures import (
@@ -37,7 +38,7 @@ from sagasmith.tui.runtime import build_app
 from sagasmith.vault import VaultService
 
 
-def _base_state_values(manifest, service):
+def _base_state_values(manifest: object, service: VaultService) -> dict[str, Any]:
     """Reusable fixture objects for player state."""
     return {
         "profile": make_valid_player_profile().model_dump(mode="json"),
@@ -86,24 +87,25 @@ def test_full_quit_resume_cycle(tmp_path: Path) -> None:
         vault_service=service,
     )
     runtime = build_persistent_graph(bootstrap, conn, campaign_id=manifest.campaign_id)
+    new_app = None
 
     base_vals = _base_state_values(manifest, service)
 
     # Scene brief template — we vary scene_id each turn to force scene boundary
     base_scene = make_valid_scene_brief().model_dump(mode="json")
 
-    def make_scene(turn_num: int) -> dict:
-        s = base_scene.copy()
+    def make_scene(turn_num: int) -> dict[str, Any]:
+        s = dict(base_scene)
         s["scene_id"] = f"scene_{turn_num:03d}"
         return s
 
     # Helper: build state for a given turn
     def build_state(
         turn_num: int,
-        prev_state: dict | None,
+        prev_state: dict[str, Any] | None,
         session_id: str = "session_001",
-        scene_override: dict | None = None,
-    ) -> dict:
+        scene_override: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         turn_id = f"turn_{turn_num:06d}"
         if prev_state is None:
             return {
@@ -115,7 +117,7 @@ def test_full_quit_resume_cycle(tmp_path: Path) -> None:
                 "content_policy": base_vals["content_policy"],
                 "house_rules": base_vals["house_rules"],
                 "character_sheet": base_vals["character_sheet"],
-                "session_state": base_vals["session_state"].copy(),
+                "session_state": cast(dict[str, Any], base_vals["session_state"]).copy(),
                 "combat_state": None,
                 "pending_player_input": f"Turn {turn_num} action",
                 "memory_packet": None,
@@ -209,6 +211,7 @@ def test_full_quit_resume_cycle(tmp_path: Path) -> None:
         new_app = build_app(root)
         assert new_app.current_session_id == "session_002"
         new_runtime = new_app.graph_runtime
+        assert new_runtime is not None
 
         # Baseline snapshot should have rolling_summary from previous session
         init_snap = new_runtime.graph.get_state(new_runtime.thread_config)
@@ -291,8 +294,8 @@ def test_full_quit_resume_cycle(tmp_path: Path) -> None:
         except Exception:
             pass
         try:
-            if "new_app" in locals() and new_app._service_conn:
-                new_app._service_conn.close()
+            if new_app is not None:
+                new_app.on_unmount()
         except Exception:
             pass
 
@@ -308,7 +311,9 @@ def test_resume_after_pre_narration_crash(tmp_path: Path) -> None:
     manifest = init_campaign(name="RetryTest", root=root, provider="fake")
     conn = open_campaign_db(root / "campaign.sqlite")
 
-    service = VaultService(campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault")
+    service = VaultService(
+        campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault"
+    )
     bootstrap = GraphBootstrap.from_services(
         dice=DiceService(campaign_seed="x", session_seed="y"),
         cost=CostGovernor(session_budget_usd=1.0),

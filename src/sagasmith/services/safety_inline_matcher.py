@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal
 
 from sagasmith.schemas.player import ContentPolicy
 
@@ -76,7 +76,7 @@ class SafetyInlineMatcher:
 
     _patterns: list[tuple[str, re.Pattern[str]]] = field(default_factory=list)
 
-    def __init__(self, policy: ContentPolicy | dict | None = None) -> None:
+    def __init__(self, policy: ContentPolicy | dict[str, Any] | None = None) -> None:
         if policy is None:
             object.__setattr__(self, "_patterns", [])
             return

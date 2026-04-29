@@ -35,6 +35,7 @@ class PauseCommand:
         # Phase 4: post graph interrupt if runtime bound
         if app.graph_runtime is not None:
             from sagasmith.graph.interrupts import InterruptKind
+
             app.graph_runtime.post_interrupt(
                 kind=InterruptKind.PAUSE,
                 payload={"reason": "player typed /pause"},
@@ -57,7 +58,9 @@ class LineCommand:
             _write(app, f"[SAFETY] Line drawn: {topic}. (No campaign bound — event not persisted.)")
             return
         try:
-            record = service.log_line(campaign_id=app.manifest.campaign_id, topic=topic, turn_id=None)
+            record = service.log_line(
+                campaign_id=app.manifest.campaign_id, topic=topic, turn_id=None
+            )
         except ValueError as exc:
             _write(app, f"[SAFETY] /line error: {exc}")
             return
@@ -67,6 +70,7 @@ class LineCommand:
         # Phase 4: post graph interrupt if runtime bound
         if app.graph_runtime is not None:
             from sagasmith.graph.interrupts import InterruptKind
+
             app.graph_runtime.post_interrupt(
                 kind=InterruptKind.LINE,
                 payload={"topic": topic},

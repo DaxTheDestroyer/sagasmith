@@ -122,8 +122,12 @@ def _seed_complete_turn(
 
 def test_list_candidates_returns_recent_completed_turn_summaries() -> None:
     conn = _make_conn()
-    _seed_complete_turn(conn, "turn-1", minute=1, summary="The first canon event.", checkpoint_id="cp-1")
-    _seed_complete_turn(conn, "turn-2", minute=2, summary="The second canon event.", checkpoint_id="cp-2")
+    _seed_complete_turn(
+        conn, "turn-1", minute=1, summary="The first canon event.", checkpoint_id="cp-1"
+    )
+    _seed_complete_turn(
+        conn, "turn-2", minute=2, summary="The second canon event.", checkpoint_id="cp-2"
+    )
     TurnRecordRepository(conn).upsert(_turn("turn-bad", status="needs_vault_repair", minute=3))
 
     candidates = RetconService(conn, campaign_id="cmp-retcon").list_candidates(limit=5)
@@ -136,8 +140,22 @@ def test_list_candidates_returns_recent_completed_turn_summaries() -> None:
 def test_preview_returns_suffix_prior_checkpoint_impact_and_token() -> None:
     conn = _make_conn()
     _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
-    _seed_complete_turn(conn, "turn-2", minute=2, summary="Selected canon.", checkpoint_id="cp-2", vault_path="sessions/session-1.md")
-    _seed_complete_turn(conn, "turn-3", minute=3, summary="Later canon.", checkpoint_id="cp-3", vault_path="npcs/npc-later.md")
+    _seed_complete_turn(
+        conn,
+        "turn-2",
+        minute=2,
+        summary="Selected canon.",
+        checkpoint_id="cp-2",
+        vault_path="sessions/session-1.md",
+    )
+    _seed_complete_turn(
+        conn,
+        "turn-3",
+        minute=3,
+        summary="Later canon.",
+        checkpoint_id="cp-3",
+        vault_path="npcs/npc-later.md",
+    )
 
     preview = RetconService(conn, campaign_id="cmp-retcon").preview("turn-2")
 
@@ -156,7 +174,9 @@ def test_preview_returns_suffix_prior_checkpoint_impact_and_token() -> None:
 
 def test_preview_blocks_when_no_prior_final_checkpoint_exists() -> None:
     conn = _make_conn()
-    _seed_complete_turn(conn, "turn-1", minute=1, summary="No prior checkpoint.", checkpoint_id="cp-1")
+    _seed_complete_turn(
+        conn, "turn-1", minute=1, summary="No prior checkpoint.", checkpoint_id="cp-1"
+    )
 
     with pytest.raises(RetconBlockedError) as exc:
         RetconService(conn, campaign_id="cmp-retcon").preview("turn-1")
@@ -177,14 +197,6 @@ def test_preview_blocks_when_selected_turn_is_not_complete() -> None:
 
 
 @dataclass
-class _RuntimeSpy:
-    rewinded: list[str]
-
-    def _rewind_to_checkpoint(self, checkpoint_id: str, *, clear_pending_narration: bool = False) -> None:
-        self.rewinded.append(checkpoint_id)
-
-
-@dataclass
 class _VaultSpy:
     master_path: Path
     player_vault_root: Path
@@ -196,7 +208,12 @@ class _VaultSpy:
 
     def rebuild_indices(self, conn: object | None = None) -> dict[str, int]:
         self.rebuild_calls += 1
-        return {"graph_pages": 0, "fts5_pages": FTS5Index(conn).rebuild_all(self.master_path) if isinstance(conn, sqlite3.Connection) else 0}
+        return {
+            "graph_pages": 0,
+            "fts5_pages": FTS5Index(conn).rebuild_all(self.master_path)
+            if isinstance(conn, sqlite3.Connection)
+            else 0,
+        }
 
 
 def _make_runtime(conn: sqlite3.Connection, vault_service: _VaultSpy) -> GraphRuntime:
@@ -206,7 +223,18 @@ def _make_runtime(conn: sqlite3.Connection, vault_service: _VaultSpy) -> GraphRu
         campaign_id="cmp-retcon",
         bootstrap=SimpleNamespace(services=SimpleNamespace(vault_service=vault_service)),
     )
-    runtime._rewind_to_checkpoint = lambda checkpoint_id: vault_service.player_vault_root.joinpath("rewound.txt").write_text(checkpoint_id, encoding="utf-8")  # type: ignore[method-assign]
+
+    def record_rewind(checkpoint_id: str) -> int:
+        return vault_service.player_vault_root.joinpath("rewound.txt").write_text(
+            checkpoint_id,
+            encoding="utf-8",
+        )
+
+    setattr(
+        runtime,
+        "_rewind_to_checkpoint",
+        record_rewind,
+    )
     return runtime
 
 
@@ -234,8 +262,17 @@ def test_runtime_confirm_retcon_rewinds_rebuilds_syncs_and_audits(tmp_path: Path
     player.mkdir()
     vault = _VaultSpy(master_path=master, player_vault_root=player)
     _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
-    _seed_complete_turn(conn, "turn-2", minute=2, summary="Selected removed canon.", checkpoint_id="cp-2", vault_path="canon.md")
-    _seed_complete_turn(conn, "turn-3", minute=3, summary="Later removed canon.", checkpoint_id="cp-3")
+    _seed_complete_turn(
+        conn,
+        "turn-2",
+        minute=2,
+        summary="Selected removed canon.",
+        checkpoint_id="cp-2",
+        vault_path="canon.md",
+    )
+    _seed_complete_turn(
+        conn, "turn-3", minute=3, summary="Later removed canon.", checkpoint_id="cp-3"
+    )
     runtime = _make_runtime(conn, vault)
 
     result = runtime.confirm_retcon("turn-2", "RETCON turn-2")
@@ -253,11 +290,15 @@ def test_runtime_confirm_retcon_rewinds_rebuilds_syncs_and_audits(tmp_path: Path
 def test_retconned_transcript_content_absent_from_canonical_context_and_memory_packet() -> None:
     conn = _make_conn()
     _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
-    _seed_complete_turn(conn, "turn-2", minute=2, summary="Forbidden removed canon detail.", checkpoint_id="cp-2")
+    _seed_complete_turn(
+        conn, "turn-2", minute=2, summary="Forbidden removed canon detail.", checkpoint_id="cp-2"
+    )
     RetconService(conn, campaign_id="cmp-retcon").confirm("turn-2", "RETCON turn-2")
 
     canonical = TranscriptRepository(conn).list_canonical_for_campaign("cmp-retcon", limit=8)
-    packet = assemble_memory_packet({"campaign_id": "cmp-retcon", "turn_id": "new", "session_state": {}}, conn=conn)
+    packet = assemble_memory_packet(
+        {"campaign_id": "cmp-retcon", "turn_id": "new", "session_state": {}}, conn=conn
+    )
 
     assert all("Forbidden removed canon detail" not in entry.content for entry in canonical)
     assert all("Forbidden removed canon detail" not in turn for turn in packet.recent_turns)

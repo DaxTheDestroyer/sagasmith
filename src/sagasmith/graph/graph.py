@@ -31,7 +31,9 @@ def build_saga_graph(bootstrap: Any) -> Any:
         },
     )
     # Play chain
-    g.add_conditional_edges("oracle", route_after_oracle, {"rules_lawyer": "rules_lawyer", END: END})
+    g.add_conditional_edges(
+        "oracle", route_after_oracle, {"rules_lawyer": "rules_lawyer", END: END}
+    )
     g.add_edge("rules_lawyer", "orator")
     g.add_edge("orator", "archivist")
     g.add_edge("archivist", END)

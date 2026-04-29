@@ -17,65 +17,73 @@ from sagasmith.schemas.mechanics import CheckResult
 # Degree-of-success keyword tables
 # Words that MUST NOT appear near an actor when the degree implies success,
 # and words that MUST appear (or at least not be contradicted).
-_SUCCESS_FORBIDDEN = frozenset({
-    "misses",
-    "missed",
-    "fails",
-    "failed",
-    "fumbles",
-    "fumbled",
-    "stumbles",
-    "stumbled",
-    "botches",
-    "botched",
-    "goes wrong",
-    "go awry",
-    "slips",
-    "slipped",
-})
+_SUCCESS_FORBIDDEN = frozenset(
+    {
+        "misses",
+        "missed",
+        "fails",
+        "failed",
+        "fumbles",
+        "fumbled",
+        "stumbles",
+        "stumbled",
+        "botches",
+        "botched",
+        "goes wrong",
+        "go awry",
+        "slips",
+        "slipped",
+    }
+)
 
-_SUCCESS_ALLOWED = frozenset({
-    "hits",
-    "connects",
-    "strikes",
-    "lands",
-    "succeeds",
-    "succeed",
-    "success",
-    "critical",
-    "pierces",
-    "slashes",
-    "cleaves",
-    "smashes",
-    "cracks",
-})
+_SUCCESS_ALLOWED = frozenset(
+    {
+        "hits",
+        "connects",
+        "strikes",
+        "lands",
+        "succeeds",
+        "succeed",
+        "success",
+        "critical",
+        "pierces",
+        "slashes",
+        "cleaves",
+        "smashes",
+        "cracks",
+    }
+)
 
-_FAILURE_FORBIDDEN = frozenset({
-    "hits",
-    "connects",
-    "strikes",
-    "lands",
-    "succeeds",
-    "pierces",
-    "slashes",
-    "cleaves",
-    "smashes",
-    "cracks",
-    "devastates",
-})
+_FAILURE_FORBIDDEN = frozenset(
+    {
+        "hits",
+        "connects",
+        "strikes",
+        "lands",
+        "succeeds",
+        "pierces",
+        "slashes",
+        "cleaves",
+        "smashes",
+        "cracks",
+        "devastates",
+    }
+)
 
-_FAILURE_ALLOWED = frozenset({
-    "misses",
-    "missed",
-    "fails",
-    "failed",
-    "fumbles",
-    "stumbles",
-    "goes wrong",
-    "glancing",
-    "wild",
-    "barely",
-})
+_FAILURE_ALLOWED = frozenset(
+    {
+        "misses",
+        "missed",
+        "fails",
+        "failed",
+        "fumbles",
+        "stumbles",
+        "goes wrong",
+        "glancing",
+        "wild",
+        "barely",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -122,15 +130,11 @@ def _check_degree_keywords(
     if degree in ("success", "critical_success"):
         for word in _SUCCESS_FORBIDDEN:
             if word in text_lower:
-                violations.append(
-                    f"degree={degree} but prose contains '{word}'"
-                )
+                violations.append(f"degree={degree} but prose contains '{word}'")
     elif degree in ("failure", "critical_failure"):
         for word in _FAILURE_FORBIDDEN:
             if word in text_lower:
-                violations.append(
-                    f"degree={degree} but prose contains '{word}'"
-                )
+                violations.append(f"degree={degree} but prose contains '{word}'")
 
     return violations
 

@@ -227,7 +227,9 @@ class GraphRuntime:
         Raises ``ValueError`` if no pre-narration checkpoint exists for the turn.
         """
         repo = CheckpointRefRepository(self.db_conn)
-        refs = [r for r in repo.list_for_turn(turn_id) if r.kind == CheckpointKind.PRE_NARRATION.value]
+        refs = [
+            r for r in repo.list_for_turn(turn_id) if r.kind == CheckpointKind.PRE_NARRATION.value
+        ]
         if not refs:
             raise ValueError(f"No pre_narration checkpoint for turn {turn_id}")
 
@@ -266,7 +268,9 @@ class GraphRuntime:
         Raises ``ValueError`` if no pre-narration checkpoint exists for the turn.
         """
         repo = CheckpointRefRepository(self.db_conn)
-        refs = [r for r in repo.list_for_turn(turn_id) if r.kind == CheckpointKind.PRE_NARRATION.value]
+        refs = [
+            r for r in repo.list_for_turn(turn_id) if r.kind == CheckpointKind.PRE_NARRATION.value
+        ]
         if not refs:
             raise ValueError(f"No pre_narration checkpoint for turn {turn_id}")
 
@@ -425,7 +429,9 @@ def build_persistent_graph(
         route_by_phase,
         {"onboarding": "onboarding", "oracle": "oracle", "rules_lawyer": "rules_lawyer", END: END},
     )
-    g.add_conditional_edges("oracle", route_after_oracle, {"rules_lawyer": "rules_lawyer", END: END})
+    g.add_conditional_edges(
+        "oracle", route_after_oracle, {"rules_lawyer": "rules_lawyer", END: END}
+    )
     g.add_edge("rules_lawyer", "orator")
     g.add_edge("orator", "archivist")
     g.add_edge("archivist", END)
@@ -482,9 +488,7 @@ def _wrap_bootstrap_with_logger(bootstrap, db_conn: sqlite3.Connection):
     def _wrap(node_fn, agent_name):
         def wrapped(state, *args, **kwargs):
             turn_id = state["turn_id"]
-            with AgentActivationLogger(
-                db_conn, turn_id=turn_id, agent_name=agent_name
-            ):
+            with AgentActivationLogger(db_conn, turn_id=turn_id, agent_name=agent_name):
                 return node_fn(state, *args, **kwargs)
 
         return wrapped

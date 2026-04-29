@@ -44,7 +44,9 @@ def build_user_prompt(
         "player_profile": player_profile.model_dump(mode="json") if player_profile else None,
         "world_bible": world_bible.model_dump(mode="json") if world_bible else None,
         "campaign_seed": campaign_seed.model_dump(mode="json") if campaign_seed else None,
-        "prior_scene_brief": prior_scene_brief.model_dump(mode="json") if prior_scene_brief else None,
+        "prior_scene_brief": prior_scene_brief.model_dump(mode="json")
+        if prior_scene_brief
+        else None,
         "instructions": [
             "Compose a concise SceneBrief planning artifact for the next playable scene.",
             "Include beat_ids parallel to beats; IDs must be stable snake_case strings.",

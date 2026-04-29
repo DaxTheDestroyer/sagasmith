@@ -22,7 +22,7 @@ from sagasmith.services.errors import TrustServiceError
 class InterruptKind(StrEnum):
     PAUSE = "pause"
     LINE = "line"
-    RETCON = "retcon"      # defined but not posted in Phase 4 — Phase 8 scope
+    RETCON = "retcon"  # defined but not posted in Phase 4 — Phase 8 scope
     BUDGET_STOP = "budget_stop"
     SAFETY_BLOCK = "safety_block"
     SESSION_END = "session_end"
@@ -44,13 +44,22 @@ class InterruptEnvelope:
         }
 
     @classmethod
-    def build(cls, *, kind: InterruptKind, payload: dict[str, Any] | None, thread_id: str, canary: Any = None) -> InterruptEnvelope:
+    def build(
+        cls,
+        *,
+        kind: InterruptKind,
+        payload: dict[str, Any] | None,
+        thread_id: str,
+        canary: Any = None,
+    ) -> InterruptEnvelope:
         payload = payload or {}
         # Redaction canary guard
         if canary is None:
             from sagasmith.evals.redaction import RedactionCanary
+
             canary = RedactionCanary()
         import json
+
         if canary.scan(json.dumps(payload)):
             raise TrustServiceError(f"interrupt payload for kind={kind} contains redacted content")
         return cls(

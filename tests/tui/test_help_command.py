@@ -16,7 +16,20 @@ from sagasmith.tui.widgets.narration import NarrationArea
 
 # TUI-06: all 12 required command names registered by build_app
 _EXPECTED_COMMANDS = sorted(
-    ["budget", "clock", "help", "inventory", "line", "map", "pause", "recap", "retcon", "save", "settings", "sheet"]
+    [
+        "budget",
+        "clock",
+        "help",
+        "inventory",
+        "line",
+        "map",
+        "pause",
+        "recap",
+        "retcon",
+        "save",
+        "settings",
+        "sheet",
+    ]
 )
 
 

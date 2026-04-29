@@ -134,7 +134,9 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
                 self.graph_runtime.graph.invoke(None, self.graph_runtime.thread_config)
                 snapshot = self.graph_runtime.graph.get_state(self.graph_runtime.thread_config)
             if snapshot.values:
-                self.current_turn_id = _next_turn_id(str(snapshot.values.get("turn_id") or self.current_turn_id or "turn_000000"))
+                self.current_turn_id = _next_turn_id(
+                    str(snapshot.values.get("turn_id") or self.current_turn_id or "turn_000000")
+                )
             current_values = dict(getattr(snapshot, "values", {}) or {})
             state = self._build_play_state(event.text, current_values or None)
             self.graph_runtime.invoke_turn(state)
@@ -156,7 +158,9 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         existing_combat = None if current_state is None else current_state.get("combat_state")
         existing_checks = [] if current_state is None else current_state.get("check_results", [])
         existing_deltas = [] if current_state is None else current_state.get("state_deltas", [])
-        existing_narration = [] if current_state is None else current_state.get("pending_narration", [])
+        existing_narration = (
+            [] if current_state is None else current_state.get("pending_narration", [])
+        )
         phase = "combat" if existing_combat is not None else "play"
         return {
             "campaign_id": self.manifest.campaign_id,
@@ -166,7 +170,9 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             "player_profile": None,
             "content_policy": None,
             "house_rules": None,
-            "character_sheet": existing_sheet if existing_sheet is not None else make_first_slice_character().model_dump(),
+            "character_sheet": existing_sheet
+            if existing_sheet is not None
+            else make_first_slice_character().model_dump(),
             "session_state": {
                 "current_scene_id": None,
                 "current_location_id": None,
@@ -230,9 +236,13 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         pending = values.get("pending_narration", [])
         if pending and len(pending) > self._synced_graph_narration_count:
             narration = self.query_one(NarrationArea)
-            for line in pending[self._synced_graph_narration_count:]:
+            for line in pending[self._synced_graph_narration_count :]:
                 narration.append_line(line)
             self._synced_graph_narration_count = len(pending)
+
+    def sync_narration_from_graph(self) -> None:
+        """Public wrapper for command handlers that need to refresh narration."""
+        self._sync_narration_from_graph()
 
     def _sync_mechanics_from_graph(self) -> None:
         """Render newly resolved mechanics and refresh status from graph state."""
@@ -263,7 +273,7 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
                 continue
 
         narration = self.query_one(NarrationArea)
-        for result in check_results[self._synced_graph_check_result_count:]:
+        for result in check_results[self._synced_graph_check_result_count :]:
             reason = result.proposal_id
             narration.append_line(f"CheckResult: {result.proposal_id}")
             narration.append_line(render_compact_roll_line(result, reason=reason))
@@ -282,7 +292,14 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         hp_current = None
         hp_max = None
         if combat_state is not None:
-            pc = next((combatant for combatant in combat_state.combatants if combatant.id.startswith("pc_")), None)
+            pc = next(
+                (
+                    combatant
+                    for combatant in combat_state.combatants
+                    if combatant.id.startswith("pc_")
+                ),
+                None,
+            )
             if pc is not None:
                 hp_current = pc.current_hp
                 hp_max = pc.max_hp
@@ -295,7 +312,8 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
                 pass
 
         last_rolls = tuple(
-            render_compact_roll_line(result, reason=result.proposal_id) for result in check_results[-3:]
+            render_compact_roll_line(result, reason=result.proposal_id)
+            for result in check_results[-3:]
         )
         self.state.status = StatusSnapshot(
             hp_current=hp_current,
@@ -314,8 +332,8 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         row = self._service_conn.execute(
             """
             SELECT sync_warning
-              FROM turn_records
-             WHERE campaign_id = ? AND session_id = ?
+             FROM turn_records
+             WHERE campaign_id = ? AND session_id = ? AND status = 'complete'
              ORDER BY completed_at DESC, turn_id DESC
              LIMIT 1
             """,
@@ -349,6 +367,8 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             self._sync_narration_from_graph()
         with suppress(Exception):
             self._sync_mechanics_from_graph()
+        with suppress(Exception):
+            self._sync_vault_warning_from_latest_turn()
 
     def on_unmount(self) -> None:
         """Close the long-lived service connection deterministically on TUI exit.

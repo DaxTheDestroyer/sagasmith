@@ -54,10 +54,8 @@ def test_name_mention_does_not_jump_to_player_known() -> None:
     assert visibility == "foreshadowed"
 
 
-
 def test_existing_visibility_is_not_demoted() -> None:
     page = _npc_page(visibility="player_known")
-
 
     visibility = promote_visibility(page, {"recent_narration_lines": ["No mention here."]})
 

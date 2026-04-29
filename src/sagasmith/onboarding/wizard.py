@@ -340,6 +340,7 @@ class OnboardingWizard:
                 return errors
             if sub_field == "hard_stop":
                 from .prompts import PromptField, PromptFieldKind
+
                 fld = PromptField(id="hard_stop", label="", kind=PromptFieldKind.BOOL)
                 parsed_val, errs = parse_answer(fld, value)
                 if errs:
@@ -417,9 +418,18 @@ class OnboardingWizard:
         if any(
             x is None
             for x in (
-                d.genre, d.tone, d.touchstones, d.pillar_weights,
-                d.pacing, d.combat_style, d.dice_ux, d.campaign_length,
-                d.character_mode, d.death_policy, d.per_session_usd, d.hard_stop,
+                d.genre,
+                d.tone,
+                d.touchstones,
+                d.pillar_weights,
+                d.pacing,
+                d.combat_style,
+                d.dice_ux,
+                d.campaign_length,
+                d.character_mode,
+                d.death_policy,
+                d.per_session_usd,
+                d.hard_stop,
             )
         ):
             return ["draft incomplete — cannot validate profile"]
@@ -487,12 +497,19 @@ def _next_phase(current: OnboardingPhase) -> OnboardingPhase:
 def _require_complete_draft(draft: _DraftState) -> None:
     """Raise RuntimeError if any required draft field is None."""
     required_fields = [
-        "genre", "tone", "touchstones", "pillar_weights", "pacing",
-        "combat_style", "dice_ux", "campaign_length", "death_policy",
-        "per_session_usd", "hard_stop", "character_mode",
+        "genre",
+        "tone",
+        "touchstones",
+        "pillar_weights",
+        "pacing",
+        "combat_style",
+        "dice_ux",
+        "campaign_length",
+        "death_policy",
+        "per_session_usd",
+        "hard_stop",
+        "character_mode",
     ]
     missing = [f for f in required_fields if getattr(draft, f) is None]
     if missing:
-        raise RuntimeError(
-            f"review called before all phases filled; missing: {missing}"
-        )
+        raise RuntimeError(f"review called before all phases filled; missing: {missing}")

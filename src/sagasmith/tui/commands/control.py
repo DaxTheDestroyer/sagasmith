@@ -55,7 +55,10 @@ class RecapCommand:
         conn = getattr(app, "_service_conn", None)
         if conn is None:
             return
-        entries = TranscriptRepository(conn).list_recent(limit=5)
+        entries = TranscriptRepository(conn).list_canonical_for_campaign(
+            app.manifest.campaign_id,
+            limit=5,
+        )
         if entries:
             _write(app, "--- Recent transcript ---")
         for entry in entries:
@@ -192,9 +195,7 @@ class RetconCommand:
 
         try:
             preview = app.graph_runtime.preview_retcon(turn_id)
-            vault_outputs = (
-                ", ".join(preview.vault_paths) if preview.vault_paths else "none"
-            )
+            vault_outputs = ", ".join(preview.vault_paths) if preview.vault_paths else "none"
             _write(app, f"[system] /retcon preview for {turn_id}:")
             _write(app, f"Affected turns: {', '.join(preview.affected_turn_ids)}")
             _write(app, f"Vault outputs: {vault_outputs}")

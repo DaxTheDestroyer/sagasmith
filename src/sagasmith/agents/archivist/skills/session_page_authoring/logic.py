@@ -68,7 +68,9 @@ def _completed_turn_ids(
     return [str(row[0]) for row in rows]
 
 
-def _transcript_rows(conn: sqlite3.Connection, turn_ids: list[str]) -> list[tuple[str, str, str, int]]:
+def _transcript_rows(
+    conn: sqlite3.Connection, turn_ids: list[str]
+) -> list[tuple[str, str, str, int]]:
     rows: list[tuple[str, str, str, int]] = []
     for turn_id in turn_ids:
         rows.extend(
@@ -86,7 +88,9 @@ def _transcript_rows(conn: sqlite3.Connection, turn_ids: list[str]) -> list[tupl
     return rows
 
 
-def _roll_rows(conn: sqlite3.Connection, turn_ids: list[str]) -> list[tuple[str, str, int, int, int, int]]:
+def _roll_rows(
+    conn: sqlite3.Connection, turn_ids: list[str]
+) -> list[tuple[str, str, int, int, int, int]]:
     rows: list[tuple[str, str, int, int, int, int]] = []
     for turn_id in turn_ids:
         rows.extend(
@@ -122,13 +126,40 @@ def _last_with_prefix(values: list[str], prefix: str) -> str | None:
 
 
 def _build_body(
-    *, transcript_rows: list[tuple[str, str, str, int]], roll_rows: list[tuple[str, str, int, int, int, int]]
+    *,
+    transcript_rows: list[tuple[str, str, str, int]],
+    roll_rows: list[tuple[str, str, int, int, int, int]],
 ) -> str:
-    narration = [content for _turn_id, kind, content, _sequence in transcript_rows if kind == "narration_final"]
-    beats = [content.removeprefix("Beat:").strip() for _turn_id, kind, content, _sequence in transcript_rows if kind == "scene_brief"]
-    lines = ["## Summary", "", *(narration or ["No completed narration was recorded."]), "", "## Beats", ""]
-    lines.extend(f"{index}. {beat}" for index, beat in enumerate(beats or ["No beats recorded."], start=1))
-    lines.extend(["", "## Rolls", "", "| Roll | Die | Natural | Mod | Total | DC |", "|---|---|---:|---:|---:|---:|"])
+    narration = [
+        content
+        for _turn_id, kind, content, _sequence in transcript_rows
+        if kind == "narration_final"
+    ]
+    beats = [
+        content.removeprefix("Beat:").strip()
+        for _turn_id, kind, content, _sequence in transcript_rows
+        if kind == "scene_brief"
+    ]
+    lines = [
+        "## Summary",
+        "",
+        *(narration or ["No completed narration was recorded."]),
+        "",
+        "## Beats",
+        "",
+    ]
+    lines.extend(
+        f"{index}. {beat}" for index, beat in enumerate(beats or ["No beats recorded."], start=1)
+    )
+    lines.extend(
+        [
+            "",
+            "## Rolls",
+            "",
+            "| Roll | Die | Natural | Mod | Total | DC |",
+            "|---|---|---:|---:|---:|---:|",
+        ]
+    )
     if roll_rows:
         for roll_id, die, natural, modifier, total, dc in roll_rows:
             mod_text = f"+{modifier}" if modifier >= 0 else str(modifier)

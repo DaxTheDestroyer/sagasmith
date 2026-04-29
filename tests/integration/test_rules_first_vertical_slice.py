@@ -192,11 +192,14 @@ async def test_rules_first_vertical_slice_sheet_check_reveal_and_combat(rules_fi
         assert damage_roll_ids[0] in "\n".join(
             effect.description for effect in resumed_attack.effects
         )
-        assert next(
-            combatant.current_hp
-            for combatant in resumed_strike_combat.combatants
-            if combatant.id == "enemy_weak_melee"
-        ) == target_hp
+        assert (
+            next(
+                combatant.current_hp
+                for combatant in resumed_strike_combat.combatants
+                if combatant.id == "enemy_weak_melee"
+            )
+            == target_hp
+        )
 
         rendered_status = format_status_snapshot(app.state.status)
         rendered_output = "\n".join([*app.narration.logged_lines, rendered_status])

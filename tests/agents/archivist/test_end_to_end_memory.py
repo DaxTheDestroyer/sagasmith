@@ -34,7 +34,9 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
     root = tmp_path / "camp"
     manifest = init_campaign(name="MemINT", root=root, provider="fake")
     conn = open_campaign_db(root / "campaign.sqlite")
-    service = VaultService(campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault")
+    service = VaultService(
+        campaign_id=manifest.campaign_id, player_vault_root=root / "player_vault"
+    )
 
     # Write a variety of vault pages to master vault
     # NPC: Orym
@@ -50,7 +52,9 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
         status="alive",
         disposition_to_pc="friendly",
     )
-    service.write_page(VaultPage(orym_fm, "Orym is a skilled halfling fighter."), Path("npcs/npc_orym.md"))
+    service.write_page(
+        VaultPage(orym_fm, "Orym is a skilled halfling fighter."), Path("npcs/npc_orym.md")
+    )
 
     # Location: Rivermouth
     river_fm = LocationFrontmatter(
@@ -62,7 +66,10 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
         region="coastal",
         status="town",
     )
-    service.write_page(VaultPage(river_fm, "Rivermouth is a bustling port town."), Path("locations/loc_rivermouth.md"))
+    service.write_page(
+        VaultPage(river_fm, "Rivermouth is a bustling port town."),
+        Path("locations/loc_rivermouth.md"),
+    )
 
     # Faction: River Guild
     guild_fm = FactionFrontmatter(
@@ -75,7 +82,9 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
         disposition_to_pc="neutral",
         power_level="regional",
     )
-    service.write_page(VaultPage(guild_fm, "The Guild controls river trade."), Path("factions/fac_river_guild.md"))
+    service.write_page(
+        VaultPage(guild_fm, "The Guild controls river trade."), Path("factions/fac_river_guild.md")
+    )
 
     # Item: Lucky charm
     charm_fm = ItemFrontmatter(
@@ -86,7 +95,9 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
         visibility="player_known",
         rarity="common",
     )
-    service.write_page(VaultPage(charm_fm, "A small charm that brings luck."), Path("items/item_charm.md"))
+    service.write_page(
+        VaultPage(charm_fm, "A small charm that brings luck."), Path("items/item_charm.md")
+    )
 
     # Lore: Ancient legend
     lore_fm = LoreFrontmatter(
@@ -97,7 +108,10 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
         visibility="player_known",
         category="myth",
     )
-    service.write_page(VaultPage(lore_fm, "An old legend speaks of a hidden treasure."), Path("lore/lore_legend.md"))
+    service.write_page(
+        VaultPage(lore_fm, "An old legend speaks of a hidden treasure."),
+        Path("lore/lore_legend.md"),
+    )
 
     # Rebuild derived indices (FTS5 + NetworkX)
     service.rebuild_indices(conn)
@@ -125,7 +139,9 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
     assert "loc_rivermouth" in entity_ids, "Expected Rivermouth entity missing"
 
     # 2. FTS5 retrieval notes should indicate matches
-    assert any(note.startswith("fts5:") for note in packet.retrieval_notes), "FTS5 retrieval not used"
+    assert any(note.startswith("fts5:") for note in packet.retrieval_notes), (
+        "FTS5 retrieval not used"
+    )
 
     # 3. Graph neighbor retrieval should also appear (because we resolved entity, neighbors may appear)
     # Not guaranteed if graph neighbors empty, but likely triggers. We'll just check notes list is non-empty

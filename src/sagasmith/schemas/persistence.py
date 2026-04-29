@@ -128,7 +128,9 @@ class SafetyEventRecord(SchemaModel):
     policy_ref: str | None
     action_taken: str
     timestamp: str  # ISO 8601 UTC
-    visibility: Literal["player_visible"] = "player_visible"  # SAFE-06: Phase 3 events are ALL player-visible
+    visibility: Literal["player_visible"] = (
+        "player_visible"  # SAFE-06: Phase 3 events are ALL player-visible
+    )
 
 
 class AgentSkillLogRecord(SchemaModel):

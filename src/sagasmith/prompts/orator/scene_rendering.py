@@ -68,9 +68,7 @@ def build_user_prompt(
             "entities": [e.model_dump(mode="json") for e in memory_packet.entities[:5]],
             "open_callbacks": memory_packet.open_callbacks[:3],
         },
-        "content_policy": (
-            content_policy.model_dump(mode="json") if content_policy else None
-        ),
+        "content_policy": (content_policy.model_dump(mode="json") if content_policy else None),
         "instructions": [
             "Render this scene as player-facing narration.",
             "DO NOT contradict any mechanical constraint tokens.",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -29,8 +30,12 @@ def conn() -> sqlite3.Connection:
 def fts_populated(conn: sqlite3.Connection) -> FTS5Index:
     """FTS5 index populated with sample vault pages."""
     fts = FTS5Index(conn)
-    fts.index_page("npcs/npc_marcus.md", "Marcus runs the Bent Copper tavern. He is a weary innkeeper.")
-    fts.index_page("locations/loc_tavern.md", "The Bent Copper is a low-ceilinged tavern in Rivermouth.")
+    fts.index_page(
+        "npcs/npc_marcus.md", "Marcus runs the Bent Copper tavern. He is a weary innkeeper."
+    )
+    fts.index_page(
+        "locations/loc_tavern.md", "The Bent Copper is a low-ceilinged tavern in Rivermouth."
+    )
     fts.index_page("npcs/npc_sera.md", "Sera is a worried wife looking for her missing husband.")
     return fts
 
@@ -71,12 +76,13 @@ def vault_service(vault_root: Path, tmp_path: Path) -> VaultService:
     svc = VaultService.__new__(VaultService)
     svc.master_path = vault_root
     svc.player_vault_root = player_vault
-    svc._resolver = _make_resolver(vault_root)
+    object.__setattr__(svc, "_resolver", _make_resolver(vault_root))
     return svc
 
 
 def _make_resolver(vault_root: Path):
     from sagasmith.vault.resolver import EntityResolver
+
     return EntityResolver(vault_root)
 
 
@@ -90,7 +96,7 @@ def _make_state(
     rolling_summary: str | None = None,
     pending_player_input: str | None = None,
     pending_narration: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Build a minimal graph state dict for testing."""
     return {
         "campaign_id": campaign_id,
@@ -121,18 +127,14 @@ class TestAssembleMemoryPacket:
         assert len(packet.retrieval_notes) > 0
         assert packet.summary
 
-    def test_rolling_summary_used_when_present(
-        self, conn: sqlite3.Connection
-    ) -> None:
+    def test_rolling_summary_used_when_present(self, conn: sqlite3.Connection) -> None:
         """Rolling summary from state is used as-is."""
         state = _make_state(rolling_summary="The party arrived at Rivermouth and met Marcus.")
         packet = assemble_memory_packet(state, conn=conn, token_cap=512)
         assert "Rivermouth" in packet.summary
         assert any("rolling_summary:included" in n for n in packet.retrieval_notes)
 
-    def test_fallback_summary_when_no_rolling(
-        self, conn: sqlite3.Connection
-    ) -> None:
+    def test_fallback_summary_when_no_rolling(self, conn: sqlite3.Connection) -> None:
         """Without rolling summary, a fallback summary is generated."""
         state = _make_state(rolling_summary=None, turn_count=5)
         packet = assemble_memory_packet(state, conn=conn, token_cap=512)
@@ -160,9 +162,7 @@ class TestAssembleMemoryPacket:
         finally:
             reset_vault_graph_cache()
 
-    def test_entity_resolution_without_vault(
-        self, conn: sqlite3.Connection
-    ) -> None:
+    def test_entity_resolution_without_vault(self, conn: sqlite3.Connection) -> None:
         """Without vault_service, provisional entity stubs are used."""
         state = _make_state(present_entities=["Marcus"])
         packet = assemble_memory_packet(state, conn=conn, token_cap=512)
@@ -184,9 +184,7 @@ class TestAssembleMemoryPacket:
         finally:
             reset_vault_graph_cache()
 
-    def test_token_cap_enforcement(
-        self, conn: sqlite3.Connection
-    ) -> None:
+    def test_token_cap_enforcement(self, conn: sqlite3.Connection) -> None:
         """MemoryPacket never exceeds token_cap."""
         # Build a long rolling summary
         long_summary = " ".join(["word"] * 500)
@@ -198,9 +196,7 @@ class TestAssembleMemoryPacket:
         )
         assert estimated <= token_cap
 
-    def test_token_cap_with_transcript(
-        self, conn: sqlite3.Connection
-    ) -> None:
+    def test_token_cap_with_transcript(self, conn: sqlite3.Connection) -> None:
         """Token cap is enforced even with both summary and transcript entries."""
         state = _make_state(
             rolling_summary="A long summary. " * 50,

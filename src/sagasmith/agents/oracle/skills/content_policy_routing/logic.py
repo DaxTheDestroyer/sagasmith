@@ -37,7 +37,16 @@ class Blocked(PolicyRouteResult):
 
 _POLICY_SYNONYMS: dict[str, tuple[str, ...]] = {
     "graphic_sexual_content": ("sexual assault", "explicit sex", "graphic sexual"),
-    "harm_to_children": ("harm a child", "children are harmed", "child corpse", "injured child", "child harmed", "harmed child", "children harmed", "harming children"),
+    "harm_to_children": (
+        "harm a child",
+        "children are harmed",
+        "child corpse",
+        "injured child",
+        "child harmed",
+        "harmed child",
+        "children harmed",
+        "harming children",
+    ),
     "graphic_violence": ("gore", "dismember", "graphic violence", "viscera"),
 }
 
@@ -93,7 +102,9 @@ def route_scene_intent(
     return Allowed(text, content_warnings=tuple(warnings))
 
 
-def safety_pre_gate(intent: str, content_policy: ContentPolicy | dict[str, Any] | None) -> PolicyRouteResult:
+def safety_pre_gate(
+    intent: str, content_policy: ContentPolicy | dict[str, Any] | None
+) -> PolicyRouteResult:
     """D-06.3-compatible pre-gate facade for Oracle."""
 
     return route_scene_intent(scene_intent=intent, content_policy=content_policy)
@@ -113,6 +124,10 @@ def _matches_policy_term(text: str, policy_term: str) -> bool:
 def _redact_term(text: str, policy_term: str) -> str:
     replacement = "safety-aware offscreen complication"
     routed = text
-    for term in (policy_term, policy_term.replace("_", " "), *_POLICY_SYNONYMS.get(policy_term, ())):
+    for term in (
+        policy_term,
+        policy_term.replace("_", " "),
+        *_POLICY_SYNONYMS.get(policy_term, ()),
+    ):
         routed = re.sub(re.escape(term), replacement, routed, flags=re.IGNORECASE)
     return routed

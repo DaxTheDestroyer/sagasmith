@@ -68,7 +68,9 @@ def _parse_soft_limits(raw: str | None) -> dict[str, _Disposition]:
 def onboard_command(
     campaign: Annotated[Path, typer.Option("--campaign", "-c", help="Campaign directory path.")],
     genre: Annotated[str | None, typer.Option("--genre", help="Comma-separated genres.")] = None,
-    tone: Annotated[str | None, typer.Option("--tone", help="Comma-separated tone keywords.")] = None,
+    tone: Annotated[
+        str | None, typer.Option("--tone", help="Comma-separated tone keywords.")
+    ] = None,
     touchstones: Annotated[
         str | None,
         typer.Option("--touchstones", help="Comma-separated books/games/films to emulate."),
@@ -119,7 +121,9 @@ def onboard_command(
     ] = None,
     yes: Annotated[
         bool,
-        typer.Option("--yes", "-y", help="Commit the reviewed onboarding records without prompting."),
+        typer.Option(
+            "--yes", "-y", help="Commit the reviewed onboarding records without prompting."
+        ),
     ] = False,
 ) -> None:
     """Complete or re-run onboarding for a local campaign."""

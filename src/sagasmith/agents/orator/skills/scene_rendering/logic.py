@@ -162,7 +162,8 @@ def render_scene(
                             cancelled = True
                             safety_events.append(
                                 _make_event(
-                                    turn_id, "fallback",
+                                    turn_id,
+                                    "fallback",
                                     hit.term,
                                     f"inline hard-limit match: {hit.matched_text}",
                                 )
@@ -176,7 +177,10 @@ def render_scene(
                         narration_lines=[_FALLBACK_NARRATION],
                         resolved_beat_ids=[],
                         safety_events=_make_safety_events(
-                            safety_events, turn_id, "fallback", f"stream_failed:{event.failure_kind}"
+                            safety_events,
+                            turn_id,
+                            "fallback",
+                            f"stream_failed:{event.failure_kind}",
                         ),
                         used_fallback=True,
                     )
@@ -203,7 +207,8 @@ def render_scene(
         if isinstance(post_verdict, BlockFallback):
             safety_events.append(
                 _make_event(
-                    turn_id, "fallback",
+                    turn_id,
+                    "fallback",
                     post_verdict.violated_term or "unknown",
                     post_verdict.reason or "blocked",
                 )
@@ -211,7 +216,9 @@ def render_scene(
             if attempt < _MAX_REWRITES:
                 continue
             # Exhausted — use fallback
-            _log_safety_event(safety_svc, campaign_id, turn_id, "fallback", post_verdict.reason or "blocked")
+            _log_safety_event(
+                safety_svc, campaign_id, turn_id, "fallback", post_verdict.reason or "blocked"
+            )
             return RenderResult(
                 narration_lines=[_FALLBACK_NARRATION],
                 resolved_beat_ids=[],
@@ -224,14 +231,18 @@ def render_scene(
         if isinstance(post_verdict, Rewrite):
             safety_events.append(
                 _make_event(
-                    turn_id, "post_gate_rewrite",
+                    turn_id,
+                    "post_gate_rewrite",
                     post_verdict.violated_term or "unknown",
                     post_verdict.reason or "rewrite",
                 )
             )
             _log_safety_event(
-                safety_svc, campaign_id, turn_id,
-                "post_gate_rewrite", post_verdict.reason or "rewrite",
+                safety_svc,
+                campaign_id,
+                turn_id,
+                "post_gate_rewrite",
+                post_verdict.reason or "rewrite",
             )
             if attempt < _MAX_REWRITES:
                 continue
@@ -251,7 +262,8 @@ def render_scene(
             if not audit.ok:
                 safety_events.append(
                     _make_event(
-                        turn_id, "post_gate_rewrite",
+                        turn_id,
+                        "post_gate_rewrite",
                         "mechanical_consistency",
                         f"audit violations: {'; '.join(audit.violations)}",
                     )
@@ -317,11 +329,7 @@ def _detect_resolved_beats(narration: str, brief: SceneBrief) -> list[str]:
 
     for beat_text, beat_id in zip(brief.beats, brief.beat_ids, strict=False):
         # Extract significant words from beat text (> 4 chars)
-        beat_words = {
-            w.lower()
-            for w in beat_text.split()
-            if len(w) > 4 and w.isalpha()
-        }
+        beat_words = {w.lower() for w in beat_text.split() if len(w) > 4 and w.isalpha()}
         if not beat_words:
             # If beat text has no long words, consider it resolved if narration is substantial
             if len(narration) > 100:

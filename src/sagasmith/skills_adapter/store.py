@@ -122,7 +122,9 @@ class SkillStore:
 
         # allowed_agents
         allowed_agents = fm.get("allowed_agents")
-        if not isinstance(allowed_agents, list) or not all(isinstance(a, str) for a in allowed_agents):
+        if not isinstance(allowed_agents, list) or not all(
+            isinstance(a, str) for a in allowed_agents
+        ):
             raise SkillValidationError("allowed_agents must be a list of strings")
         # REJECT agent-scoped skills with ["*"] — no silent downgrade
         if agent_scope != "_shared" and "*" in allowed_agents:

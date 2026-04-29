@@ -27,7 +27,14 @@ JSON_SCHEMA: dict[str, Any] = {
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["skill_check", "start_combat", "strike", "move", "end_turn", "none"],
+                        "enum": [
+                            "skill_check",
+                            "start_combat",
+                            "strike",
+                            "move",
+                            "end_turn",
+                            "none",
+                        ],
                     },
                     "stat": {"type": ["string", "null"]},
                     "target_id": {"type": ["string", "null"]},
@@ -62,7 +69,9 @@ def build_user_prompt(player_input: str, scene_context: dict[str, Any] | None = 
     available_targets = ", ".join(_string_list(context.get("available_targets"))) or (
         "enemy_weak_melee, enemy_weak_ranged"
     )
-    available_attacks = ", ".join(_string_list(context.get("available_attacks"))) or "longsword, shortbow"
+    available_attacks = (
+        ", ".join(_string_list(context.get("available_attacks"))) or "longsword, shortbow"
+    )
     return "\n".join(
         [
             "Classify the player input into first-slice intent candidates.",

@@ -175,7 +175,7 @@ Plans:
 Plans:
 - [x] 08-01-PLAN.md — Add retcon/audit persistence schema, centralized canonical-query helpers, and vault-write audit tracking so retconned rows remain retained but excluded from canon by default (QA-01, QA-02).
 - [x] 08-02-PLAN.md — Implement checkpoint-based RetconService and GraphRuntime execution that previews affected outputs, blocks unsafe rollback data, marks affected turns retconned, rebuilds derived layers, and resyncs the player vault (QA-01, QA-02).
-- [ ] 08-03-PLAN.md — Replace the `/retcon` stub with recent-turn picker, impact preview, exact typed confirmation token, completion messaging, and blocked-repair guidance (QA-01, QA-02).
+- [x] 08-03-PLAN.md — Replace the `/retcon` stub with recent-turn picker, impact preview, exact typed confirmation token, completion messaging, and blocked-repair guidance (QA-01, QA-02).
 - [x] 08-04-PLAN.md — Add layered MVP no-paid-call smoke coverage and `make release-gate` wrapping lint, format check, type check, tests, MVP smoke, and secret scan (QA-08, QA-09).
 
 ## Coverage
@@ -205,4 +205,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 5. Rules-First PF2e Vertical Slice | 5/5 | Complete | 2026-04-28 |
 | 6. AI GM Story Loop | 4/8 | In progress | - |
 | 7. Memory, Vault, and Resume Differentiator | 5/6 | In progress | - |
-| 8. Retcon, Repair, and Release Hardening | 3/4 | In progress | - |
+| 8. Retcon, Repair, and Release Hardening | 4/4 | Complete | 2026-04-29 |

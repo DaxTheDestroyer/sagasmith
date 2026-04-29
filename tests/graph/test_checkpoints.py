@@ -110,6 +110,7 @@ def test_build_checkpointer_returns_sqlitesaver():
     cp = build_checkpointer(conn)
     assert cp is not None
     from langgraph.checkpoint.sqlite import SqliteSaver
+
     assert isinstance(cp, SqliteSaver)
 
 
@@ -362,4 +363,5 @@ def test_extract_checkpoint_id():
     class FakeSnapshot:
         def __init__(self) -> None:
             self.config = {}
+
     assert extract_checkpoint_id(FakeSnapshot()) is None

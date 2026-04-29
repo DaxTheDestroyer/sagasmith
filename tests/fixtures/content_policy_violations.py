@@ -191,10 +191,7 @@ MULTILINGUAL_FIXTURES: tuple[ViolationFixture, ...] = (
 # ---------------------------------------------------------------------------
 
 ALL_FIXTURES: tuple[ViolationFixture, ...] = (
-    HARD_LIMIT_FIXTURES
-    + SOFT_LIMIT_FIXTURES
-    + BOUNDARY_FIXTURES
-    + MULTILINGUAL_FIXTURES
+    HARD_LIMIT_FIXTURES + SOFT_LIMIT_FIXTURES + BOUNDARY_FIXTURES + MULTILINGUAL_FIXTURES
 )
 
 

@@ -89,7 +89,11 @@ def test_qa03_seeded_replay() -> None:
     d8_1 = dice1.roll(die="d8", purpose="damage_longsword", actor_id="pc", modifier=4, roll_index=1)
     d8_2 = dice2.roll(die="d8", purpose="damage_longsword", actor_id="pc", modifier=4, roll_index=1)
 
-    assert (d20_1.roll_id, d20_1.natural, d20_1.total) == (d20_2.roll_id, d20_2.natural, d20_2.total)
+    assert (d20_1.roll_id, d20_1.natural, d20_1.total) == (
+        d20_2.roll_id,
+        d20_2.natural,
+        d20_2.total,
+    )
     assert (d8_1.roll_id, d8_1.natural, d8_1.total) == (d8_2.roll_id, d8_2.natural, d8_2.total)
 
 
@@ -97,7 +101,9 @@ def test_qa03_skill_check() -> None:
     sheet = make_first_slice_character()
     engine = RulesEngine(dice=DiceService(campaign_seed="qa03", session_seed="skill"))
 
-    result = engine.resolve_check(sheet, stat="athletics", dc=15, reason="QA-03 skill", roll_index=2)
+    result = engine.resolve_check(
+        sheet, stat="athletics", dc=15, reason="QA-03 skill", roll_index=2
+    )
 
     assert result.proposal_id == "check_athletics_000002"
     assert result.roll_result.roll_id == "roll_athletics_pc_valeros_first_slice_000002"
@@ -118,7 +124,11 @@ def test_qa03_initiative() -> None:
 
     state, initiative = combat.start_encounter(sheet, enemies, roll_index=4)
 
-    assert [entry.combatant_id for entry in state.initiative_order] == [sheet.id, enemies[1].id, enemies[0].id]
+    assert [entry.combatant_id for entry in state.initiative_order] == [
+        sheet.id,
+        enemies[1].id,
+        enemies[0].id,
+    ]
     assert [result.roll_result.roll_id for result in initiative] == [
         "roll_perception_pc_valeros_first_slice_000004",
         "roll_initiative_enemy_weak_melee_000005",
@@ -135,7 +145,9 @@ def test_qa03_strike_and_hp_damage() -> None:
     combat, _rules = _scripted_engine(dice)
     state, _initiative = combat.start_encounter(sheet, enemies)
 
-    updated, attack, damage = combat.resolve_strike(state, sheet.id, enemies[0].id, "longsword", roll_index=10)
+    updated, attack, damage = combat.resolve_strike(
+        state, sheet.id, enemies[0].id, "longsword", roll_index=10
+    )
 
     assert attack.degree == "success"
     assert attack.roll_result.roll_id == "roll_attack_longsword_pc_valeros_first_slice_000010"
@@ -143,9 +155,19 @@ def test_qa03_strike_and_hp_damage() -> None:
     assert damage.roll_id == "roll_damage_longsword_pc_valeros_first_slice_000010"
     assert attack.state_deltas[0].path == "combatants.enemy_weak_melee.current_hp"
     assert attack.state_deltas[0].value == 0
-    assert next(combatant.current_hp for combatant in updated.combatants if combatant.id == enemies[0].id) == 0
+    assert (
+        next(
+            combatant.current_hp
+            for combatant in updated.combatants
+            if combatant.id == enemies[0].id
+        )
+        == 0
+    )
     assert updated.action_counts[sheet.id] == 2
-    assert "damage_roll=roll_damage_longsword_pc_valeros_first_slice_000010" in attack.effects[0].description
+    assert (
+        "damage_roll=roll_damage_longsword_pc_valeros_first_slice_000010"
+        in attack.effects[0].description
+    )
 
 
 def test_qa03_roll_log_completeness() -> None:
@@ -157,7 +179,9 @@ def test_qa03_roll_log_completeness() -> None:
     combat, _rules = _scripted_engine(dice)
 
     state, initiative = combat.start_encounter(sheet, enemies, roll_index=7)
-    _updated, attack, damage = combat.resolve_strike(state, sheet.id, enemies[0].id, "longsword", roll_index=20)
+    _updated, attack, damage = combat.resolve_strike(
+        state, sheet.id, enemies[0].id, "longsword", roll_index=20
+    )
 
     produced_roll_ids = [result.roll_result.roll_id for result in initiative]
     produced_roll_ids.append(attack.roll_result.roll_id)
@@ -167,8 +191,16 @@ def test_qa03_roll_log_completeness() -> None:
     assert len(produced_roll_ids) == 5
     assert len(set(produced_roll_ids)) == len(produced_roll_ids)
     assert all(roll_id.startswith("roll_") for roll_id in produced_roll_ids)
-    assert {roll_id.split("_")[1] for roll_id in produced_roll_ids} >= {"perception", "initiative", "attack", "damage"}
-    assert all(result.roll_result.total == result.roll_result.natural + result.roll_result.modifier for result in initiative)
+    assert {roll_id.split("_")[1] for roll_id in produced_roll_ids} >= {
+        "perception",
+        "initiative",
+        "attack",
+        "damage",
+    }
+    assert all(
+        result.roll_result.total == result.roll_result.natural + result.roll_result.modifier
+        for result in initiative
+    )
     assert attack.roll_result.total == attack.roll_result.natural + attack.roll_result.modifier
     assert damage is not None and damage.total == damage.natural + damage.modifier
 

@@ -28,6 +28,7 @@ def test_status_snapshot_format_clock_filled() -> None:
 def test_status_snapshot_is_frozen() -> None:
     snap = StatusSnapshot(hp_current=5)
     import dataclasses
+
     assert dataclasses.is_dataclass(snap)
     # Frozen dataclass raises FrozenInstanceError on attribute assignment
     try:

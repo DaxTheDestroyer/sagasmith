@@ -77,7 +77,11 @@ def test_invalid_intents_do_not_generate_proposals() -> None:
     rules, combat = _engines()
 
     proposals = proposals_from_candidates(
-        [IntentCandidate(action="none", confidence=1.0, reason="narrative", source="deterministic")],
+        [
+            IntentCandidate(
+                action="none", confidence=1.0, reason="narrative", source="deterministic"
+            )
+        ],
         character_sheet=sheet,
         rules_engine=rules,
         combat_engine=combat,

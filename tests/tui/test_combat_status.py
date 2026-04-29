@@ -36,7 +36,10 @@ def _combat_state(*, active_id: str = "pc", pc_hp: int = 20, enemies: int = 2) -
         encounter_id="encounter_001",
         round_number=2,
         active_combatant_id=active_id,
-        initiative_order=[InitiativeEntry(combatant_id=c.id, initiative=15 - index) for index, c in enumerate(combatants)],
+        initiative_order=[
+            InitiativeEntry(combatant_id=c.id, initiative=15 - index)
+            for index, c in enumerate(combatants)
+        ],
         combatants=combatants,
         positions={c.id: "close" for c in combatants},
         action_counts={c.id: 3 for c in combatants},

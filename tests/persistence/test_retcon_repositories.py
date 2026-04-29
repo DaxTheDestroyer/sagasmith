@@ -27,7 +27,9 @@ def _make_conn() -> sqlite3.Connection:
     return conn
 
 
-def _turn(turn_id: str, *, status: str = "complete", completed_at: str = "2026-04-29T10:00:00Z") -> TurnRecord:
+def _turn(
+    turn_id: str, *, status: str = "complete", completed_at: str = "2026-04-29T10:00:00Z"
+) -> TurnRecord:
     return TurnRecord(
         turn_id=turn_id,
         campaign_id="campaign-1",

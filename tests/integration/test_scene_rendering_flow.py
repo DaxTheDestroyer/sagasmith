@@ -59,12 +59,16 @@ class TestSceneRenderingFlow:
             cost=CostGovernor(session_budget_usd=1.0),
         )
         result = orator_node(state, services)
-        assert result["pending_narration"] == ["The scene shifts. A new detail draws your attention."]
+        assert result["pending_narration"] == [
+            "The scene shifts. A new detail draws your attention."
+        ]
         assert result["memory_packet"] is not None
 
     def test_happy_path_with_streaming_client(self) -> None:
         """With streaming client, narration passes all gates."""
-        narration = "You stand at the riverbank. The morning mist curls over the water as you investigate."
+        narration = (
+            "You stand at the riverbank. The morning mist curls over the water as you investigate."
+        )
         client = DeterministicFakeClient(
             scripted_streams={
                 "orator.scene-rendering": [
@@ -152,8 +156,7 @@ class TestSceneRenderingFlow:
 
         rows = AgentSkillLogRepository(conn).list_for_turn("turn_render_001")
         assert any(
-            row.agent_name == "orator" and row.skill_name == "scene-rendering"
-            for row in rows
+            row.agent_name == "orator" and row.skill_name == "scene-rendering" for row in rows
         )
 
 

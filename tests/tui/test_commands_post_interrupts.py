@@ -46,9 +46,7 @@ class FakeRuntime:
     def thread_config(self) -> dict[str, dict[str, str]]:
         return {"configurable": {"thread_id": "campaign:test"}}
 
-    def post_interrupt(
-        self, *, kind: InterruptKind, payload: dict[str, Any] | None = None
-    ) -> None:
+    def post_interrupt(self, *, kind: InterruptKind, payload: dict[str, Any] | None = None) -> None:
         self.calls.append((kind, payload))
 
 
@@ -173,7 +171,6 @@ async def test_line_posts_interrupt_when_graph_bound(tmp_path: Path) -> None:
     kind, payload = fake.calls[0]
     assert kind == InterruptKind.LINE
     assert payload == {"topic": "graphic_violence"}
-
 
 
 @pytest.mark.asyncio

@@ -15,9 +15,14 @@ from sagasmith.services.secrets import SecretRef
 
 def init_command(
     name: Annotated[str | None, typer.Option("--name", "-n", help="Campaign display name.")] = None,
-    path: Annotated[Path | None, typer.Option("--path", "-p", help="Campaign directory (default: ./<slug>).")] = None,
+    path: Annotated[
+        Path | None, typer.Option("--path", "-p", help="Campaign directory (default: ./<slug>).")
+    ] = None,
     provider: Annotated[str, typer.Option("--provider", help="openrouter | fake")] = "fake",
-    api_key_env: Annotated[str | None, typer.Option("--api-key-env", help="Env var name holding the API key (for openrouter).")] = None,
+    api_key_env: Annotated[
+        str | None,
+        typer.Option("--api-key-env", help="Env var name holding the API key (for openrouter)."),
+    ] = None,
 ) -> None:
     """Initialize a new local campaign. CLI-01, CLI-02."""
     # Resolve name — prompt if TTY, fail loudly in non-interactive mode.

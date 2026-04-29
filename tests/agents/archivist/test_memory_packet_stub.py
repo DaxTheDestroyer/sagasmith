@@ -26,7 +26,15 @@ def _conn_with_turn(content: str) -> sqlite3.Connection:
     )
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_000001", "cmp_001", "sess_001", "complete", "2026-01-01T00:00:00Z", "2026-01-01T00:00:10Z", 1),
+        (
+            "turn_000001",
+            "cmp_001",
+            "sess_001",
+            "complete",
+            "2026-01-01T00:00:00Z",
+            "2026-01-01T00:00:10Z",
+            1,
+        ),
     )
     conn.execute(
         "INSERT INTO transcript_entries (turn_id, kind, content, sequence, created_at) VALUES (?, ?, ?, ?, ?)",
@@ -54,7 +62,9 @@ def test_assembly_uses_recent_transcript_and_enforces_token_cap() -> None:
 
     packet = assemble_memory_packet_stub(state, conn=conn, token_cap=30)
 
-    estimated = estimate_tokens(packet.summary) + sum(estimate_tokens(line) for line in packet.recent_turns)
+    estimated = estimate_tokens(packet.summary) + sum(
+        estimate_tokens(line) for line in packet.recent_turns
+    )
     assert estimated <= packet.token_cap
     assert packet.token_cap == 30
     assert len(packet.retrieval_notes) > 0

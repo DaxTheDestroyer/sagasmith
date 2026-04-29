@@ -23,7 +23,8 @@ def format_combat_status(combat_state: CombatState | None) -> list[str]:
     remaining_actions = combat_state.action_counts.get(active_id, 0)
     reaction = "available" if combat_state.reaction_available.get(active_id, False) else "spent"
     positions = ", ".join(
-        f"{combatant_id}={position}" for combatant_id, position in sorted(combat_state.positions.items())
+        f"{combatant_id}={position}"
+        for combatant_id, position in sorted(combat_state.positions.items())
     )
     enemies = [combatant for combatant in combat_state.combatants if combatant.id != "pc"]
     if not enemies:

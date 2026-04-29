@@ -48,7 +48,9 @@ async def test_settings_without_triple_says_run_onboarding(tmp_path: Path) -> No
         SettingsCommand().handle(app, ())
         logged = app.query_one(NarrationArea).logged_lines[:]
 
-    assert any("no onboarding triple found" in line for line in logged), f"Expected no-triple msg; got: {logged}"
+    assert any("no onboarding triple found" in line for line in logged), (
+        f"Expected no-triple msg; got: {logged}"
+    )
 
 
 @pytest.mark.asyncio
@@ -83,4 +85,6 @@ async def test_settings_without_store_is_noop(tmp_path: Path) -> None:
         SettingsCommand().handle(app, ())
         logged = app.query_one(NarrationArea).logged_lines[:]
 
-    assert any("onboarding store not bound" in line for line in logged), f"Expected store-not-bound msg; got: {logged}"
+    assert any("onboarding store not bound" in line for line in logged), (
+        f"Expected store-not-bound msg; got: {logged}"
+    )

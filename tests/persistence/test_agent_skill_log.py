@@ -23,7 +23,15 @@ def _insert_turn_record(conn: sqlite3.Connection, turn_id: str) -> None:
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) "
         "VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (turn_id, "camp-test", "sess-test", "complete", "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 1),
+        (
+            turn_id,
+            "camp-test",
+            "sess-test",
+            "complete",
+            "2026-01-01T00:00:00Z",
+            "2026-01-01T00:00:00Z",
+            1,
+        ),
     )
     conn.commit()
 
@@ -126,6 +134,7 @@ def test_agent_skill_log_redaction_canary_blocks_insert() -> None:
     class AlwaysFire(RedactionCanary):
         def scan(self, text: str):
             from sagasmith.evals.redaction import RedactionHit
+
             return [RedactionHit(label="test", match="x", index=0)]
 
     repo = AgentSkillLogRepository(conn)

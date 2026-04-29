@@ -24,7 +24,7 @@ def test_init_campaign_writes_manifest_and_db(tmp_path: Path) -> None:
     # Verify the DB has all migrations applied and a campaign row.
     conn = open_campaign_db(root / "campaign.sqlite", read_only=True)
     try:
-        assert current_schema_version(conn) == 7
+        assert current_schema_version(conn) == 8
         row = conn.execute(
             "SELECT campaign_name FROM campaigns WHERE campaign_id = ?",
             (manifest.campaign_id,),

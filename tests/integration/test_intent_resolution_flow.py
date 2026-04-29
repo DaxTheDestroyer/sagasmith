@@ -60,7 +60,15 @@ def test_llm_fallback_flow_resolves_and_logs_skill_activation() -> None:
     )
     conn.execute(
         "INSERT INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        ("turn_000001", "cmp_001", "sess_001", "complete", "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z", 1),
+        (
+            "turn_000001",
+            "cmp_001",
+            "sess_001",
+            "complete",
+            "2026-01-01T00:00:00Z",
+            "2026-01-01T00:00:00Z",
+            1,
+        ),
     )
     conn.commit()
     client = DeterministicFakeClient(
@@ -90,7 +98,14 @@ def test_llm_fallback_flow_resolves_and_logs_skill_activation() -> None:
     )
     runtime = build_persistent_graph(bootstrap, conn, campaign_id="cmp_001")
     state = _state("I read the snapped branches for direction")
-    state.update({"campaign_id": "cmp_001", "session_id": "sess_001", "turn_id": "turn_000001", "phase": "combat"})
+    state.update(
+        {
+            "campaign_id": "cmp_001",
+            "session_id": "sess_001",
+            "turn_id": "turn_000001",
+            "phase": "combat",
+        }
+    )
 
     result = runtime.invoke_turn(state)
 

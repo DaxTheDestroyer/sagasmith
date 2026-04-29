@@ -88,7 +88,9 @@ def configure_command(
         if new_default_model != current.default_model:
             changed.append("default_model")
 
-        new_narration_model = current.narration_model if narration_model is None else narration_model
+        new_narration_model = (
+            current.narration_model if narration_model is None else narration_model
+        )
         if new_narration_model != current.narration_model:
             changed.append("narration_model")
 

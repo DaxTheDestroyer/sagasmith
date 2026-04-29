@@ -168,8 +168,7 @@ class TestPyprojectPackaging:
         )
 
         assert has_include or has_force or has_setuptools, (
-            f"pyproject.toml must declare SKILL.md inclusion in build config; "
-            f"found wheel={wheel}"
+            f"pyproject.toml must declare SKILL.md inclusion in build config; found wheel={wheel}"
         )
 
 

@@ -90,7 +90,9 @@ class RetconService:
                 "Repair by choosing a completed canonical turn or resolving the incomplete turn first.",
             )
 
-        prior_checkpoint_id = _prior_final_checkpoint(self.conn, self.campaign_id, selected.completed_at)
+        prior_checkpoint_id = _prior_final_checkpoint(
+            self.conn, self.campaign_id, selected.completed_at
+        )
         if prior_checkpoint_id is None:
             raise RetconBlockedError(
                 f"No prior final checkpoint exists before turn {selected_turn_id}.",
@@ -112,7 +114,9 @@ class RetconService:
             selected_turn_id=selected_turn_id,
             affected_turn_ids=affected_turn_ids,
             prior_checkpoint_id=prior_checkpoint_id,
-            transcript_count=_count_rows_for_turns(self.conn, "transcript_entries", affected_turn_ids),
+            transcript_count=_count_rows_for_turns(
+                self.conn, "transcript_entries", affected_turn_ids
+            ),
             roll_count=_count_rows_for_turns(self.conn, "roll_logs", affected_turn_ids),
             vault_paths=_vault_paths(self.conn, affected_turn_ids),
             confirmation_token=f"RETCON {selected_turn_id}",
@@ -183,7 +187,9 @@ def _concise(value: str, *, max_chars: int = 160) -> str:
     return line[: max_chars - 1].rstrip() + "…"
 
 
-def _prior_final_checkpoint(conn: sqlite3.Connection, campaign_id: str, before_completed_at: str) -> str | None:
+def _prior_final_checkpoint(
+    conn: sqlite3.Connection, campaign_id: str, before_completed_at: str
+) -> str | None:
     row = conn.execute(
         """
         SELECT cr.checkpoint_id

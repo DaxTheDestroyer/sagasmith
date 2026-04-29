@@ -120,7 +120,9 @@ def test_sync_removes_stale_player_projection_files(tmp_path: Path) -> None:
     assert not stale.exists()
 
 
-def test_sync_wraps_io_failures_as_vault_sync_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_sync_wraps_io_failures_as_vault_sync_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     service = _service(tmp_path)
     service.write_page(
         VaultPage(

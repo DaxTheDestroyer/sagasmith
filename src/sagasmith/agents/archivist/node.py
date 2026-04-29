@@ -291,12 +291,20 @@ def _is_scene_boundary(*, state: dict[str, Any], scene_brief: dict[str, Any]) ->
     beat_ids = scene_brief.get("beat_ids")
     resolved = state.get("resolved_beat_ids", [])
     if isinstance(beat_ids, list) and beat_ids:
-        resolved_set = {value for value in resolved if isinstance(value, str)} if isinstance(resolved, list) else set()
+        resolved_set = (
+            {value for value in resolved if isinstance(value, str)}
+            if isinstance(resolved, list)
+            else set()
+        )
         return all(isinstance(value, str) and value in resolved_set for value in beat_ids)
     beats = scene_brief.get("beats")
     resolved_beats = state.get("resolved_beats", [])
     if isinstance(beats, list) and beats:
-        resolved_set = {value for value in resolved_beats if isinstance(value, str)} if isinstance(resolved_beats, list) else set()
+        resolved_set = (
+            {value for value in resolved_beats if isinstance(value, str)}
+            if isinstance(resolved_beats, list)
+            else set()
+        )
         return all(isinstance(value, str) and value in resolved_set for value in beats)
     return False
 
@@ -308,7 +316,7 @@ def _summary_snippets(state: dict[str, Any]) -> list[str]:
         snippets.append(f"Player: {player_input.strip()}")
     pending_narration = state.get("pending_narration", [])
     if isinstance(pending_narration, list):
-        snippets.extend(value.strip() for value in pending_narration if isinstance(value, str) and value.strip())
+        snippets.extend(
+            value.strip() for value in pending_narration if isinstance(value, str) and value.strip()
+        )
     return snippets
-
-

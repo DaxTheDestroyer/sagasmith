@@ -33,6 +33,7 @@ def _make_app(tmp_path: Path) -> SagaSmithApp:
 # Fake runtime / preview helpers
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class _FakePreview:
     selected_turn_id: str
@@ -76,7 +77,7 @@ class _RecordingRuntime:
                 "and enforce canonical exclusion after success."
             ),
         )
-        self._confirm_result: _FakeResult = _FakeResult(
+        self._confirm_result: _FakeResult | Exception = _FakeResult(
             selected_turn_id="turn_000003",
             affected_turn_ids=["turn_000003", "turn_000004"],
             prior_checkpoint_id="cp_000002",
@@ -95,6 +96,12 @@ class _RecordingRuntime:
         if isinstance(self._confirm_result, Exception):
             raise self._confirm_result
         return self._confirm_result
+
+    def set_preview_result(self, result: _FakePreview | Exception) -> None:
+        self._preview_result = result
+
+    def set_confirm_result(self, result: _FakeResult | Exception) -> None:
+        self._confirm_result = result
 
 
 # ---------------------------------------------------------------------------
@@ -133,8 +140,8 @@ async def test_no_args_lists_candidates(tmp_path: Path) -> None:
                 campaign_id=app.manifest.campaign_id,
                 session_id="session_001",
                 status="complete",
-                started_at=f"2026-04-29T10:0{idx+1}:00Z",
-                completed_at=f"2026-04-29T10:0{idx+1}:30Z",
+                started_at=f"2026-04-29T10:0{idx + 1}:00Z",
+                completed_at=f"2026-04-29T10:0{idx + 1}:30Z",
                 schema_version=1,
             )
         )
@@ -144,7 +151,7 @@ async def test_no_args_lists_candidates(tmp_path: Path) -> None:
                 kind="narration_final",
                 content=f"Summary for {turn_id}.",
                 sequence=0,
-                created_at=f"2026-04-29T10:0{idx+1}:20Z",
+                created_at=f"2026-04-29T10:0{idx + 1}:20Z",
             )
         )
     conn.commit()
@@ -202,7 +209,7 @@ async def test_preview_blocked_error_prints_blocked_and_repair(tmp_path: Path) -
         "Turn turn_000003 is not complete.",
         "Repair by choosing a completed canonical turn.",
     )
-    runtime._preview_result = blocked
+    runtime.set_preview_result(blocked)
     app.graph_runtime = runtime  # type: ignore[assignment]
     logged: list[str] = []
     async with app.run_test():
@@ -256,7 +263,7 @@ async def test_wrong_token_prints_blocked_guidance(tmp_path: Path) -> None:
         "Confirmation token for turn turn_000003 did not match.",
         "Repair by typing the exact token: RETCON turn_000003",
     )
-    runtime._confirm_result = blocked
+    runtime.set_confirm_result(blocked)
     app.graph_runtime = runtime  # type: ignore[assignment]
     logged: list[str] = []
     async with app.run_test():
@@ -282,8 +289,8 @@ async def test_successful_retcon_calls_sync_after_retcon(tmp_path: Path) -> None
     app.graph_runtime = runtime  # type: ignore[assignment]
 
     # Patch sync_after_retcon to track calls.
-    sync_calls: list[list] = []
-    app.sync_after_retcon = lambda: sync_calls.append([])
+    sync_calls: list[None] = []
+    app.sync_after_retcon = lambda: sync_calls.append(None)
 
     async with app.run_test():
         RetconCommand().handle(app, ("turn_000003", "RETCON", "turn_000003"))

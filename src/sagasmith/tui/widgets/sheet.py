@@ -15,7 +15,9 @@ def _format_modifier(value: int) -> str:
 def render_character_sheet(sheet: CharacterSheet) -> str:
     """Render a read-only first-slice character sheet as stable plain text."""
 
-    conditions = ", ".join(condition.name for condition in sheet.conditions) if sheet.conditions else "none"
+    conditions = (
+        ", ".join(condition.name for condition in sheet.conditions) if sheet.conditions else "none"
+    )
     lines = [
         "Character Sheet",
         "",

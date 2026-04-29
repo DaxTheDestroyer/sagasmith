@@ -38,4 +38,6 @@ def test_soft_limit_adds_warning_or_adjusts() -> None:
     )
 
     assert result.kind in {"allowed", "rerouted"}
-    assert result.kind == "rerouted" or result.content_warnings == ("graphic_violence:fade_to_black",)
+    assert result.kind == "rerouted" or result.content_warnings == (
+        "graphic_violence:fade_to_black",
+    )

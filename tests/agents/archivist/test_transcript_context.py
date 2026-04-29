@@ -34,7 +34,13 @@ def _conn_with_transcript() -> sqlite3.Connection:
         )
         conn.execute(
             "INSERT INTO transcript_entries (turn_id, kind, content, sequence, created_at) VALUES (?, ?, ?, ?, ?)",
-            (turn_id, "narration_final", f"Marcus mentioned clue {index}.", 0, "2026-01-01T00:00:00Z"),
+            (
+                turn_id,
+                "narration_final",
+                f"Marcus mentioned clue {index}.",
+                0,
+                "2026-01-01T00:00:00Z",
+            ),
         )
     conn.commit()
     return conn

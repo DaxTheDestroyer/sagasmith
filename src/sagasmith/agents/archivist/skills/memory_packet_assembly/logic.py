@@ -49,9 +49,7 @@ def assemble_memory_packet(
     scene_brief: dict[str, Any] = scene_brief_raw if isinstance(scene_brief_raw, dict) else {}
 
     session_state_raw = state.get("session_state") or {}
-    session_state: dict[str, Any] = (
-        session_state_raw if isinstance(session_state_raw, dict) else {}
-    )
+    session_state: dict[str, Any] = session_state_raw if isinstance(session_state_raw, dict) else {}
     current_session_raw = session_state.get("session_number", 1)
     current_session = current_session_raw if isinstance(current_session_raw, int) else 1
     turn_count_raw = session_state.get("turn_count", 0)

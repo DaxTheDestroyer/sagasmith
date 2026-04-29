@@ -47,7 +47,11 @@ class InitiativeDice:
 class ScriptedCombatDice:
     """Deterministic rolls selected by purpose/index for strike tests."""
 
-    def __init__(self, d20_naturals: dict[tuple[str, str, int], int], damage_naturals: dict[tuple[str, str, int], int]) -> None:
+    def __init__(
+        self,
+        d20_naturals: dict[tuple[str, str, int], int],
+        damage_naturals: dict[tuple[str, str, int], int],
+    ) -> None:
         self.d20_naturals = d20_naturals
         self.damage_naturals = damage_naturals
 
@@ -99,7 +103,9 @@ def _engine_with_dice(dice: InitiativeDice | ScriptedCombatDice | DiceService) -
     return CombatEngine(dice=dice, rules=RulesEngine(dice=dice))  # type: ignore[arg-type]
 
 
-def _started_state(dice: ScriptedCombatDice) -> tuple[CombatEngine, CharacterSheet, tuple[CombatantState, CombatantState], CombatState]:
+def _started_state(
+    dice: ScriptedCombatDice,
+) -> tuple[CombatEngine, CharacterSheet, tuple[CombatantState, CombatantState], CombatState]:
     sheet = make_first_slice_character()
     enemies = make_first_slice_enemies()
     engine = CombatEngine(dice=dice, rules=RulesEngine(dice=dice))  # type: ignore[arg-type]
@@ -118,7 +124,9 @@ def test_start_encounter_rolls_initiative_and_sets_action_state() -> None:
         }
     )
 
-    state, initiative_results = _engine_with_dice(dice).start_encounter(sheet, enemies, roll_index=4)
+    state, initiative_results = _engine_with_dice(dice).start_encounter(
+        sheet, enemies, roll_index=4
+    )
 
     assert state.encounter_id == "enc_first_slice"
     assert state.round_number == 1
@@ -200,7 +208,9 @@ def test_resolve_strike_handles_hit_miss_and_critical_hit_with_damage_rolls() ->
     )
     engine, _, _, state = _started_state(dice)
 
-    hit_state, hit_check, hit_damage = engine.resolve_strike(state, sheet.id, enemies[0].id, "longsword", roll_index=10)
+    hit_state, hit_check, hit_damage = engine.resolve_strike(
+        state, sheet.id, enemies[0].id, "longsword", roll_index=10
+    )
     assert hit_check.degree == "success"
     assert hit_damage is not None
     assert hit_state.action_counts[sheet.id] == 2
@@ -208,13 +218,20 @@ def test_resolve_strike_handles_hit_miss_and_critical_hit_with_damage_rolls() ->
     assert "damage_roll=roll_" in hit_check.effects[0].description
     assert next(c.current_hp for c in hit_state.combatants if c.id == enemies[0].id) == 1
 
-    miss_state, miss_check, miss_damage = engine.resolve_strike(state, sheet.id, enemies[0].id, "longsword", roll_index=20)
+    miss_state, miss_check, miss_damage = engine.resolve_strike(
+        state, sheet.id, enemies[0].id, "longsword", roll_index=20
+    )
     assert miss_check.degree == "failure"
     assert miss_damage is None
     assert miss_check.state_deltas == []
-    assert next(c.current_hp for c in miss_state.combatants if c.id == enemies[0].id) == enemies[0].current_hp
+    assert (
+        next(c.current_hp for c in miss_state.combatants if c.id == enemies[0].id)
+        == enemies[0].current_hp
+    )
 
-    close_second_enemy_state = state.model_copy(update={"positions": {**state.positions, enemies[1].id: "close"}})
+    close_second_enemy_state = state.model_copy(
+        update={"positions": {**state.positions, enemies[1].id: "close"}}
+    )
     critical_state, critical_check, critical_damage = engine.resolve_strike(
         close_second_enemy_state, sheet.id, enemies[1].id, "longsword", roll_index=30
     )
@@ -283,7 +300,10 @@ def test_is_encounter_complete_when_pc_or_all_enemies_are_defeated() -> None:
 
     assert not engine.is_encounter_complete(state)
 
-    defeated_enemies = [state.combatants[0], *(enemy.model_copy(update={"current_hp": 0}) for enemy in enemies)]
+    defeated_enemies = [
+        state.combatants[0],
+        *(enemy.model_copy(update={"current_hp": 0}) for enemy in enemies),
+    ]
     assert engine.is_encounter_complete(state.model_copy(update={"combatants": defeated_enemies}))
 
     defeated_pc = [state.combatants[0].model_copy(update={"current_hp": 0}), *enemies]

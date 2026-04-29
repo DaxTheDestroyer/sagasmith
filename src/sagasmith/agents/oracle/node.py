@@ -88,7 +88,9 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
         updates["memory_packet"] = memory_packet.model_dump()
     current_brief_payload = state.get("scene_brief")
     current_brief = (
-        SceneBrief.model_validate(current_brief_payload) if current_brief_payload is not None else None
+        SceneBrief.model_validate(current_brief_payload)
+        if current_brief_payload is not None
+        else None
     )
     branch = analyze_player_choice(
         player_input=state.get("pending_player_input"),
@@ -107,20 +109,31 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
         )
         route = safety_pre_gate(scene_intent, state.get("content_policy"))
         if isinstance(route, Blocked):
-            _log_safety_event_to_service(services, state, "pre_gate_block", route.policy_ref, route.reason or "blocked")
+            _log_safety_event_to_service(
+                services, state, "pre_gate_block", route.policy_ref, route.reason or "blocked"
+            )
             return {
                 **updates,
                 "last_interrupt": _safety_block_interrupt(
                     state=state,
                     reason=route.reason or "blocked by content policy",
                 ),
-                "safety_events": [*state.get("safety_events", []), _safety_event(state, route.policy_ref, "pre_gate_block", route.reason or "blocked")],
+                "safety_events": [
+                    *state.get("safety_events", []),
+                    _safety_event(
+                        state, route.policy_ref, "pre_gate_block", route.reason or "blocked"
+                    ),
+                ],
             }
         if isinstance(route, Rerouted):
-            _log_safety_event_to_service(services, state, "pre_gate_reroute", route.policy_ref, route.reason or "rerouted")
+            _log_safety_event_to_service(
+                services, state, "pre_gate_reroute", route.policy_ref, route.reason or "rerouted"
+            )
             updates["safety_events"] = [
                 *state.get("safety_events", []),
-                _safety_event(state, route.policy_ref, "pre_gate_reroute", route.reason or "rerouted"),
+                _safety_event(
+                    state, route.policy_ref, "pre_gate_reroute", route.reason or "rerouted"
+                ),
             ]
 
         if not _generated_campaign_context(updates):
@@ -152,8 +165,7 @@ def _should_generate_campaign_context(state: dict[str, Any], services: AgentServ
     if state.get("world_bible") is not None and state.get("campaign_seed") is not None:
         return False
     return all(
-        state.get(key) is not None
-        for key in ("player_profile", "content_policy", "house_rules")
+        state.get(key) is not None for key in ("player_profile", "content_policy", "house_rules")
     )
 
 
@@ -201,7 +213,9 @@ def _input_is_exact_policy_ref(player_input: str, content_policy: object | None)
         return False
     lowered = player_input.lower()
     terms = [*content_policy.get("hard_limits", []), *content_policy.get("soft_limits", {}).keys()]
-    return any(lowered in {str(term).lower(), str(term).replace("_", " ").lower()} for term in terms)
+    return any(
+        lowered in {str(term).lower(), str(term).replace("_", " ").lower()} for term in terms
+    )
 
 
 def _compose_or_fallback_scene_brief(
@@ -245,7 +259,9 @@ def _fallback_scene_brief(scene_intent: str, content_warnings: list[str]) -> Sce
     )
 
 
-def _interrupt(*, kind: InterruptKind, state: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+def _interrupt(
+    *, kind: InterruptKind, state: dict[str, Any], payload: dict[str, Any]
+) -> dict[str, Any]:
     return InterruptEnvelope.build(
         kind=kind,
         payload=payload,
