@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 07-05-PLAN.md
-last_updated: "2026-04-29T08:46:02Z"
-last_activity: 2026-04-29 -- Completed Phase 7 Plan 05 player vault sync, recap, repair CLI, and resume warnings
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-29T17:04:21Z"
+last_activity: 2026-04-29 -- Completed Phase 8 Plan 01 retcon audit persistence and canonical query helpers
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 31
-  completed_plans: 31
-  percent: 100
+  total_plans: 35
+  completed_plans: 32
+  percent: 91
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
-**Current focus:** Phase 7 planning — Memory Vault and Search
+**Current focus:** Phase 8 — Retcon, Repair, and Release Hardening
 
 ## Current Position
 
-Phase: 7 of 8 (Memory Vault and Resume) — Waves 1-5 complete
-Plan: 07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 ✅, 07-06 next
-Status: Ready for Wave 6 QA (player-vault leakage, repair, quit/resume smoke)
-Last activity: 2026-04-29 -- Completed 07-05 player-vault sync, /recap, vault repair CLI, resumed session numbering, and sync warning display
+Phase: 8 of 8 (Retcon, Repair, and Release Hardening) — Plan 08-01 complete
+Plan: 08-01 ✅, 08-02 next
+Status: Retcon audit persistence groundwork complete; ready for RetconService/checkpoint execution
+Last activity: 2026-04-29 -- Completed 08-01 retcon schema, canonical repositories, transcript filtering, and vault-write audit tracking
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 22 min
 - Total execution time: ~5.8 hours
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100%
 | 4. Graph Runtime and Agent Skills | 5 | 5 | ~35 min |
 | 5. Rules-First PF2e Vertical Slice | 5 | 69 min | 14 min |
 | 6. AI GM Story Loop | 7 | ~115 min | ~16 min |
+| 8. Retcon, Repair, and Release Hardening | 1 | 5 min | 5 min |
 
 *Updated after each plan completion*
 
@@ -79,7 +80,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Execute Phase 7 Plan 07-06 (QA tests and release gate for memory/vault/resume).
+- Execute Phase 8 Plan 08-02 (RetconService and checkpoint-based rollback execution).
 
 ### Blockers/Concerns
 
@@ -134,6 +135,8 @@ Recent decisions affecting current work:
 - [07-04]: Canon-conflict detection is a non-blocking warning stub until full extraction/routing is implemented.
 - [07-05]: Player-vault sync rebuilds the player projection from scratch to remove stale spoiler files.
 - [07-05]: `/recap` is deterministic and provider-free, reading graph rolling_summary plus SQLite transcript rows.
+- [08-01]: Retconned rows are retained for audit but excluded from canonical turn/transcript helpers by default.
+- [08-01]: Vault-write audit records are inserted only after successful master-vault writes.
 
 ## Deferred Items
 
@@ -147,6 +150,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-29T08:46:02Z
-Stopped at: Completed 07-05-PLAN.md; Phase 7 07-06 next
+Last session: 2026-04-29T17:04:21Z
+Stopped at: Completed 08-01-PLAN.md; Phase 8 08-02 next
 Resume file: None
