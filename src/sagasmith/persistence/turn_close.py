@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from pathlib import Path
 
 from sagasmith.evals.redaction import RedactionCanary
 from sagasmith.schemas.mechanics import RollResult
@@ -17,6 +18,8 @@ from sagasmith.schemas.persistence import (
 )
 from sagasmith.schemas.provider import ProviderLogRecord
 from sagasmith.services.errors import TrustServiceError
+from sagasmith.vault import VaultService, VaultPage
+from sagasmith.vault.page import BaseVaultFrontmatter
 
 from .repositories import (
     CheckpointRefRepository,
@@ -27,6 +30,19 @@ from .repositories import (
     TranscriptRepository,
     TurnRecordRepository,
 )
+
+# Mapping from vault page type to subfolder (matches resolver _TYPE_PREFIX)
+_TYPE_MAP: dict[str, tuple[type[BaseVaultFrontmatter] | None, str]] = {
+    "npc": (None, "npcs"),
+    "pc": (None, "pcs"),
+    "location": (None, "locations"),
+    "faction": (None, "factions"),
+    "item": (None, "items"),
+    "quest": (None, "quests"),
+    "callback": (None, "callbacks"),
+    "session": (None, "sessions"),
+    "lore": (None, "lore"),
+}
 
 
 @dataclass(frozen=True)
@@ -40,6 +56,11 @@ class TurnCloseBundle:
     state_deltas: list[StateDeltaRecord]
     cost_logs: list[CostLogRecord]
     checkpoint_refs: list[CheckpointRef]
+    vault_pages: list[VaultPage] = None
+    rolling_summary: str | None = None
+
+    def __post_init__(self):
+        object.__setattr__(self, "vault_pages", self.vault_pages or [])
 
 
 def _assert_no_secret_shaped_payloads(bundle: TurnCloseBundle) -> None:
@@ -67,7 +88,12 @@ def _assert_no_secret_shaped_payloads(bundle: TurnCloseBundle) -> None:
             )
 
 
-def close_turn(conn: sqlite3.Connection, bundle: TurnCloseBundle) -> TurnRecord:
+def close_turn(
+    conn: sqlite3.Connection,
+    bundle: TurnCloseBundle,
+    *,
+    vault_service: VaultService | None = None,
+) -> TurnRecord:
     """Apply PERSISTENCE_SPEC §4 steps 1-7 atomically. Mark turn complete only on commit.
 
     Steps:
@@ -80,6 +106,13 @@ def close_turn(conn: sqlite3.Connection, bundle: TurnCloseBundle) -> TurnRecord:
     7. Append checkpoint refs
     8. Upsert turn record with status='complete'
     9. COMMIT
+    10. Write vault pages (if provided)
+    11. Update derived indices (skipped in MVP; Plan 07-03)
+    12. Sync player vault (if vault_service provided)
+
+    If any vault write fails, update turn status to "needs_vault_repair" and skip
+    derived indices and sync. If sync fails, set sync_warning column but keep
+    status "complete".
     """
     transcript_repo = TranscriptRepository(conn)
     roll_repo = RollLogRepository(conn)
@@ -126,5 +159,48 @@ def close_turn(conn: sqlite3.Connection, bundle: TurnCloseBundle) -> TurnRecord:
     except Exception as exc:
         conn.rollback()
         raise TrustServiceError(f"turn-close failed: {exc}") from exc
+
+    # Post-commit: vault writes (outside SQLite transaction)
+    if vault_service is not None and bundle.vault_pages:
+        try:
+            for page in bundle.vault_pages:
+                page_type = page.frontmatter.type
+                slug = page.frontmatter.id
+                type_info = _TYPE_MAP.get(page_type)
+                if type_info is None:
+                    raise ValueError(f"Unknown vault page type: {page_type}")
+                _, subfolder = type_info
+                rel_path = Path(subfolder) / f"{slug}.md"
+                vault_service.write_page(page, rel_path, is_master=True)
+            vault_service.resolver.refresh()
+        except Exception as exc:
+            # Mark turn as needing vault repair
+            turn_repo.upsert(
+                TurnRecord(
+                    turn_id=bundle.turn_record.turn_id,
+                    campaign_id=bundle.turn_record.campaign_id,
+                    session_id=bundle.turn_record.session_id,
+                    status="needs_vault_repair",
+                    started_at=bundle.turn_record.started_at,
+                    completed_at=now,
+                    schema_version=bundle.turn_record.schema_version,
+                )
+            )
+            conn.commit()
+            raise TrustServiceError(f"vault write failed after SQLite commit: {exc}") from exc
+
+        # Derived indices update (deferred to Plan 07-03)
+        # ...
+
+        # Player-vault sync
+        try:
+            vault_service.sync()
+        except Exception as exc:
+            # Set persistent sync warning, but do NOT flip status
+            conn.execute(
+                "UPDATE turn_records SET sync_warning = ? WHERE turn_id = ?",
+                (str(exc), bundle.turn_record.turn_id),
+            )
+            conn.commit()
 
     return completed_record

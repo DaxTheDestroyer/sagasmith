@@ -302,8 +302,10 @@ class TurnRecordRepository:
     def upsert(self, record: TurnRecord) -> str:
         self.conn.execute(
             """
-            INSERT OR REPLACE INTO turn_records (turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO turn_records (
+                turn_id, campaign_id, session_id, status, started_at, completed_at,
+                schema_version, sync_warning
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.turn_id,
@@ -313,13 +315,18 @@ class TurnRecordRepository:
                 record.started_at,
                 record.completed_at,
                 record.schema_version,
+                record.sync_warning,
             ),
         )
         return record.turn_id
 
     def get(self, turn_id: str) -> TurnRecord | None:
         row = self.conn.execute(
-            "SELECT turn_id, campaign_id, session_id, status, started_at, completed_at, schema_version FROM turn_records WHERE turn_id = ?",
+            """
+            SELECT turn_id, campaign_id, session_id, status, started_at, completed_at,
+                   schema_version, sync_warning
+              FROM turn_records WHERE turn_id = ?
+            """,
             (turn_id,),
         ).fetchone()
         if row is None:
@@ -332,6 +339,7 @@ class TurnRecordRepository:
             started_at=row[4],
             completed_at=row[5],
             schema_version=row[6],
+            sync_warning=row[7],
         )
 
 

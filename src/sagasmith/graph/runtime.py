@@ -26,6 +26,7 @@ from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind
 from sagasmith.persistence.repositories import CheckpointRefRepository, TurnRecordRepository
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
 from sagasmith.schemas.persistence import CheckpointRef, TurnRecord
+from sagasmith.vault import VaultService
 
 
 def thread_config_for(campaign_id: str) -> dict[str, Any]:
@@ -125,6 +126,8 @@ class GraphRuntime:
         provider_logs=None,
         state_deltas=None,
         cost_logs=None,
+        vault_pages=None,
+        rolling_summary=None,
     ) -> TurnRecord:
         """Resume past the orator interrupt, run archivist, close the turn.
 
@@ -138,6 +141,14 @@ class GraphRuntime:
         final_cp_id = extract_checkpoint_id(final_snapshot)
         if final_cp_id is None:
             raise RuntimeError("LangGraph did not surface checkpoint_id after resume")
+
+        # Collect vault_pending_writes from final state (produced by archivist_node)
+        final_state = final_snapshot.values or {}
+        vault_pages_list = vault_pages or final_state.get("vault_pending_writes", [])
+        if rolling_summary is None:
+            rolling_summary_val = final_state.get("rolling_summary")
+            if isinstance(rolling_summary_val, str):
+                rolling_summary = rolling_summary_val
 
         final_ref = CheckpointRef(
             checkpoint_id=final_cp_id,
@@ -153,8 +164,12 @@ class GraphRuntime:
             state_deltas=state_deltas or [],
             cost_logs=cost_logs or [],
             checkpoint_refs=[final_ref],
+            vault_pages=vault_pages_list,
+            rolling_summary=rolling_summary,
         )
-        return close_turn(self.db_conn, bundle)
+        # Inject vault_service if available
+        vault_service = getattr(self.bootstrap.services, "vault_service", None)
+        return close_turn(self.db_conn, bundle, vault_service=vault_service)
 
     def discard_incomplete_turn(self, turn_id: str) -> TurnRecord:
         """Rewind the graph thread to the pre-narration checkpoint and mark the

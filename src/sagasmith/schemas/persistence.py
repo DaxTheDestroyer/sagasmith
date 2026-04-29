@@ -46,6 +46,7 @@ class TurnRecord(SchemaModel):
     started_at: str
     completed_at: str
     schema_version: int = Field(ge=1)
+    sync_warning: str | None = None  # Set if player-vault sync fails post-commit
 
 
 class CheckpointRef(SchemaModel):
