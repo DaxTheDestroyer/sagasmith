@@ -9,7 +9,6 @@ import pytest
 
 from sagasmith.evals import harness
 
-
 pytestmark = pytest.mark.smoke
 
 

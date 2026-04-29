@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable
 
 import pydantic
 
@@ -24,7 +24,6 @@ from sagasmith.schemas.export import LLM_BOUNDARY_AND_PERSISTED_MODELS, export_a
 from sagasmith.schemas.provider import TokenUsage
 from sagasmith.schemas.validation import PersistedStateError, validate_persisted_state
 from sagasmith.services.cost import CostGovernor
-
 
 _MVP_CHECK_NAMES = [
     "mvp.install_entrypoint",
