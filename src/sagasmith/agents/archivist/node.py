@@ -9,6 +9,7 @@ import yaml
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet,
 )
+from sagasmith.agents.archivist.skills.rolling_summary_update.logic import update_summary
 from sagasmith.agents.archivist.skills.visibility_promotion.logic import promote_visibility
 from sagasmith.agents.archivist.skills.vault_page_upsert.logic import (
     vault_page_upsert,
@@ -32,6 +33,7 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                 "vault-page-upsert",
                 "memory-packet-assembly",
                 "visibility-promotion",
+                "rolling-summary-update",
             ]:
                 if store.find(name=skill_name, agent_scope="archivist") is not None:
                     activation.set_skill(skill_name)
@@ -134,8 +136,13 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             except ValueError:
                 pass
 
+    rolling_summary = _maybe_update_rolling_summary(
+        state=state,
+        services=services,
+        scene_brief=scene_brief,
+    )
+
     # Build rolling summary meta page if provided
-    rolling_summary = state.get("rolling_summary")
     if vault_service is not None and isinstance(rolling_summary, str):
         # Use a fixed id; if conflict, slugify the summary title? Use "rolling_summary" as id; collides rarely
         frontmatter = LoreFrontmatter(
@@ -161,12 +168,13 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
         )
 
     memory_packet = assemble_memory_packet(
-        state,
+        {**state, "rolling_summary": rolling_summary},
         conn=getattr(services, "transcript_conn", None),
         vault_service=vault_service,
     )
     return {
         "session_state": session_state,
+        "rolling_summary": rolling_summary,
         "pending_player_input": None,
         "memory_packet": memory_packet.model_dump(),
         "vault_pending_writes": vault_pending_writes,
@@ -227,3 +235,57 @@ def _vault_relative_path(page: VaultPage) -> Any:
     }
     folder = folder_by_type.get(page.frontmatter.type, "lore")
     return Path(folder) / f"{page.frontmatter.id}.md"
+
+
+def _maybe_update_rolling_summary(
+    *,
+    state: dict[str, Any],
+    services: Any,
+    scene_brief: dict[str, Any],
+) -> Any:
+    old_summary = state.get("rolling_summary")
+    llm_client = getattr(services, "llm", None)
+    if llm_client is None or not _is_scene_boundary(state=state, scene_brief=scene_brief):
+        return old_summary
+    snippets = _summary_snippets(state)
+    if not snippets and not scene_brief:
+        return old_summary
+    summary = update_summary(
+        old_summary=old_summary if isinstance(old_summary, str) else None,
+        new_transcript_snippets=snippets,
+        scene_brief=scene_brief,
+        llm_client=llm_client,
+        token_cap=800,
+    )
+    return summary
+
+
+def _is_scene_boundary(*, state: dict[str, Any], scene_brief: dict[str, Any]) -> bool:
+    if bool(state.get("oracle_bypass_detected")):
+        return True
+    previous_id = state.get("previous_scene_id")
+    current_id = scene_brief.get("scene_id")
+    if isinstance(previous_id, str) and isinstance(current_id, str) and previous_id != current_id:
+        return True
+    beat_ids = scene_brief.get("beat_ids")
+    resolved = state.get("resolved_beat_ids", [])
+    if isinstance(beat_ids, list) and beat_ids:
+        resolved_set = {value for value in resolved if isinstance(value, str)} if isinstance(resolved, list) else set()
+        return all(isinstance(value, str) and value in resolved_set for value in beat_ids)
+    beats = scene_brief.get("beats")
+    resolved_beats = state.get("resolved_beats", [])
+    if isinstance(beats, list) and beats:
+        resolved_set = {value for value in resolved_beats if isinstance(value, str)} if isinstance(resolved_beats, list) else set()
+        return all(isinstance(value, str) and value in resolved_set for value in beats)
+    return False
+
+
+def _summary_snippets(state: dict[str, Any]) -> list[str]:
+    snippets: list[str] = []
+    player_input = state.get("pending_player_input")
+    if isinstance(player_input, str) and player_input.strip():
+        snippets.append(f"Player: {player_input.strip()}")
+    pending_narration = state.get("pending_narration", [])
+    if isinstance(pending_narration, list):
+        snippets.extend(value.strip() for value in pending_narration if isinstance(value, str) and value.strip())
+    return snippets
