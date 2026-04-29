@@ -149,8 +149,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **QA-05**: Test suite verifies configured hard-limit content does not appear in player-facing prose across a regression scenario.
 - [ ] **QA-06**: Test suite verifies player-vault projection contains no GM-only fields, comments, or pages.
 - [x] **QA-07**: Test suite verifies CostGovernor warnings and hard-stop behavior.
-- [ ] **QA-08**: Smoke suite verifies install/init/configure/onboard/play skill challenge/play simple combat/quit/resume without paid LLM calls.
-- [ ] **QA-09**: Release gate requires lint, type check, unit tests, smoke tests, and secret scan to pass.
+- [x] **QA-08**: Smoke suite verifies install/init/configure/onboard/play skill challenge/play simple combat/quit/resume without paid LLM calls.
+- [x] **QA-09**: Release gate requires lint, type check, unit tests, smoke tests, and secret scan to pass.
 
 ## v2 Requirements
 
@@ -312,8 +312,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QA-06 | Phase 7 | Pending |
 | QA-01 | Phase 8 | Pending |
 | QA-02 | Phase 8 | Pending |
-| QA-08 | Phase 8 | Pending |
-| QA-09 | Phase 8 | Pending |
+| QA-08 | Phase 8 | Complete |
+| QA-09 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 106 total
@@ -325,4 +325,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-28 after Phase 6 Plan 06-02 completion*
+*Last updated: 2026-04-29 after Phase 8 Plan 08-04 completion*
