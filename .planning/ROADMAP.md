@@ -171,7 +171,12 @@ Plans:
   1. User can retcon the last completed turn after confirmation, and retconned turns are excluded from canonical replay, summaries, and vault rebuilds.
   2. Developer can run the no-paid-call smoke suite for install, init, configure, onboard, play skill challenge, play simple combat, quit, and resume.
   3. Release is blocked unless lint, type check, unit tests, smoke tests, and secret scan pass.
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 08-01-PLAN.md — Add retcon/audit persistence schema, centralized canonical-query helpers, and vault-write audit tracking so retconned rows remain retained but excluded from canon by default (QA-01, QA-02).
+- [ ] 08-02-PLAN.md — Implement checkpoint-based RetconService and GraphRuntime execution that previews affected outputs, blocks unsafe rollback data, marks affected turns retconned, rebuilds derived layers, and resyncs the player vault (QA-01, QA-02).
+- [ ] 08-03-PLAN.md — Replace the `/retcon` stub with recent-turn picker, impact preview, exact typed confirmation token, completion messaging, and blocked-repair guidance (QA-01, QA-02).
+- [ ] 08-04-PLAN.md — Add layered MVP no-paid-call smoke coverage and `make release-gate` wrapping lint, format check, type check, tests, MVP smoke, and secret scan (QA-08, QA-09).
 
 ## Coverage
 
