@@ -16,6 +16,7 @@ from sagasmith.schemas.persistence import (
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
+    VaultWriteAuditRecord,
 )
 from sagasmith.schemas.provider import ProviderLogRecord
 from sagasmith.services.errors import TrustServiceError
@@ -30,6 +31,7 @@ from .repositories import (
     StateDeltaRepository,
     TranscriptRepository,
     TurnRecordRepository,
+    VaultWriteAuditRepository,
 )
 
 # Mapping from vault page type to subfolder (matches resolver _TYPE_PREFIX)
@@ -123,6 +125,7 @@ def close_turn(
     cost_repo = CostLogRepository(conn)
     checkpoint_repo = CheckpointRefRepository(conn)
     turn_repo = TurnRecordRepository(conn)
+    vault_write_audit_repo = VaultWriteAuditRepository(conn)
 
     try:
         _assert_no_secret_shaped_payloads(bundle)
@@ -168,7 +171,16 @@ def close_turn(
             for page in bundle.vault_pages:
                 rel_path = _relative_path_for_page(page)
                 vault_service.write_page(page, rel_path, is_master=True)
+                vault_write_audit_repo.append(
+                    VaultWriteAuditRecord(
+                        turn_id=bundle.turn_record.turn_id,
+                        vault_path=rel_path.as_posix(),
+                        operation="write_page",
+                        recorded_at=datetime.now(UTC).isoformat(),
+                    )
+                )
             vault_service.resolver.refresh()
+            conn.commit()
         except Exception as exc:
             # Mark turn as needing vault repair
             turn_repo.upsert(

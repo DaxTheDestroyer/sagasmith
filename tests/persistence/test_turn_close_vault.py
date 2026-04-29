@@ -179,7 +179,7 @@ def test_close_turn_sqlite_failure_does_not_record_vault_write_audit(tmp_path: P
                 TranscriptEntry(
                     turn_id="t1",
                     kind="player_input",
-                    content="bad secret-shaped sk-proj-this-should-block",
+                    content="bad secret-shaped sk-proj-this-should-block-abcdef123456",
                     sequence=0,
                     created_at="2026-04-26T12:00:00Z",
                 )
