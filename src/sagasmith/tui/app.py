@@ -338,6 +338,18 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         with suppress(Exception):
             self.query_one(StatusPanel).snapshot = self.state.status
 
+    def sync_after_retcon(self) -> None:
+        """Resync narration and mechanics after a retcon rewinds graph state.
+
+        Called by RetconCommand after a successful confirm_retcon. Uses
+        suppress blocks so a transient TUI sync failure after retcon does not
+        crash the app — the state is already correct in the graph.
+        """
+        with suppress(Exception):
+            self._sync_narration_from_graph()
+        with suppress(Exception):
+            self._sync_mechanics_from_graph()
+
     def on_unmount(self) -> None:
         """Close the long-lived service connection deterministically on TUI exit.
 

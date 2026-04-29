@@ -184,6 +184,7 @@ class RetconCommand:
                     f"[system] Retcon complete: returned to checkpoint before {turn_id}. "
                     "Affected turns are audit-retained and excluded from canon.",
                 )
+                app.sync_after_retcon()
             except RetconBlockedError as e:
                 _write(app, f"[system] /retcon blocked: {e}")
                 _write(app, f"[system] repair: {e.repair_guidance}")
