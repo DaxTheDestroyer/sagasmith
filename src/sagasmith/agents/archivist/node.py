@@ -6,14 +6,16 @@ from typing import Any
 
 import yaml
 
+from sagasmith.agents.archivist.skills.canon_conflict_detection.logic import detect_conflicts
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet,
 )
 from sagasmith.agents.archivist.skills.rolling_summary_update.logic import update_summary
-from sagasmith.agents.archivist.skills.visibility_promotion.logic import promote_visibility
+from sagasmith.agents.archivist.skills.session_page_authoring.logic import author_session
 from sagasmith.agents.archivist.skills.vault_page_upsert.logic import (
     vault_page_upsert,
 )
+from sagasmith.agents.archivist.skills.visibility_promotion.logic import promote_visibility
 from sagasmith.graph.activation_log import get_current_activation
 from sagasmith.schemas.world import WorldBible
 from sagasmith.vault import VaultPage, VaultService
@@ -34,6 +36,8 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                 "memory-packet-assembly",
                 "visibility-promotion",
                 "rolling-summary-update",
+                "session-page-authoring",
+                "canon-conflict-detection",
             ]:
                 if store.find(name=skill_name, agent_scope="archivist") is not None:
                     activation.set_skill(skill_name)
@@ -167,6 +171,20 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             },
         )
 
+    player_input = state.get("pending_player_input")
+    pending_conflicts = detect_conflicts(
+        player_input if isinstance(player_input, str) else "",
+        vault_pending_writes,
+    )
+
+    session_page_path = _maybe_author_session(
+        state=state,
+        vault_service=vault_service,
+        db_conn=getattr(services, "transcript_conn", None),
+        campaign_id=str(state.get("campaign_id", "")),
+        session_number=session_number,
+    )
+
     memory_packet = assemble_memory_packet(
         {**state, "rolling_summary": rolling_summary},
         conn=getattr(services, "transcript_conn", None),
@@ -175,6 +193,8 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
     return {
         "session_state": session_state,
         "rolling_summary": rolling_summary,
+        "pending_conflicts": pending_conflicts,
+        "session_page_path": session_page_path,
         "pending_player_input": None,
         "memory_packet": memory_packet.model_dump(),
         "vault_pending_writes": vault_pending_writes,
@@ -289,3 +309,34 @@ def _summary_snippets(state: dict[str, Any]) -> list[str]:
     if isinstance(pending_narration, list):
         snippets.extend(value.strip() for value in pending_narration if isinstance(value, str) and value.strip())
     return snippets
+
+
+def _maybe_author_session(
+    *,
+    state: dict[str, Any],
+    vault_service: VaultService | None,
+    db_conn: Any,
+    campaign_id: str,
+    session_number: int,
+) -> str | None:
+    if vault_service is None or db_conn is None or not campaign_id:
+        return None
+    if not _is_session_end(state):
+        return None
+    date_in_game = str(state.get("game_clock", "unknown"))
+    return author_session(
+        session_number=session_number,
+        campaign_id=campaign_id,
+        db_conn=db_conn,
+        vault_service=vault_service,
+        date_in_game=date_in_game,
+    )
+
+
+def _is_session_end(state: dict[str, Any]) -> bool:
+    if state.get("phase") == "session_end" or state.get("session_end") is True:
+        return True
+    interrupt = state.get("pending_interrupt") or state.get("last_interrupt")
+    if isinstance(interrupt, dict):
+        return interrupt.get("kind") == "session_end"
+    return False

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 from sagasmith.vault.page import VaultPage
 
@@ -20,7 +20,7 @@ def promote_visibility(page: VaultPage, context: dict[str, Any]) -> Visibility:
     - Existing ``foreshadowed`` and ``player_known`` pages are never demoted.
     """
 
-    current = cast(Visibility, page.frontmatter.visibility)
+    current: Visibility = page.frontmatter.visibility
     if current == "player_known":
         return current
 
@@ -37,7 +37,7 @@ def _is_present_entity(page: VaultPage, context: dict[str, Any]) -> bool:
     scene_brief = context.get("scene_brief")
     if not isinstance(scene_brief, dict):
         return False
-    values = scene_brief.get("present_entities", [])
+    values: object = scene_brief.get("present_entities", [])
     if not isinstance(values, list):
         return False
     needles = _entity_needles(page)
