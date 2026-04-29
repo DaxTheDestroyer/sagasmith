@@ -9,9 +9,9 @@ import pytest
 from sagasmith.memory.fts5 import FTS5Index
 from sagasmith.persistence.db import campaign_db
 from sagasmith.persistence.migrations import apply_migrations
-from sagasmith.persistence.repositories import TurnRecordRepository
+from sagasmith.persistence.repositories import TurnRecordRepository, VaultWriteAuditRepository
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
-from sagasmith.schemas.persistence import TurnRecord
+from sagasmith.schemas.persistence import TranscriptEntry, TurnRecord
 from sagasmith.services.errors import TrustServiceError
 from sagasmith.vault import VaultPage, VaultService
 from sagasmith.vault.page import LoreFrontmatter
@@ -75,6 +75,7 @@ def test_close_turn_with_vault_writes_success(
         # Verify vault page written to master vault
         expected = vault_service.master_path / "lore" / "test_lore.md"
         assert expected.exists()
+        assert VaultWriteAuditRepository(conn).list_for_turn("t1")
         # Verify player vault sync: gm_only page should not appear in player vault
         player_file = vault_service.player_vault_root / "lore" / "test_lore.md"
         assert not player_file.exists()
@@ -141,6 +142,61 @@ def test_close_turn_vault_write_failure_sets_needs_vault_repair(
         assert turn is not None
         assert turn.status == "needs_vault_repair"
         assert turn.sync_warning is None
+        assert VaultWriteAuditRepository(conn).list_for_turn("t1") == []
+
+
+def test_close_turn_sqlite_failure_does_not_record_vault_write_audit(tmp_path: Path) -> None:
+    path = _db(tmp_path)
+    with campaign_db(path) as conn:
+        apply_migrations(conn)
+        vault_service = VaultService(
+            campaign_id="c1",
+            player_vault_root=tmp_path / "player_vault",
+        )
+        vault_service.ensure_master_path()
+        vault_service.ensure_player_vault()
+        frontmatter = LoreFrontmatter(
+            id="never_written",
+            type="lore",
+            name="Never Written",
+            aliases=[],
+            visibility="gm_only",
+            first_encountered="1",
+            category="test",
+        )
+        page = VaultPage(frontmatter, body="should not be written")
+        bundle = TurnCloseBundle(
+            turn_record=TurnRecord(
+                turn_id="t1",
+                campaign_id="c1",
+                session_id="s1",
+                status="complete",
+                started_at="2026-04-26T12:00:00Z",
+                completed_at="2026-04-26T12:00:00Z",
+                schema_version=1,
+            ),
+            transcript_entries=[
+                TranscriptEntry(
+                    turn_id="t1",
+                    kind="player_input",
+                    content="bad secret-shaped sk-proj-this-should-block",
+                    sequence=0,
+                    created_at="2026-04-26T12:00:00Z",
+                )
+            ],
+            roll_results=[],
+            provider_logs=[],
+            state_deltas=[],
+            cost_logs=[],
+            checkpoint_refs=[],
+            vault_pages=[page],
+            rolling_summary=None,
+        )
+
+        with pytest.raises(TrustServiceError, match="turn-close failed"):
+            close_turn(conn, bundle, vault_service=vault_service)
+
+        assert VaultWriteAuditRepository(conn).list_for_turn("t1") == []
 
 
 def test_close_turn_sync_failure_sets_sync_warning(
