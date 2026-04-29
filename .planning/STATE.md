@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Phase 7 Wave 3 complete (07-03); 07-01 summary backfilled and verified
-last_updated: "2026-04-29T08:27:00Z"
-last_activity: 2026-04-29 -- Backfilled and verified 07-01 summary; Phase 7 Wave 3 remains complete
+stopped_at: Completed 07-04-PLAN.md
+last_updated: "2026-04-29T08:36:29Z"
+last_activity: 2026-04-29 -- Completed Phase 7 Plan 04 Archivist memory enrichment skills
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 31
-  completed_plans: 29
-  percent: 94
+  completed_plans: 30
+  percent: 97
 ---
 
 # Project State
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 ## Current Position
 
-Phase: 7 of 8 (Memory Vault and Resume) — Waves 1-3 complete
-Plan: 07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 next
-Status: Ready for Wave 4 (visibility promotion, canon conflict detection, repair/TUI commands)
-Last activity: 2026-04-29 -- Backfilled and verified 07-01 summary; 07-03 remains latest implementation wave
+Phase: 7 of 8 (Memory Vault and Resume) — Waves 1-4 complete
+Plan: 07-01 ✅, 07-02 ✅, 07-03 ✅, 07-04 ✅, 07-05 next
+Status: Ready for Wave 5 (player-vault sync, repair commands, /recap, quit/resume)
+Last activity: 2026-04-29 -- Completed 07-04 visibility promotion, rolling summary, session authoring, and canon-conflict stub
 
-Progress: [██████████░] 94%
+Progress: [██████████░] 97%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 28
+- Total plans completed: 30
 - Average duration: 22 min
 - Total execution time: ~5.8 hours
 
@@ -85,7 +85,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Begin Phase 7 planning (Memory Vault and Search).
+- Execute Phase 7 Plan 07-05 (player-vault sync, repair commands, /recap, quit/resume).
 
 ### Blockers/Concerns
 
@@ -136,6 +136,8 @@ Recent decisions affecting current work:
 - [06-04]: Mechanical-consistency audit uses deterministic degree-of-success keyword tables; no second LLM verifier in Phase 6 (D-06.2).
 - [06-04]: Beat resolution uses keyword overlap heuristic between narration and beat text; actor_id parameter reserved for Phase 7 per-actor filtering.
 - [06-04]: Two-rewrite budget shared between post-gate blocks/rewrites and mechanics audit failures.
+- [07-04]: Hyphenated Agent Skill directories wrap underscore Python packages so skill discovery names remain stable while imports remain valid.
+- [07-04]: Canon-conflict detection is a non-blocking warning stub until full extraction/routing is implemented.
 
 ## Deferred Items
 
@@ -147,6 +149,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-04-29T08:27:00Z
-Stopped at: Completed 07-01 summary backfill; Phase 7 07-04 next
+Last session: 2026-04-29T08:36:29Z
+Stopped at: Completed 07-04-PLAN.md; Phase 7 07-05 next
 Resume file: None

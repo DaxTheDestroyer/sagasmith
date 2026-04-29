@@ -122,12 +122,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **PERS-06**: System can rebuild derived indices from SQLite plus master vault after corruption or deletion.
 - [x] **VAULT-01**: System creates a master vault in app data and a player vault in the campaign directory.
 - [x] **VAULT-02**: System writes Obsidian-compatible markdown pages with YAML frontmatter and wikilinks for sessions, NPCs, locations, factions, items, quests, callbacks, lore, index, and log.
-- [ ] **VAULT-03**: System enforces `gm_only`, `foreshadowed`, and `player_known` visibility states when projecting the player vault.
+- [x] **VAULT-03**: System enforces `gm_only`, `foreshadowed`, and `player_known` visibility states when projecting the player vault.
 - [ ] **VAULT-04**: System strips GM-only frontmatter fields and `<!-- gm: ... -->` blocks from player-vault projections.
-- [ ] **VAULT-05**: System generates or refreshes player-vault `index.md` and `log.md` after sync.
+- [x] **VAULT-05**: System generates or refreshes player-vault `index.md` and `log.md` after sync.
 - [x] **VAULT-06**: System resolves incoming named entities by slug and aliases before creating a new vault page.
 - [ ] **VAULT-07**: System can assemble memory from exact search, graph neighborhoods, callbacks, summaries, and semantic retrieval interfaces without exceeding the configured token cap.
-- [ ] **VAULT-08**: System detects canon conflicts and surfaces them rather than silently overwriting canonical facts.
+- [x] **VAULT-08**: System detects canon conflicts and surfaces them rather than silently overwriting canonical facts.
 - [ ] **VAULT-09**: User can run `/recap` to receive a summary based on persisted transcript and canonical memory.
 - [ ] **VAULT-10**: User can resume a campaign after a later process start and see NPCs, quests, and prior events recalled correctly.
 
@@ -299,12 +299,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERS-06 | Phase 7 | Pending |
 | VAULT-01 | Phase 7 | Complete |
 | VAULT-02 | Phase 7 | Complete |
-| VAULT-03 | Phase 7 | Pending |
+| VAULT-03 | Phase 7 | Complete |
 | VAULT-04 | Phase 7 | Pending |
-| VAULT-05 | Phase 7 | Pending |
+| VAULT-05 | Phase 7 | Complete |
 | VAULT-06 | Phase 7 | Complete |
 | VAULT-07 | Phase 7 | Pending |
-| VAULT-08 | Phase 7 | Pending |
+| VAULT-08 | Phase 7 | Complete |
 | VAULT-09 | Phase 7 | Pending |
 | VAULT-10 | Phase 7 | Pending |
 | AI-11 | Phase 7 | Complete |
