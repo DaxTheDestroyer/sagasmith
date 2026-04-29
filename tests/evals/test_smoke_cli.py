@@ -1,9 +1,12 @@
 """End-to-end no-paid-call smoke CLI tests."""
 
+import subprocess
+
 import pytest
 from typer.testing import CliRunner
 
 from sagasmith.cli.main import app
+from sagasmith.cli.smoke_cmd import SmokeMode
 
 pytestmark = pytest.mark.smoke
 
@@ -39,3 +42,21 @@ def test_smoke_default_mode_is_fast():
     result = CliRunner().invoke(app, ["smoke"])
     assert result.exit_code == 0
     assert "checks passed" in result.stdout
+
+
+def test_smoke_mode_includes_mvp() -> None:
+    assert SmokeMode.MVP == "mvp"
+
+
+def test_smoke_mvp_mode_exits_zero_from_local_entrypoint() -> None:
+    proc = subprocess.run(
+        ["uv", "run", "sagasmith", "smoke", "--mode", "mvp"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert "OK  mvp.init" in proc.stdout
+    assert "OK  mvp.resume" in proc.stdout
+    assert "mvp.resume" in proc.stdout
