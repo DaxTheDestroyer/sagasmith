@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 import tempfile
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any, Callable
 
 import pydantic
 
@@ -22,6 +24,18 @@ from sagasmith.schemas.export import LLM_BOUNDARY_AND_PERSISTED_MODELS, export_a
 from sagasmith.schemas.provider import TokenUsage
 from sagasmith.schemas.validation import PersistedStateError, validate_persisted_state
 from sagasmith.services.cost import CostGovernor
+
+
+_MVP_CHECK_NAMES = [
+    "mvp.install_entrypoint",
+    "mvp.init",
+    "mvp.configure_fake",
+    "mvp.onboard",
+    "mvp.play_skill_challenge",
+    "mvp.play_simple_combat",
+    "mvp.quit",
+    "mvp.resume",
+]
 
 
 @dataclass(frozen=True)
@@ -52,6 +66,261 @@ class SmokeResult:
         lines.append("")
         lines.append(f"{sum(check.ok for check in self.checks)}/{len(self.checks)} checks passed")
         return "\n".join(lines)
+
+
+@dataclass
+class _MvpSmokeContext:
+    root: Path | None = None
+    campaign_id: str | None = None
+    db_path: Path | None = None
+    skill_roll_id: str | None = None
+    combat_attack_roll_id: str | None = None
+
+
+def _safe_smoke_detail(exc: BaseException) -> str:
+    detail = str(exc)[:200]
+    for token in ("api_key", "authorization", "bearer", "openrouter"):
+        detail = detail.replace(token, "[redacted]")
+        detail = detail.replace(token.upper(), "[redacted]")
+    hits = RedactionCanary().scan(detail)
+    if hits:
+        return f"redacted secret-shaped detail: {hits[0].label}"
+    return detail
+
+
+def run_mvp_smoke() -> SmokeResult:
+    """Run the full MVP smoke path without network calls or provider credentials."""
+
+    result = SmokeResult()
+    context = _MvpSmokeContext()
+    steps: list[tuple[str, Callable[[_MvpSmokeContext], str]]] = [
+        ("mvp.install_entrypoint", _mvp_install_entrypoint),
+        ("mvp.init", _mvp_init),
+        ("mvp.configure_fake", _mvp_configure_fake),
+        ("mvp.onboard", _mvp_onboard),
+        ("mvp.play_skill_challenge", _mvp_play_skill_challenge),
+        ("mvp.play_simple_combat", _mvp_play_simple_combat),
+        ("mvp.quit", _mvp_quit),
+        ("mvp.resume", _mvp_resume),
+    ]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        context.root = Path(tmp) / "mvp-smoke-campaign"
+        for name, step in steps:
+            try:
+                detail = step(context)
+                result.checks.append(SmokeCheck(name, True, detail))
+            except Exception as exc:
+                result.checks.append(SmokeCheck(name, False, _safe_smoke_detail(exc)))
+                break
+
+    return result
+
+
+def _require_context_value[T](value: T | None, label: str) -> T:
+    if value is None:
+        raise RuntimeError(f"missing smoke context: {label}")
+    return value
+
+
+def _mvp_install_entrypoint(_context: _MvpSmokeContext) -> str:
+    import sagasmith
+    from sagasmith.cli.main import app
+
+    if not sagasmith.__version__:
+        raise RuntimeError("sagasmith.__version__ is empty")
+    command_names = {command.name for command in app.registered_commands}
+    if "smoke" not in command_names:
+        raise RuntimeError("Typer app import did not expose smoke command")
+    return f"version={sagasmith.__version__} cli=typer"
+
+
+def _mvp_init(context: _MvpSmokeContext) -> str:
+    from sagasmith.app.campaign import init_campaign, open_campaign
+
+    root = _require_context_value(context.root, "root")
+    manifest = init_campaign(name="MVP Smoke", root=root, provider="fake")
+    paths, reopened = open_campaign(root)
+    if reopened.campaign_id != manifest.campaign_id:
+        raise RuntimeError("campaign manifest did not reopen with the same ID")
+    context.campaign_id = manifest.campaign_id
+    context.db_path = paths.db
+    return "campaign storage created"
+
+
+def _mvp_configure_fake(context: _MvpSmokeContext) -> str:
+    from sagasmith.app.config import SettingsRepository
+    from sagasmith.persistence.db import open_campaign_db
+    from sagasmith.schemas.campaign import ProviderSettings
+
+    campaign_id = _require_context_value(context.campaign_id, "campaign_id")
+    db_path = _require_context_value(context.db_path, "db_path")
+    conn = open_campaign_db(db_path)
+    try:
+        settings = ProviderSettings(
+            provider="fake",
+            api_key_ref=None,
+            default_model="fake/mvp-default",
+            narration_model="fake/mvp-narration",
+            cheap_model="fake/mvp-cheap",
+        )
+        repo = SettingsRepository(conn)
+        with conn:
+            repo.put_provider_settings(campaign_id, settings)
+        reloaded = repo.get_provider_settings(campaign_id)
+    finally:
+        conn.close()
+    if reloaded is None or reloaded.provider != "fake" or reloaded.api_key_ref is not None:
+        raise RuntimeError("fake provider settings did not persist without credentials")
+    return "provider=fake"
+
+
+def _mvp_onboard(context: _MvpSmokeContext) -> str:
+    from sagasmith.evals.fixtures import (
+        make_valid_content_policy,
+        make_valid_house_rules,
+        make_valid_player_profile,
+    )
+    from sagasmith.onboarding.store import OnboardingStore, OnboardingTriple
+    from sagasmith.persistence.db import open_campaign_db
+
+    campaign_id = _require_context_value(context.campaign_id, "campaign_id")
+    db_path = _require_context_value(context.db_path, "db_path")
+    conn = open_campaign_db(db_path)
+    try:
+        store = OnboardingStore(conn)
+        store.commit(
+            campaign_id,
+            OnboardingTriple(
+                player_profile=make_valid_player_profile(),
+                content_policy=make_valid_content_policy(),
+                house_rules=make_valid_house_rules(),
+            ),
+        )
+        if not store.exists(campaign_id):
+            raise RuntimeError("onboarding triple not committed")
+    finally:
+        conn.close()
+    return "onboarding triple committed"
+
+
+def _mvp_play_skill_challenge(context: _MvpSmokeContext) -> str:
+    from sagasmith.rules.first_slice import make_first_slice_character
+    from sagasmith.services.dice import DiceService
+    from sagasmith.services.rules_engine import RulesEngine
+
+    campaign_id = _require_context_value(context.campaign_id, "campaign_id")
+    sheet = make_first_slice_character()
+    dice = DiceService(campaign_seed=campaign_id, session_seed="mvp_smoke")
+    check = RulesEngine(dice=dice).resolve_check(
+        sheet,
+        stat="athletics",
+        dc=15,
+        reason="mvp smoke skill challenge",
+        roll_index=0,
+    )
+    context.skill_roll_id = check.roll_result.roll_id
+    return f"roll={check.roll_result.roll_id} degree={check.degree}"
+
+
+def _mvp_play_simple_combat(context: _MvpSmokeContext) -> str:
+    from sagasmith.rules.first_slice import make_first_slice_character, make_first_slice_enemies
+    from sagasmith.services.combat_engine import CombatEngine
+    from sagasmith.services.dice import DiceService
+    from sagasmith.services.rules_engine import RulesEngine
+
+    campaign_id = _require_context_value(context.campaign_id, "campaign_id")
+    sheet = make_first_slice_character()
+    dice = DiceService(campaign_seed=campaign_id, session_seed="mvp_smoke")
+    rules = RulesEngine(dice=dice)
+    combat = CombatEngine(dice=dice, rules=rules)
+    combat_state, initiative = combat.start_encounter(sheet, make_first_slice_enemies(), roll_index=1)
+    while combat_state.active_combatant_id != sheet.id:
+        combat_state = combat.end_turn(combat_state)
+    combat_state, attack, damage = combat.resolve_strike(
+        combat_state,
+        sheet.id,
+        "enemy_weak_melee",
+        "longsword",
+        roll_index=1 + len(initiative),
+    )
+    context.combat_attack_roll_id = attack.roll_result.roll_id
+    if not combat_state.initiative_order or combat_state.action_counts[sheet.id] != 2:
+        raise RuntimeError("simple combat state did not advance after Strike")
+    damage_detail = f" damage={damage.roll_id}" if damage is not None else ""
+    return f"attack={attack.roll_result.roll_id}{damage_detail}"
+
+
+def _mvp_quit(context: _MvpSmokeContext) -> str:
+    from sagasmith.persistence.db import open_campaign_db
+    from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
+    from sagasmith.schemas.persistence import CheckpointRef, TranscriptEntry, TurnRecord
+
+    campaign_id = _require_context_value(context.campaign_id, "campaign_id")
+    db_path = _require_context_value(context.db_path, "db_path")
+    now = datetime.now(UTC).isoformat()
+    conn = open_campaign_db(db_path)
+    try:
+        close_turn(
+            conn,
+            TurnCloseBundle(
+                turn_record=TurnRecord(
+                    turn_id="mvp_turn_000001",
+                    campaign_id=campaign_id,
+                    session_id="session_001",
+                    status="complete",
+                    started_at=now,
+                    completed_at=now,
+                    schema_version=1,
+                ),
+                transcript_entries=[
+                    TranscriptEntry(
+                        turn_id="mvp_turn_000001",
+                        kind="player_input",
+                        content="quit after MVP smoke turn",
+                        sequence=0,
+                        created_at=now,
+                    ),
+                    TranscriptEntry(
+                        turn_id="mvp_turn_000001",
+                        kind="narration_final",
+                        content="Smoke resumes after quit.",
+                        sequence=1,
+                        created_at=now,
+                    ),
+                ],
+                roll_results=[],
+                provider_logs=[],
+                state_deltas=[],
+                cost_logs=[],
+                checkpoint_refs=[
+                    CheckpointRef(
+                        checkpoint_id="mvp_final_checkpoint_000001",
+                        turn_id="mvp_turn_000001",
+                        kind="final",
+                        created_at=now,
+                    )
+                ],
+            ),
+        )
+    finally:
+        conn.close()
+    return "final checkpoint persisted"
+
+
+def _mvp_resume(context: _MvpSmokeContext) -> str:
+    from sagasmith.tui.runtime import build_app
+
+    root = _require_context_value(context.root, "root")
+    app = build_app(root, build_graph_runtime=False)
+    try:
+        if "Smoke resumes after quit." not in app.initial_scrollback:
+            raise RuntimeError("resume scrollback missing completed turn narration")
+        if app.current_session_number != 2:
+            raise RuntimeError(f"expected session 2 after resume, got {app.current_session_number}")
+    finally:
+        app.on_unmount()
+    return "scrollback restored session=2"
 
 
 def run_smoke() -> SmokeResult:
