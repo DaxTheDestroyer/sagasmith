@@ -9,6 +9,10 @@ from types import SimpleNamespace
 
 import pytest
 
+from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import assemble_memory_packet
+from sagasmith.graph.runtime import GraphRuntime
+from sagasmith.memory.fts5 import FTS5Index
+from sagasmith.memory.graph import get_vault_graph, reset_vault_graph_cache
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import (
     CheckpointRefRepository,
@@ -19,12 +23,13 @@ from sagasmith.persistence.repositories import (
     VaultWriteAuditRepository,
 )
 from sagasmith.persistence.retcon import RetconBlockedError, RetconService
-from sagasmith.graph.runtime import GraphRuntime
-from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import assemble_memory_packet
-from sagasmith.memory.fts5 import FTS5Index
-from sagasmith.memory.graph import get_vault_graph, reset_vault_graph_cache
 from sagasmith.schemas.mechanics import RollResult
-from sagasmith.schemas.persistence import CheckpointRef, TranscriptEntry, TurnRecord, VaultWriteAuditRecord
+from sagasmith.schemas.persistence import (
+    CheckpointRef,
+    TranscriptEntry,
+    TurnRecord,
+    VaultWriteAuditRecord,
+)
 
 pytestmark = pytest.mark.integration
 

@@ -15,7 +15,6 @@ from sagasmith.persistence.repositories import (
 )
 from sagasmith.schemas.persistence import RetconAuditRecord
 
-
 _RETCON_EFFECTS = (
     "Retcon will perform a state rewind to the prior safe checkpoint, rebuild "
     "affected transcript/mechanics/vault/memory outputs from canonical sources, "
