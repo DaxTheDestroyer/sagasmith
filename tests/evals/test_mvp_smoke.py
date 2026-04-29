@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -65,3 +66,20 @@ def test_mvp_smoke_failure_includes_step_name_and_non_secret_detail(
     assert "temporary campaign fixture missing" in formatted
     assert "sk-" not in formatted
     assert "api_key" not in formatted.lower()
+
+
+def test_release_gate_make_targets_are_release_blocking() -> None:
+    makefile = Path("Makefile").read_text(encoding="utf-8")
+
+    assert ".PHONY:" in makefile and "release-gate" in makefile
+    assert "secret-scan:" in makefile
+    assert "release-gate:" in makefile
+    assert "uv run sagasmith smoke --mode mvp" in makefile
+    assert makefile.index("secret-scan:") < makefile.index("release-gate:")
+    assert makefile.index("$(MAKE) lint") < makefile.index("$(MAKE) format-check")
+    assert makefile.index("$(MAKE) format-check") < makefile.index("$(MAKE) typecheck")
+    assert makefile.index("$(MAKE) typecheck") < makefile.index("$(MAKE) test")
+    assert makefile.index("$(MAKE) test") < makefile.index("uv run sagasmith smoke --mode mvp")
+    assert makefile.index("uv run sagasmith smoke --mode mvp") < makefile.index(
+        "$(MAKE) secret-scan"
+    )

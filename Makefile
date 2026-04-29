@@ -1,4 +1,4 @@
-.PHONY: install lint format format-check typecheck test smoke precommit clean
+.PHONY: install lint format format-check typecheck test smoke precommit secret-scan release-gate clean
 
 install:
 	uv sync --all-groups
@@ -23,6 +23,17 @@ smoke:
 
 precommit:
 	uv run pre-commit run --all-files
+
+secret-scan:
+	uv run pre-commit run gitleaks --all-files
+
+release-gate:
+	$(MAKE) lint
+	$(MAKE) format-check
+	$(MAKE) typecheck
+	$(MAKE) test
+	uv run sagasmith smoke --mode mvp
+	$(MAKE) secret-scan
 
 clean:
 	rm -rf .pytest_cache .ruff_cache .venv dist build *.egg-info
