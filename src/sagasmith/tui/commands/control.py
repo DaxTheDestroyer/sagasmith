@@ -155,14 +155,50 @@ class RetconCommand:
     description: str = "Retcon the last completed turn (confirmation required)."
 
     def handle(self, app: SagaSmithApp, args: tuple[str, ...]) -> None:
-        if app.graph_runtime is not None:
-            from sagasmith.graph.interrupts import InterruptKind
+        if app.graph_runtime is None:
+            _write(app, "[system] /retcon unavailable: no active graph runtime.")
+            return
 
-            app.graph_runtime.post_interrupt(
-                kind=InterruptKind.RETCON,
-                payload={"reason": "player typed /retcon"},
+        from sagasmith.persistence.retcon import RetconBlockedError, RetconService
+
+        if not args:
+            service = RetconService(
+                app.graph_runtime.db_conn,
+                campaign_id=app.manifest.campaign_id,
             )
-        _write(
-            app,
-            "[system] /retcon requested. Phase 8 release-hardening wires confirmation and rollback.",
-        )
+            candidates = service.list_candidates()
+            _write(app, "[system] /retcon candidates:")
+            for i, c in enumerate(candidates, 1):
+                _write(app, f"{i}. {c.turn_id} \u2014 {c.completed_at} \u2014 {c.summary}")
+            return
+
+        turn_id = args[0]
+        confirmation_tokens = args[1:]
+
+        if confirmation_tokens:
+            token = " ".join(confirmation_tokens)
+            try:
+                app.graph_runtime.confirm_retcon(turn_id, token)
+                _write(
+                    app,
+                    f"[system] Retcon complete: returned to checkpoint before {turn_id}. "
+                    "Affected turns are audit-retained and excluded from canon.",
+                )
+            except RetconBlockedError as e:
+                _write(app, f"[system] /retcon blocked: {e}")
+                _write(app, f"[system] repair: {e.repair_guidance}")
+            return
+
+        try:
+            preview = app.graph_runtime.preview_retcon(turn_id)
+            vault_outputs = (
+                ", ".join(preview.vault_paths) if preview.vault_paths else "none"
+            )
+            _write(app, f"[system] /retcon preview for {turn_id}:")
+            _write(app, f"Affected turns: {', '.join(preview.affected_turn_ids)}")
+            _write(app, f"Vault outputs: {vault_outputs}")
+            _write(app, f"Effects: {preview.effects}")
+            _write(app, f"Type: /retcon {turn_id} {preview.confirmation_token}")
+        except RetconBlockedError as e:
+            _write(app, f"[system] /retcon blocked: {e}")
+            _write(app, f"[system] repair: {e.repair_guidance}")

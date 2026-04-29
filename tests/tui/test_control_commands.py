@@ -19,7 +19,6 @@ from sagasmith.tui.commands.control import (
     InventoryCommand,
     MapCommand,
     RecapCommand,
-    RetconCommand,
     SaveCommand,
 )
 from sagasmith.tui.commands.registry import CommandRegistry
@@ -46,7 +45,6 @@ _STUB_CASES = [
     (SaveCommand(), "/save", "Phase 4"),
     (InventoryCommand(), "/inventory", "Phase 5"),
     (MapCommand(), "/map", "Phase 5"),
-    (RetconCommand(), "/retcon", "Phase 8"),
 ]
 
 

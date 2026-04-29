@@ -14,7 +14,7 @@ from sagasmith.graph.interrupts import InterruptKind
 from sagasmith.persistence.db import open_campaign_db
 from sagasmith.services.safety import SafetyEventService
 from sagasmith.tui.app import SagaSmithApp
-from sagasmith.tui.commands.control import RetconCommand
+from sagasmith.tui.commands.control import SaveCommand
 from sagasmith.tui.commands.registry import CommandRegistry
 from sagasmith.tui.commands.safety import LineCommand, PauseCommand
 from sagasmith.tui.widgets.narration import NarrationArea
@@ -31,7 +31,7 @@ def _make_app_with_safety(tmp_path: Path) -> tuple[SagaSmithApp, str]:
     registry = CommandRegistry()
     registry.register(PauseCommand())
     registry.register(LineCommand())
-    registry.register(RetconCommand())
+    registry.register(SaveCommand())
     app.commands = registry  # type: ignore[assignment]
     return app, m.campaign_id
 
@@ -174,30 +174,6 @@ async def test_line_posts_interrupt_when_graph_bound(tmp_path: Path) -> None:
     assert kind == InterruptKind.LINE
     assert payload == {"topic": "graphic_violence"}
 
-
-# ---------------------------------------------------------------------------
-# Test 5: RetconCommand posts RETCON interrupt
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_retcon_posts_interrupt_when_graph_bound(tmp_path: Path) -> None:
-    """Phase 4: /retcon is represented as an interrupt; Phase 8 owns rollback."""
-    app, _campaign_id = _make_app_with_safety(tmp_path)
-    fake = FakeRuntime()
-    app.graph_runtime = fake  # type: ignore[assignment]
-
-    async with app.run_test() as pilot:
-        await pilot.click("#player-input")
-        for ch in "/retcon":
-            await pilot.press(ch)
-        await pilot.press("enter")
-        await pilot.pause()
-
-    assert len(fake.calls) == 1
-    kind, payload = fake.calls[0]
-    assert kind == InterruptKind.RETCON
-    assert payload == {"reason": "player typed /retcon"}
 
 
 @pytest.mark.asyncio
