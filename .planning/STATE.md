@@ -142,6 +142,8 @@ Items acknowledged and carried forward from previous milestone close:
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
 | Integration | 06-08: full-turn-flow + safety-enforcement integration tests (`test_full_turn_flow.py`, `test_safety_enforcement.py`) | Deferred | 2026-04-28 (Phase 6) |
+| Session pages | 07-04: `session_page_authoring` permanently emits `quests_closed=[]` and `callbacks_paid_off=[]`; real inference requires canonical quest/callback state tracking | Deferred | 2026-04-29 (Phase 7) |
+| Visibility | 07-04: `visibility_promotion` uses substring match on entity name/alias; short names may cause false promotion | Deferred | 2026-04-29 (Phase 7) |
 
 ## Session Continuity
 

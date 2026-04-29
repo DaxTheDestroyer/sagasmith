@@ -1,8 +1,9 @@
 ---
 name: rolling-summary-update
-agent: archivist
+allowed_agents: [archivist]
 first_slice: true
-implementation_surface: llm
+implementation_surface: prompted
+description: Updates campaign rolling summary at scene boundaries using LLM; retains canonical facts within token cap.
 ---
 
 # Rolling Summary Update

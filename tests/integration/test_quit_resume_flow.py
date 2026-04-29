@@ -26,11 +26,11 @@ from sagasmith.evals.fixtures import (
     make_valid_world_bible,
 )
 from sagasmith.graph.bootstrap import GraphBootstrap, default_skill_store
+from sagasmith.graph.interrupts import InterruptKind
 from sagasmith.graph.runtime import build_persistent_graph
 from sagasmith.persistence.db import open_campaign_db
 from sagasmith.persistence.repositories import TurnRecordRepository
 from sagasmith.providers import DeterministicFakeClient
-from sagasmith.schemas.enums import InterruptKind
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.dice import DiceService
 from sagasmith.tui.runtime import build_app

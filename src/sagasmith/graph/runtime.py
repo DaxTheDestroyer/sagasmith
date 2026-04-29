@@ -22,10 +22,11 @@ from sagasmith.graph.checkpoints import (
     build_checkpointer,
     extract_checkpoint_id,
 )
-from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind
+from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind, is_session_end_state
 from sagasmith.persistence.repositories import CheckpointRefRepository, TurnRecordRepository
 from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
 from sagasmith.schemas.persistence import CheckpointRef, TurnRecord
+from sagasmith.vault import VaultPage
 
 
 def thread_config_for(campaign_id: str) -> dict[str, Any]:
@@ -70,15 +71,43 @@ class GraphRuntime:
             return snapshot.values
         if snapshot.next == () and snapshot.values and snapshot_turn_id == turn_id:
             return snapshot.values
+        if snapshot.next == () and snapshot.values and snapshot_turn_id != turn_id:
+            from langgraph.graph import START
+
+            self.graph.update_state(self.thread_config, initial_state, as_node=START)
         try:
             _ = self.graph.invoke(initial_state, self.thread_config)
         except BudgetStopError as e:
             _ = self.post_interrupt(kind=InterruptKind.BUDGET_STOP, payload={"reason": str(e)})
             return self.graph.get_state(self.thread_config).values
         snapshot = self.graph.get_state(self.thread_config)
+        if (snapshot.values or {}).get("turn_id") != turn_id:
+            return self._pre_narration_fallback_state(initial_state)
+        if (snapshot.values or {}).get("memory_packet") is None:
+            return self._pre_narration_fallback_state({**initial_state, **(snapshot.values or {})})
         if snapshot.next == ("orator",):
             self._record_pre_narration_checkpoint(turn_id, snapshot)
         return snapshot.values
+
+    def _pre_narration_fallback_state(self, initial_state: dict[str, Any]) -> dict[str, Any]:
+        """Return pre-narration state when an ended LangGraph thread will not restart.
+
+        LangGraph 1.1.x can retain an END checkpoint for a campaign-scoped thread
+        after process restart. This preserves the Phase 7 resume contract by
+        assembling the provider-free memory packet from persisted vault/transcript
+        layers for the new turn.
+        """
+        from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
+            assemble_memory_packet,
+        )
+
+        vault_service = getattr(self.bootstrap.services, "vault_service", None)
+        memory_packet = assemble_memory_packet(
+            initial_state,
+            conn=self.db_conn,
+            vault_service=vault_service,
+        )
+        return {**initial_state, "memory_packet": memory_packet.model_dump()}
 
     def post_interrupt(
         self, *, kind: InterruptKind, payload: dict[str, Any] | None = None
@@ -135,6 +164,9 @@ class GraphRuntime:
         """
         # Note: LangGraph 1.1.10 has a bug with Command(resume=None).
         # Using None input directly is the working resume pattern proven in Task 1.
+        initial_snapshot = self.graph.get_state(self.thread_config)
+        initial_state = initial_snapshot.values or {}
+        session_end_requested = is_session_end_state(initial_state)
         _ = self.graph.invoke(None, self.thread_config)
         final_snapshot = self.graph.get_state(self.thread_config)
         final_cp_id = extract_checkpoint_id(final_snapshot)
@@ -143,7 +175,16 @@ class GraphRuntime:
 
         # Collect vault_pending_writes from final state (produced by archivist_node)
         final_state = final_snapshot.values or {}
-        vault_pages_list = vault_pages or final_state.get("vault_pending_writes", [])
+        session_end_requested = session_end_requested or is_session_end_state(final_state)
+        vault_pages_raw = vault_pages or final_state.get("vault_pending_writes", [])
+        # Deserialize VaultPage objects if stored as dicts for checkpoint compatibility.
+        vault_pages_list: list[VaultPage] = []
+        for item in vault_pages_raw:
+            if isinstance(item, VaultPage):
+                vault_pages_list.append(item)
+            elif isinstance(item, dict):
+                # Reconstruct from serialized form
+                vault_pages_list.append(VaultPage.from_dict(item))
         if rolling_summary is None:
             rolling_summary_val = final_state.get("rolling_summary")
             if isinstance(rolling_summary_val, str):
@@ -168,7 +209,16 @@ class GraphRuntime:
         )
         # Inject vault_service if available
         vault_service = getattr(self.bootstrap.services, "vault_service", None)
-        return close_turn(self.db_conn, bundle, vault_service=vault_service)
+        completed_record = close_turn(self.db_conn, bundle, vault_service=vault_service)
+        if session_end_requested and vault_service is not None:
+            _author_session_after_close(
+                db_conn=self.db_conn,
+                campaign_id=self.campaign_id,
+                session_id=turn_record.session_id,
+                final_state=final_state,
+                vault_service=vault_service,
+            )
+        return completed_record
 
     def discard_incomplete_turn(self, turn_id: str) -> TurnRecord:
         """Rewind the graph thread to the pre-narration checkpoint and mark the
@@ -344,6 +394,39 @@ def build_persistent_graph(
         campaign_id=campaign_id,
         bootstrap=wrapped,
     )
+
+
+def _author_session_after_close(
+    *,
+    db_conn: sqlite3.Connection,
+    campaign_id: str,
+    session_id: str,
+    final_state: dict[str, Any],
+    vault_service: Any,
+) -> None:
+    from sagasmith.agents.archivist.skills.session_page_authoring.logic import author_session
+
+    session_number = _session_number_from_id(session_id)
+    if session_number is None:
+        return
+    date_in_game = str(final_state.get("game_clock", "unknown"))
+    author_session(
+        session_number=session_number,
+        campaign_id=campaign_id,
+        db_conn=db_conn,
+        vault_service=vault_service,
+        date_in_game=date_in_game,
+    )
+    vault_service.resolver.refresh()
+    vault_service.rebuild_indices(db_conn)
+    vault_service.sync()
+
+
+def _session_number_from_id(session_id: str) -> int | None:
+    prefix, sep, suffix = session_id.rpartition("_")
+    if sep and prefix == "session" and suffix.isdigit():
+        return int(suffix)
+    return None
 
 
 def _wrap_bootstrap_with_logger(bootstrap, db_conn: sqlite3.Connection):

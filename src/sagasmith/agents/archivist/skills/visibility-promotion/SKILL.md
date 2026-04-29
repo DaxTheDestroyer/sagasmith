@@ -1,8 +1,9 @@
 ---
 name: visibility-promotion
-agent: archivist
+allowed_agents: [archivist]
 first_slice: true
 implementation_surface: deterministic
+description: Promotes vault page visibility (gm_only to foreshadowed to player_known) based on entity presence in narration; never demotes.
 ---
 
 # Visibility Promotion

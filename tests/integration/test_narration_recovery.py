@@ -9,13 +9,12 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import UTC, datetime
 
 import pytest
 
 from sagasmith.graph.bootstrap import GraphBootstrap
 from sagasmith.graph.checkpoints import CheckpointKind
-from sagasmith.graph.runtime import GraphRuntime, build_persistent_graph
+from sagasmith.graph.runtime import build_persistent_graph
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import (
     CheckpointRefRepository,
@@ -246,7 +245,7 @@ class TestDeterministicStability:
         runtime1 = build_persistent_graph(bootstrap1, conn1, campaign_id="cmp_001")
 
         state1 = _play_state()
-        values1 = runtime1.invoke_turn(state1)
+        runtime1.invoke_turn(state1)
         # Complete the turn normally.
         runtime1.resume_and_close(_make_turn_record())
         final1 = runtime1.graph.get_state(runtime1.thread_config).values

@@ -41,6 +41,7 @@ class SagaGraphState(TypedDict):
     vault_master_path: str
     vault_player_path: str
     rolling_summary: str | None
+    vault_pending_writes: list[Any]
 
 
 # Import-time field-drift guard

@@ -7,11 +7,11 @@ from typing import Any
 import yaml
 
 from sagasmith.agents.archivist.skills.canon_conflict_detection.logic import detect_conflicts
+from sagasmith.agents.archivist.skills.entity_resolution.logic import resolve_entity
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet,
 )
 from sagasmith.agents.archivist.skills.rolling_summary_update.logic import update_summary
-from sagasmith.agents.archivist.skills.session_page_authoring.logic import author_session
 from sagasmith.agents.archivist.skills.vault_page_upsert.logic import (
     vault_page_upsert,
 )
@@ -24,7 +24,7 @@ from sagasmith.vault.page import LoreFrontmatter
 
 def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
     """Assemble memory packet, persist entity pages to vault, and return vault writes."""
-    if services._call_recorder is not None:
+    if getattr(services, "_call_recorder", None) is not None:
         services._call_recorder.append("archivist")
     activation = get_current_activation()
     if activation is not None:
@@ -33,11 +33,11 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             for skill_name in [
                 "entity-resolution",
                 "vault-page-upsert",
-                "memory-packet-assembly",
                 "visibility-promotion",
                 "rolling-summary-update",
                 "session-page-authoring",
                 "canon-conflict-detection",
+                "memory-packet-assembly",
             ]:
                 if store.find(name=skill_name, agent_scope="archivist") is not None:
                     activation.set_skill(skill_name)
@@ -64,9 +64,13 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                 first_encountered=str(session_number),
                 category="world_bible",
             )
-            body = yaml.safe_dump(
-                world_bible.model_dump(mode="json"), sort_keys=False, allow_unicode=True
+            # State may store WorldBible as a dict (serialized) or pydantic model
+            wb_data = (
+                world_bible
+                if isinstance(world_bible, dict)
+                else world_bible.model_dump(mode="json")
             )
+            body = yaml.safe_dump(wb_data, sort_keys=False, allow_unicode=True)
             page = VaultPage(frontmatter, body)
             vault_pending_writes.append(page)
 
@@ -81,9 +85,12 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                 first_encountered=str(session_number),
                 category="campaign_seed",
             )
-            body = yaml.safe_dump(
-                campaign_seed.model_dump(mode="json"), sort_keys=False, allow_unicode=True
+            cs_data = (
+                campaign_seed
+                if isinstance(campaign_seed, dict)
+                else campaign_seed.model_dump(mode="json")
             )
+            body = yaml.safe_dump(cs_data, sort_keys=False, allow_unicode=True)
             page = VaultPage(frontmatter, body)
             vault_pending_writes.append(page)
 
@@ -106,8 +113,7 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             # Resolve to see if already exists
             resolved = _resolve_known_entity(vault_service, entity_name)
             if resolved is not None:
-                _promote_existing_page(
-                    vault_service=vault_service,
+                promoted = _promote_existing_page(
                     page=resolved,
                     context={
                         "scene_brief": scene_brief,
@@ -115,6 +121,8 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                         "pending_narration": state.get("pending_narration", []),
                     },
                 )
+                if promoted is not None:
+                    vault_pending_writes.append(promoted)
                 continue
             # Determine entity type: default to npc; later phases may infer from context
             entity_type = "npc"
@@ -127,6 +135,8 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
                 "status": "alive",
                 "disposition_to_pc": "neutral",
             }
+            if entity_name.startswith("npc_"):
+                draft["id"] = entity_name
             # Visibility: if entity is present in scene, it's player_known (they see it)
             visibility = "player_known"
             try:
@@ -177,27 +187,30 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
         vault_pending_writes,
     )
 
-    session_page_path = _maybe_author_session(
-        state=state,
-        vault_service=vault_service,
-        db_conn=getattr(services, "transcript_conn", None),
-        campaign_id=str(state.get("campaign_id", "")),
-        session_number=session_number,
-    )
-
     memory_packet = assemble_memory_packet(
         {**state, "rolling_summary": rolling_summary},
         conn=getattr(services, "transcript_conn", None),
         vault_service=vault_service,
     )
+
+    # Serialize vault_pending_writes to a checkpoint-safe representation.
+    # LangGraph's msgpack serializer cannot handle VaultPage objects directly.
+    # The runtime will reconstruct VaultPage instances after the graph completes.
+    if getattr(services, "transcript_conn", None) is None:
+        pending_vault_payload: list[VaultPage] | list[dict[str, Any]] = vault_pending_writes
+    else:
+        pending_vault_payload = [
+            {"frontmatter": page.frontmatter.model_dump(mode="json"), "body": page.body}
+            for page in vault_pending_writes
+        ]
+
     return {
         "session_state": session_state,
         "rolling_summary": rolling_summary,
         "pending_conflicts": pending_conflicts,
-        "session_page_path": session_page_path,
         "pending_player_input": None,
         "memory_packet": memory_packet.model_dump(),
-        "vault_pending_writes": vault_pending_writes,
+        "vault_pending_writes": pending_vault_payload,
         # Phase 4: pending_narration preserved so smoke test can sync to TUI.
         # Phase 7 archivist will persist to transcript_entries before clearing.
         "pending_narration": state.get("pending_narration", []),
@@ -205,12 +218,13 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
 
 
 def _resolve_known_entity(vault_service: VaultService, entity_name: str) -> VaultPage | None:
-    """Resolve a scene entity without requiring aliases to exist."""
+    """Resolve a scene entity across all supported types."""
     for entity_type in ("npc", "location", "faction", "item", "quest", "callback", "lore"):
-        resolved = vault_service.resolver.resolve(entity_name, entity_type=entity_type)
-        if resolved is not None:
-            return resolved
-    return vault_service.resolver.resolve(entity_name, entity_type=None)
+        page, status = resolve_entity(entity_name, entity_type, vault_service.resolver)
+        if status == "matched":
+            return page
+    page, status = resolve_entity(entity_name, None, vault_service.resolver)
+    return page if status == "matched" else None
 
 
 def _promote_pending_pages(pages: list[VaultPage], *, context: dict[str, Any]) -> list[VaultPage]:
@@ -229,32 +243,16 @@ def _promote_pending_pages(pages: list[VaultPage], *, context: dict[str, Any]) -
     return promoted
 
 
-def _promote_existing_page(
-    *, vault_service: VaultService, page: VaultPage, context: dict[str, Any]
-) -> None:
+def _promote_existing_page(*, page: VaultPage, context: dict[str, Any]) -> VaultPage | None:
+    """Return a visibility-promoted copy of page, or None if no change needed.
+
+    Callers must add the returned page to vault_pending_writes so promotion
+    lands inside the transactional close_turn boundary.
+    """
     new_visibility = promote_visibility(page, context)
     if new_visibility == page.frontmatter.visibility:
-        return
-    promoted = VaultPage(page.frontmatter.model_copy(update={"visibility": new_visibility}), page.body)
-    relative_path = _vault_relative_path(promoted)
-    vault_service.write_page(promoted, relative_path)
-
-
-def _vault_relative_path(page: VaultPage) -> Any:
-    from pathlib import Path
-
-    folder_by_type = {
-        "npc": "npcs",
-        "location": "locations",
-        "faction": "factions",
-        "item": "items",
-        "quest": "quests",
-        "callback": "callbacks",
-        "session": "sessions",
-        "lore": "lore",
-    }
-    folder = folder_by_type.get(page.frontmatter.type, "lore")
-    return Path(folder) / f"{page.frontmatter.id}.md"
+        return None
+    return VaultPage(page.frontmatter.model_copy(update={"visibility": new_visibility}), page.body)
 
 
 def _maybe_update_rolling_summary(
@@ -265,7 +263,10 @@ def _maybe_update_rolling_summary(
 ) -> Any:
     old_summary = state.get("rolling_summary")
     llm_client = getattr(services, "llm", None)
-    if llm_client is None or not _is_scene_boundary(state=state, scene_brief=scene_brief):
+    needs_initial_summary = not isinstance(old_summary, str) or not old_summary.strip()
+    if llm_client is None or (
+        not needs_initial_summary and not _is_scene_boundary(state=state, scene_brief=scene_brief)
+    ):
         return old_summary
     snippets = _summary_snippets(state)
     if not snippets and not scene_brief:
@@ -311,32 +312,3 @@ def _summary_snippets(state: dict[str, Any]) -> list[str]:
     return snippets
 
 
-def _maybe_author_session(
-    *,
-    state: dict[str, Any],
-    vault_service: VaultService | None,
-    db_conn: Any,
-    campaign_id: str,
-    session_number: int,
-) -> str | None:
-    if vault_service is None or db_conn is None or not campaign_id:
-        return None
-    if not _is_session_end(state):
-        return None
-    date_in_game = str(state.get("game_clock", "unknown"))
-    return author_session(
-        session_number=session_number,
-        campaign_id=campaign_id,
-        db_conn=db_conn,
-        vault_service=vault_service,
-        date_in_game=date_in_game,
-    )
-
-
-def _is_session_end(state: dict[str, Any]) -> bool:
-    if state.get("phase") == "session_end" or state.get("session_end") is True:
-        return True
-    interrupt = state.get("pending_interrupt") or state.get("last_interrupt")
-    if isinstance(interrupt, dict):
-        return interrupt.get("kind") == "session_end"
-    return False

@@ -120,6 +120,7 @@ class VaultService:
         the master vault. LanceDB remains future-scoped for this MVP slice.
         """
         counts: dict[str, int] = {"graph_pages": 0, "fts5_pages": 0}
+        self.resolver.refresh()
         from sagasmith.memory.graph import warm_vault_graph
 
         graph = warm_vault_graph(self.master_path)
@@ -206,18 +207,20 @@ def _strip_gm_comments(body: str) -> str:
 
 
 def _foreshadowed_stub(page: VaultPage) -> VaultPage:
-    stub_front = BaseVaultFrontmatter(
-        id=page.frontmatter.id,
-        type=page.frontmatter.type,
-        name=page.frontmatter.name,
-        aliases=page.frontmatter.aliases or [],
-        visibility="foreshadowed",
-        first_encountered=page.frontmatter.first_encountered,
-    )
-    return VaultPage(
-        stub_front,
-        body="*Unknown - you have heard this name but know little more.*",
-    )
+    """Create a foreshadowed stub preserving non-GM fields but stripping any GM-only keys."""
+    # Serialize original frontmatter to a mutable dict
+    front_dict = page.frontmatter.model_dump(mode="json")
+    # Remove any GM-only fields that must not appear in player vault
+    gm_keys = {"secrets", "gm_notes"} | {k for k in front_dict if k.startswith("gm_")}
+    for k in gm_keys:
+        front_dict.pop(k, None)
+    # Downgrade visibility
+    front_dict["visibility"] = "foreshadowed"
+    # Validate with the concrete frontmatter class derived from type
+    cls = _frontmatter_type_for(front_dict.get("type"))
+    stub_front = cls.model_validate(front_dict)
+    body = "*Unknown - you have heard this name but know little more.*"
+    return VaultPage(stub_front, body)
 
 
 def _strip_player_known_page(page: VaultPage) -> VaultPage:

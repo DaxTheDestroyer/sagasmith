@@ -172,24 +172,33 @@ class VaultPage:
             front_dict: dict[str, Any] = (
                 {str(key): value for key, value in loaded.items()} if isinstance(loaded, dict) else {}
             )
-            # Determine concrete frontmatter class from 'type'
-            ftype = front_dict.get("type")
-            mapping = {
-                "npc": NpcFrontmatter,
-                "location": LocationFrontmatter,
-                "faction": FactionFrontmatter,
-                "item": ItemFrontmatter,
-                "quest": QuestFrontmatter,
-                "callback": CallbackFrontmatter,
-                "session": SessionFrontmatter,
-                "lore": LoreFrontmatter,
-            }
-            cls_type = mapping.get(ftype) if isinstance(ftype, str) else None
-            if cls_type is None:
-                raise ValueError(f"Unknown vault page type: {ftype!r}")
-            frontmatter = cls_type.model_validate(front_dict)
+            frontmatter = cls._frontmatter_from_dict(front_dict)
         else:
-            # No frontmatter: minimal VaultPage with empty base?
             frontmatter = BaseVaultFrontmatter(id="orphan", type="lore", name="Orphan")
             body = text
         return cls(frontmatter, body)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> VaultPage:
+        """Reconstruct a VaultPage from a serializable dict (frontmatter + body)."""
+        front_dict = data["frontmatter"]
+        frontmatter = cls._frontmatter_from_dict(front_dict)
+        body = data.get("body", "")
+        return cls(frontmatter, body)
+
+    @staticmethod
+    def _frontmatter_from_dict(front_dict: dict[str, Any]) -> BaseVaultFrontmatter:
+        """Instantiate the correct frontmatter subclass from a dict."""
+        ftype = front_dict.get("type")
+        mapping: dict[str, type[BaseVaultFrontmatter]] = {
+            "npc": NpcFrontmatter,
+            "location": LocationFrontmatter,
+            "faction": FactionFrontmatter,
+            "item": ItemFrontmatter,
+            "quest": QuestFrontmatter,
+            "callback": CallbackFrontmatter,
+            "session": SessionFrontmatter,
+            "lore": LoreFrontmatter,
+        }
+        cls_type = mapping.get(ftype, BaseVaultFrontmatter) if isinstance(ftype, str) else BaseVaultFrontmatter
+        return cls_type.model_validate(front_dict)

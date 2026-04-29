@@ -30,12 +30,12 @@ At turn-close for each new or updated entity discovered during the turn. Also fo
 9. Return `VaultPageUpsertResult(page, relative_path, action)`.
 
 ## Inputs
-- `entity_draft: dict` — Raw entity fields from the scene/LLM output. Must include at least `name` and `type`.
-- `visibility: str` — One of `"player_known"`, `"foreshadowed"`, `"gm_only"`. Node decides based on scene context.
-- `session_number: int` — Current session number for `first_encountered` tracking.
+- `entity_draft: dict` - Raw entity fields from the scene/LLM output. Must include at least `name` and `type`.
+- `visibility: str` - One of `"player_known"`, `"foreshadowed"`, `"gm_only"`. Node decides based on scene context.
+- `session_number: int` - Current session number for `first_encountered` tracking.
 
 ## Outputs
-- `VaultPageUpsertResult` — The validated page, vault-relative target path, and either `"created"` or `"updated"`.
+- `VaultPageUpsertResult` - The validated page, vault-relative target path, and either `"created"` or `"updated"`.
 
 ## Notes
 - This skill does not write files. `close_turn()` owns atomic vault writes after SQLite commit.

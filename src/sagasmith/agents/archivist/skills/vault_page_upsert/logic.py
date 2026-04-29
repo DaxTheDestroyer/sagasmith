@@ -124,7 +124,11 @@ def vault_page_upsert(
         page = VaultPage(frontmatter, body=existing_page.body)
     else:
         # Create new page — resolve slug collision
-        page_id = _find_unique_slug(slug, target_dir, prefix)
+        page_id = (
+            existing_id.strip()
+            if isinstance(existing_id, str) and existing_id.strip()
+            else _find_unique_slug(slug, target_dir, prefix)
+        )
         target_path = target_dir / f"{page_id}.md"
 
         # Build frontmatter dict from draft with defaults

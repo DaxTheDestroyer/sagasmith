@@ -52,6 +52,11 @@ _EXPECTED_SURFACE: dict[str, str] = {
     "turn-close-persistence": "deterministic",
     "onboarding-phase-wizard": "deterministic",
     "entity-resolution": "deterministic",
+    "vault-page-upsert": "deterministic",
+    "visibility-promotion": "deterministic",
+    "rolling-summary-update": "prompted",
+    "session-page-authoring": "deterministic",
+    "canon-conflict-detection": "deterministic",
 }
 
 

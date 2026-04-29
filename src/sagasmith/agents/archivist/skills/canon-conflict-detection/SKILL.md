@@ -1,8 +1,9 @@
 ---
 name: canon-conflict-detection
-agent: archivist
+allowed_agents: [archivist]
 first_slice: true
 implementation_surface: deterministic
+description: MVP stub for canon conflict detection: logs structured warning on conflicts, returns no conflicts, never blocks play.
 ---
 
 # Canon Conflict Detection

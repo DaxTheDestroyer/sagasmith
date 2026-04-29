@@ -1,8 +1,9 @@
 ---
 name: session-page-authoring
-agent: archivist
+allowed_agents: [archivist]
 first_slice: true
 implementation_surface: deterministic
+description: Authors session log pages (sessions/session_NNN.md) with frontmatter, summary, beats, rolls, and wikilinks from transcript.
 ---
 
 # Session Page Authoring

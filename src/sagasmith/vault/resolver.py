@@ -87,6 +87,10 @@ class EntityResolver:
         if entity_type is not None:
             prefix = _TYPE_PREFIX.get(entity_type)
             if prefix:
+                direct_id = slugify(name)
+                page = self._slug_index.get(direct_id)
+                if page is not None and getattr(page.frontmatter, "type", None) == entity_type:
+                    return page
                 candidate_id = f"{prefix}{slugify(name)}"
                 page = self._slug_index.get(candidate_id)
                 if page is not None:

@@ -6,9 +6,11 @@ oracle-skills.md §2.3.
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any, cast
 
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
+    assemble_memory_packet,
     assemble_memory_packet_stub,
 )
 from sagasmith.agents.oracle.skills.campaign_seed_generation.logic import generate_campaign_seed
@@ -76,9 +78,12 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
             updates["campaign_seed"] = campaign_seed.model_dump()
 
     if state.get("memory_packet") is None:
-        memory_packet = assemble_memory_packet_stub(
-            state,
-            conn=getattr(services, "transcript_conn", None),
+        conn = getattr(services, "transcript_conn", None)
+        vault_service = getattr(services, "vault_service", None)
+        memory_packet = (
+            assemble_memory_packet(state, conn=conn, vault_service=vault_service)
+            if vault_service is not None
+            else assemble_memory_packet_stub(state, conn=conn)
         )
         updates["memory_packet"] = memory_packet.model_dump()
     current_brief_payload = state.get("scene_brief")
@@ -306,7 +311,5 @@ def _log_safety_event_to_service(
             )
     except Exception:
         # Roll back failed transaction so the connection stays usable
-        try:
+        with contextlib.suppress(Exception):
             safety_svc.conn.rollback()
-        except Exception:
-            pass

@@ -83,7 +83,8 @@ def test_sync_projects_known_and_foreshadowed_without_gm_leakage(tmp_path: Path)
     stub = (service.player_vault_root / "factions/fac_guild.md").read_text(encoding="utf-8")
     assert "id: fac_guild" in stub
     assert "name: River Guild" in stub
-    assert "alignment" not in stub
+    assert "gm_notes" not in stub
+    assert "secrets" not in stub
     assert "The guild controls everything" not in stub
     assert "*Unknown - you have heard this name but know little more.*" in stub
 

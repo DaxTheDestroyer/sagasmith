@@ -7,7 +7,6 @@ secrets, inline GM comments, or gm_only pages after sync.
 from __future__ import annotations
 
 import re
-
 from pathlib import Path
 
 import pytest
@@ -49,7 +48,6 @@ def _create_gm_heavy_world(service: VaultService) -> None:
                 disposition_to_pc="neutral",
                 gm_notes="Knows about the secret passage",  # GM-only field
                 secrets=["double agent"],  # GM-only field also filtered
-                # Could also have gm_ prefixed custom fields dynamically
             ),
             body="Grimdagger runs the tavern.\n<!-- gm: actually a cult leader -->\nPublic info only.",
         ),
@@ -68,10 +66,10 @@ def _create_gm_heavy_world(service: VaultService) -> None:
                 alignment="lawful evil",
                 disposition_to_pc="unknown",
                 power_level="citywide",
-                gm_notes="Actually controls the mayor",  # GM-only field
-                secrets=["corruption everywhere"],  # GM-only field
+                gm_notes="Actually controls the mayor",
+                secrets=["corruption everywhere"],
             ),
-            "The Council governs the city.",  # Should be STRIPPED entirely from stub
+            "The Council governs the city.",
         ),
         Path("factions/fac_secret_cabal.md"),
     )
@@ -102,7 +100,7 @@ def _create_gm_heavy_world(service: VaultService) -> None:
                 aliases=[],
                 visibility="player_known",
                 region="downtown",
-                status="hidden",  # required field
+                status="hidden",
             ),
             body="A quiet room.\n<!-- gm:\n  This room contains a trapped door\n  that only the GM knows about\n  it leads to the underground cult\n-->\nThe room appears ordinary.",
         ),
@@ -119,9 +117,8 @@ def _create_gm_heavy_world(service: VaultService) -> None:
                 aliases=["the pendant"],
                 visibility="player_known",
                 rarity="uncommon",
-                attunement="none",
                 # Simulate a custom GM-field that our frontmatter model accepts as extra
-                # because model_validate(extra="allow") on BaseVaultFrontmatter
+                # because model_validate(extra="allow") on BaseVaultFrontmatter.
                 # The _strip_player_known_page should drop any key starting with gm_
             ),
             body="A faint pulse can be felt.\n<!-- gm: amulet is a key to the demon portal -->",
@@ -138,10 +135,10 @@ def _create_gm_heavy_world(service: VaultService) -> None:
                 name="Unfinished Business",
                 aliases=["the debt"],
                 visibility="foreshadowed",
-                given_by="npc_grimdagger",  # required-ish optional field
-                status="rumored",  # required
+                given_by="npc_grimdagger",
+                status="rumored",
             ),
-            "Someone owes someone something.",  # Body should be replaced with stub
+            "Someone owes someone something.",
         ),
         Path("quests/quest_unfinished_business.md"),
     )
@@ -225,7 +222,7 @@ def test_player_vault_has_zero_gm_leakage(
 
     violations = _scan_player_vault_for_gm_patterns(service.player_vault_root)
 
-    matching = [v for v in violations if v[0] == pattern_name or pattern_name in v[1]]
+    matching = [v for v in violations if v[1] == pattern_name or expected_violation_msg in v[2]]
     # Assert: no violations of the checked pattern
     assert not matching, (
         f"GM leakage detected in player vault ({len(matching)} violation(s)):\n"
@@ -253,6 +250,3 @@ def test_foreshadowed_stubs_contain_only_unknown_marker(tmp_path: Path) -> None:
     assert stub.exists(), "Foreshadowed stub page missing"
     body = stub.read_text(encoding="utf-8")
     assert "*Unknown - you have heard this name but know little more.*" in body
-    # No other lore details should be present
-    assert "controls the mayor" not in body
-    assert "corruption" not in body

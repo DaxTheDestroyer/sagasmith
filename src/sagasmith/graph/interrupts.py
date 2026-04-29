@@ -66,3 +66,11 @@ def extract_pending_interrupt(runtime) -> dict[str, Any] | None:
     snapshot = runtime.graph.get_state(runtime.thread_config)
     values = getattr(snapshot, "values", {}) or {}
     return values.get("last_interrupt")
+
+
+def is_session_end_state(state: dict[str, Any]) -> bool:
+    """Return True when state signals a session-end condition."""
+    if state.get("phase") == "session_end" or state.get("session_end") is True:
+        return True
+    interrupt = state.get("pending_interrupt") or state.get("last_interrupt")
+    return isinstance(interrupt, dict) and interrupt.get("kind") == InterruptKind.SESSION_END.value
