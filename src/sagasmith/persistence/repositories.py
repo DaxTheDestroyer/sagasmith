@@ -48,6 +48,28 @@ class TranscriptRepository:
             for row in rows
         ]
 
+    def list_recent(self, *, limit: int = 5) -> list[TranscriptEntry]:
+        """Return recent transcript entries in chronological order."""
+        rows = self.conn.execute(
+            """
+            SELECT turn_id, kind, content, sequence, created_at
+              FROM transcript_entries
+             ORDER BY id DESC
+             LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [
+            TranscriptEntry(
+                turn_id=row[0],
+                kind=row[1],
+                content=row[2],
+                sequence=row[3],
+                created_at=row[4],
+            )
+            for row in reversed(rows)
+        ]
+
 
 @dataclass(frozen=True)
 class RollLogRepository:

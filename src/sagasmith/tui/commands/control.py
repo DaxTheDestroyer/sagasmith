@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from sagasmith.rules.first_slice import make_first_slice_character
 from sagasmith.schemas.mechanics import CharacterSheet
+from sagasmith.persistence.repositories import TranscriptRepository
 
 if TYPE_CHECKING:
     from sagasmith.tui.app import SagaSmithApp
@@ -39,7 +40,31 @@ class RecapCommand:
     description: str = "Show rolling summary of recent events."
 
     def handle(self, app: SagaSmithApp, args: tuple[str, ...]) -> None:
-        _write(app, "[system] /recap (stub — Phase 7 Archivist will assemble real summaries).")
+        values: dict[str, object] = {}
+        if app.graph_runtime is not None:
+            snapshot = app.graph_runtime.graph.get_state(app.graph_runtime.thread_config)
+            values = dict(getattr(snapshot, "values", {}) or {})
+        summary = values.get("rolling_summary") if values else None
+        if not isinstance(summary, str) or not summary.strip():
+            summary = "[No summary available]"
+
+        _write(app, "=== RECAP ===")
+        for line in summary.splitlines() or [summary]:
+            _write(app, line)
+
+        conn = getattr(app, "_service_conn", None)
+        if conn is None:
+            return
+        entries = TranscriptRepository(conn).list_recent(limit=5)
+        if entries:
+            _write(app, "--- Recent transcript ---")
+        for entry in entries:
+            if entry.kind == "player_input":
+                _write(app, f"> {entry.content}")
+            elif entry.kind == "narration_final":
+                _write(app, entry.content)
+            else:
+                _write(app, f"[{entry.content}]")
 
 
 @dataclass(frozen=True)
