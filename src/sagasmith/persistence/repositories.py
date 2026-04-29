@@ -12,10 +12,12 @@ from sagasmith.schemas.persistence import (
     AgentSkillLogRecord,
     CheckpointRef,
     CostLogRecord,
+    RetconAuditRecord,
     SafetyEventRecord,
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
+    VaultWriteAuditRecord,
 )
 from sagasmith.schemas.provider import ProviderLogRecord
 
@@ -58,6 +60,41 @@ class TranscriptRepository:
              LIMIT ?
             """,
             (limit,),
+        ).fetchall()
+        return [
+            TranscriptEntry(
+                turn_id=row[0],
+                kind=row[1],
+                content=row[2],
+                sequence=row[3],
+                created_at=row[4],
+            )
+            for row in reversed(rows)
+        ]
+
+    def list_canonical_for_campaign(
+        self,
+        campaign_id: str,
+        *,
+        limit: int = 8,
+        include_retconned: bool = False,
+    ) -> list[TranscriptEntry]:
+        """Return recent campaign transcript rows, excluding retconned turns by default."""
+
+        if limit <= 0:
+            return []
+        status_filter = "" if include_retconned else "AND tr.status != 'retconned'"
+        rows = self.conn.execute(
+            f"""
+            SELECT te.turn_id, te.kind, te.content, te.sequence, te.created_at
+              FROM transcript_entries AS te
+              JOIN turn_records AS tr ON tr.turn_id = te.turn_id
+             WHERE tr.campaign_id = ?
+               {status_filter}
+             ORDER BY tr.completed_at DESC, te.sequence DESC
+             LIMIT ?
+            """,
+            (campaign_id, limit),
         ).fetchall()
         return [
             TranscriptEntry(
@@ -321,6 +358,18 @@ class CheckpointRefRepository:
 class TurnRecordRepository:
     conn: sqlite3.Connection
 
+    def _row_to_record(self, row: sqlite3.Row | tuple[Any, ...]) -> TurnRecord:
+        return TurnRecord(
+            turn_id=row[0],
+            campaign_id=row[1],
+            session_id=row[2],
+            status=row[3],
+            started_at=row[4],
+            completed_at=row[5],
+            schema_version=row[6],
+            sync_warning=row[7],
+        )
+
     def upsert(self, record: TurnRecord) -> str:
         self.conn.execute(
             """
@@ -353,16 +402,165 @@ class TurnRecordRepository:
         ).fetchone()
         if row is None:
             return None
-        return TurnRecord(
-            turn_id=row[0],
-            campaign_id=row[1],
-            session_id=row[2],
-            status=row[3],
-            started_at=row[4],
-            completed_at=row[5],
-            schema_version=row[6],
-            sync_warning=row[7],
+        return self._row_to_record(row)
+
+    def list_recent_completed(self, campaign_id: str, *, limit: int = 5) -> list[TurnRecord]:
+        """Return recent completed, non-retconned turns newest first."""
+
+        if limit <= 0:
+            return []
+        rows = self.conn.execute(
+            """
+            SELECT turn_id, campaign_id, session_id, status, started_at, completed_at,
+                   schema_version, sync_warning
+              FROM turn_records
+             WHERE campaign_id = ?
+               AND status = 'complete'
+             ORDER BY completed_at DESC
+             LIMIT ?
+            """,
+            (campaign_id, limit),
+        ).fetchall()
+        return [self._row_to_record(row) for row in rows]
+
+    def list_affected_suffix(self, campaign_id: str, selected_turn_id: str) -> list[TurnRecord]:
+        """Return selected completed turn and later completed canonical turns."""
+
+        selected = self.get(selected_turn_id)
+        if selected is None or selected.campaign_id != campaign_id or selected.status != "complete":
+            return []
+        rows = self.conn.execute(
+            """
+            SELECT turn_id, campaign_id, session_id, status, started_at, completed_at,
+                   schema_version, sync_warning
+              FROM turn_records
+             WHERE campaign_id = ?
+               AND status = 'complete'
+               AND completed_at >= ?
+             ORDER BY completed_at ASC
+            """,
+            (campaign_id, selected.completed_at),
+        ).fetchall()
+        return [self._row_to_record(row) for row in rows]
+
+    def mark_retconned(self, turn_ids: list[str]) -> None:
+        """Mark existing turns retconned while preserving their raw rows."""
+
+        if not turn_ids:
+            return
+        placeholders = ", ".join("?" for _ in turn_ids)
+        self.conn.execute(
+            f"UPDATE turn_records SET status = 'retconned' WHERE turn_id IN ({placeholders})",
+            tuple(turn_ids),
         )
+
+
+@dataclass(frozen=True)
+class RetconAuditRepository:
+    conn: sqlite3.Connection
+
+    def append(self, record: RetconAuditRecord) -> str:
+        self.conn.execute(
+            """
+            INSERT INTO retcon_audit (
+                retcon_id, campaign_id, selected_turn_id, affected_turn_ids_json,
+                prior_checkpoint_id, confirmation_token, reason, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                record.retcon_id,
+                record.campaign_id,
+                record.selected_turn_id,
+                json.dumps(record.affected_turn_ids),
+                record.prior_checkpoint_id,
+                record.confirmation_token,
+                record.reason,
+                record.created_at,
+            ),
+        )
+        return record.retcon_id
+
+    def get(self, retcon_id: str) -> RetconAuditRecord | None:
+        row = self.conn.execute(
+            """
+            SELECT retcon_id, campaign_id, selected_turn_id, affected_turn_ids_json,
+                   prior_checkpoint_id, confirmation_token, reason, created_at
+              FROM retcon_audit
+             WHERE retcon_id = ?
+            """,
+            (retcon_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return RetconAuditRecord(
+            retcon_id=row[0],
+            campaign_id=row[1],
+            selected_turn_id=row[2],
+            affected_turn_ids=json.loads(row[3]),
+            prior_checkpoint_id=row[4],
+            confirmation_token=row[5],
+            reason=row[6],
+            created_at=row[7],
+        )
+
+
+@dataclass(frozen=True)
+class VaultWriteAuditRepository:
+    conn: sqlite3.Connection
+
+    def append(self, record: VaultWriteAuditRecord) -> int:
+        cursor = self.conn.execute(
+            """
+            INSERT INTO vault_write_audit (turn_id, vault_path, operation, recorded_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (record.turn_id, record.vault_path, record.operation, record.recorded_at),
+        )
+        assert cursor.lastrowid is not None
+        return cursor.lastrowid
+
+    def list_for_turn(self, turn_id: str) -> list[VaultWriteAuditRecord]:
+        rows = self.conn.execute(
+            """
+            SELECT turn_id, vault_path, operation, recorded_at
+              FROM vault_write_audit
+             WHERE turn_id = ?
+             ORDER BY id
+            """,
+            (turn_id,),
+        ).fetchall()
+        return [
+            VaultWriteAuditRecord(
+                turn_id=row[0],
+                vault_path=row[1],
+                operation=row[2],
+                recorded_at=row[3],
+            )
+            for row in rows
+        ]
+
+    def list_for_turns(self, turn_ids: list[str]) -> list[VaultWriteAuditRecord]:
+        if not turn_ids:
+            return []
+        placeholders = ", ".join("?" for _ in turn_ids)
+        rows = self.conn.execute(
+            f"""
+            SELECT turn_id, vault_path, operation, recorded_at
+              FROM vault_write_audit
+             WHERE turn_id IN ({placeholders})
+             ORDER BY id
+            """,
+            tuple(turn_ids),
+        ).fetchall()
+        return [
+            VaultWriteAuditRecord(
+                turn_id=row[0],
+                vault_path=row[1],
+                operation=row[2],
+                recorded_at=row[3],
+            )
+            for row in rows
+        ]
 
 
 @dataclass(frozen=True)

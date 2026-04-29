@@ -5,6 +5,8 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
+from sagasmith.persistence.repositories import TranscriptRepository
+
 
 @dataclass(frozen=True)
 class TranscriptContextEntry:
@@ -37,29 +39,19 @@ def get_recent_transcript_context(
     if conn is None or limit <= 0:
         return []
     try:
-        rows = conn.execute(
-            """
-            SELECT te.turn_id, te.kind, te.content, te.sequence
-            FROM transcript_entries AS te
-            JOIN turn_records AS tr ON tr.turn_id = te.turn_id
-            WHERE tr.campaign_id = ?
-            ORDER BY tr.completed_at DESC, te.sequence DESC
-            LIMIT ?
-            """,
-            (campaign_id, limit),
-        ).fetchall()
+        records = TranscriptRepository(conn).list_canonical_for_campaign(campaign_id, limit=limit)
     except sqlite3.Error:
         return []
     entries = [
         TranscriptContextEntry(
-            turn_id=row[0],
-            kind=row[1],
-            content=row[2],
-            sequence=row[3],
+            turn_id=record.turn_id,
+            kind=record.kind,
+            content=record.content,
+            sequence=record.sequence,
         )
-        for row in rows
+        for record in records
     ]
-    return list(reversed(entries))
+    return entries
 
 
 def format_transcript_context(entries: list[TranscriptContextEntry]) -> list[str]:
