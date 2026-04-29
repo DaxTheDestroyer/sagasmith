@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -18,6 +19,10 @@ from sagasmith.persistence.repositories import (
     VaultWriteAuditRepository,
 )
 from sagasmith.persistence.retcon import RetconBlockedError, RetconService
+from sagasmith.graph.runtime import GraphRuntime
+from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import assemble_memory_packet
+from sagasmith.memory.fts5 import FTS5Index
+from sagasmith.memory.graph import get_vault_graph, reset_vault_graph_cache
 from sagasmith.schemas.mechanics import RollResult
 from sagasmith.schemas.persistence import CheckpointRef, TranscriptEntry, TurnRecord, VaultWriteAuditRecord
 
@@ -179,6 +184,94 @@ class _VaultSpy:
     master_path: Path
     player_vault_root: Path
     synced: bool = False
+    rebuild_calls: int = 0
 
     def sync(self) -> None:
         self.synced = True
+
+    def rebuild_indices(self, conn: object | None = None) -> dict[str, int]:
+        self.rebuild_calls += 1
+        return {"graph_pages": 0, "fts5_pages": FTS5Index(conn).rebuild_all(self.master_path) if isinstance(conn, sqlite3.Connection) else 0}
+
+
+def _make_runtime(conn: sqlite3.Connection, vault_service: _VaultSpy) -> GraphRuntime:
+    runtime = GraphRuntime(
+        graph=SimpleNamespace(),
+        db_conn=conn,
+        campaign_id="cmp-retcon",
+        bootstrap=SimpleNamespace(services=SimpleNamespace(vault_service=vault_service)),
+    )
+    runtime._rewind_to_checkpoint = lambda checkpoint_id: vault_service.player_vault_root.joinpath("rewound.txt").write_text(checkpoint_id, encoding="utf-8")  # type: ignore[method-assign]
+    return runtime
+
+
+def test_confirm_with_wrong_token_blocks_and_makes_no_status_changes() -> None:
+    conn = _make_conn()
+    _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
+    _seed_complete_turn(conn, "turn-2", minute=2, summary="Selected canon.", checkpoint_id="cp-2")
+
+    with pytest.raises(RetconBlockedError):
+        RetconService(conn, campaign_id="cmp-retcon").confirm("turn-2", "RETCON wrong")
+
+    assert TurnRecordRepository(conn).get("turn-2").status == "complete"  # type: ignore[union-attr]
+    assert conn.execute("SELECT COUNT(*) FROM retcon_audit").fetchone()[0] == 0
+
+
+def test_runtime_confirm_retcon_rewinds_rebuilds_syncs_and_audits(tmp_path: Path) -> None:
+    conn = _make_conn()
+    master = tmp_path / "master"
+    master.mkdir()
+    (master / "canon.md").write_text(
+        "---\nid: lore_canon\ntype: lore\nname: Canon\nvisibility: player_known\n---\n\nremaining canon",
+        encoding="utf-8",
+    )
+    player = tmp_path / "player"
+    player.mkdir()
+    vault = _VaultSpy(master_path=master, player_vault_root=player)
+    _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
+    _seed_complete_turn(conn, "turn-2", minute=2, summary="Selected removed canon.", checkpoint_id="cp-2", vault_path="canon.md")
+    _seed_complete_turn(conn, "turn-3", minute=3, summary="Later removed canon.", checkpoint_id="cp-3")
+    runtime = _make_runtime(conn, vault)
+
+    result = runtime.confirm_retcon("turn-2", "RETCON turn-2")
+
+    assert result.message.startswith("Retcon complete")
+    assert player.joinpath("rewound.txt").read_text(encoding="utf-8") == "cp-1"
+    assert vault.rebuild_calls == 1
+    assert vault.synced is True
+    assert TurnRecordRepository(conn).get("turn-2").status == "retconned"  # type: ignore[union-attr]
+    assert TurnRecordRepository(conn).get("turn-3").status == "retconned"  # type: ignore[union-attr]
+    assert RetconAuditRepository(conn).get(result.audit_id) is not None
+    assert FTS5Index(conn).query("remaining")
+
+
+def test_retconned_transcript_content_absent_from_canonical_context_and_memory_packet() -> None:
+    conn = _make_conn()
+    _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
+    _seed_complete_turn(conn, "turn-2", minute=2, summary="Forbidden removed canon detail.", checkpoint_id="cp-2")
+    RetconService(conn, campaign_id="cmp-retcon").confirm("turn-2", "RETCON turn-2")
+
+    canonical = TranscriptRepository(conn).list_canonical_for_campaign("cmp-retcon", limit=8)
+    packet = assemble_memory_packet({"campaign_id": "cmp-retcon", "turn_id": "new", "session_state": {}}, conn=conn)
+
+    assert all("Forbidden removed canon detail" not in entry.content for entry in canonical)
+    assert all("Forbidden removed canon detail" not in turn for turn in packet.recent_turns)
+
+
+def test_runtime_confirm_retcon_returns_without_session_exit(tmp_path: Path) -> None:
+    conn = _make_conn()
+    master = tmp_path / "master"
+    master.mkdir()
+    player = tmp_path / "player"
+    player.mkdir()
+    vault = _VaultSpy(master_path=master, player_vault_root=player)
+    _seed_complete_turn(conn, "turn-1", minute=1, summary="Safe prior canon.", checkpoint_id="cp-1")
+    _seed_complete_turn(conn, "turn-2", minute=2, summary="Selected canon.", checkpoint_id="cp-2")
+
+    result = _make_runtime(conn, vault).confirm_retcon("turn-2", "RETCON turn-2")
+
+    assert result.selected_turn_id == "turn-2"
+    assert "excluded from canon" in result.message
+    assert not result.message.lower().startswith("exit")
+    reset_vault_graph_cache()
+    assert get_vault_graph().get_all_node_ids() == []
