@@ -104,6 +104,8 @@ def make_saga_state(**overrides: object) -> dict[str, object]:
         "pending_conflicts": [],
         "safety_events": [],
         "cost_state": make_cost_state(),
+        "vault_master_path": "/tmp/vault/master",
+        "vault_player_path": "/tmp/vault/player",
     }
     data.update(overrides)
     return data

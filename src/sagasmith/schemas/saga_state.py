@@ -51,3 +51,6 @@ class SagaState(SchemaModel):
     safety_events: list[SafetyEvent] = Field(default_factory=list[SafetyEvent])
     cost_state: CostState
     last_interrupt: dict[str, Any] | None = None
+    vault_master_path: str
+    vault_player_path: str
+    rolling_summary: str | None = None

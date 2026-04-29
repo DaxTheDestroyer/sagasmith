@@ -25,6 +25,7 @@ from sagasmith.tui.commands.recovery import DiscardCommand, RetryCommand
 from sagasmith.tui.commands.registry import CommandRegistry
 from sagasmith.tui.commands.safety import LineCommand, PauseCommand
 from sagasmith.tui.commands.settings import SettingsCommand
+from sagasmith.vault import VaultService
 
 SCROLLBACK_LIMIT = 50  # last N transcript entries loaded on resume (TUI-03)
 
@@ -68,11 +69,15 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
             campaign_seed=manifest.campaign_id,
             session_seed="session_001",
         )
+        vault_service = VaultService(
+            campaign_id=manifest.campaign_id, player_vault_root=paths.player_vault
+        )
         bootstrap = GraphBootstrap.from_services(
             dice=dice_service,
             cost=app.cost_governor,
             safety=app.safety_events,
             llm=None,
+            vault_service=vault_service,
         )
         app.graph_runtime = build_persistent_graph(
             bootstrap, service_conn, campaign_id=manifest.campaign_id

@@ -38,6 +38,9 @@ class SagaGraphState(TypedDict):
     safety_events: list[object]
     cost_state: object
     last_interrupt: dict[str, Any] | None
+    vault_master_path: str
+    vault_player_path: str
+    rolling_summary: str | None
 
 
 # Import-time field-drift guard

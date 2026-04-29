@@ -25,6 +25,7 @@ class AgentServices:
     llm: object | None = None
     skill_store: SkillStore | None = None
     transcript_conn: sqlite3.Connection | None = None
+    vault_service: object | None = None
     # test-only hook: if non-None, nodes append their name to this list on entry.
     # Used by graph tests to verify execution order without polluting production code.
     _call_recorder: list[str] | None = None
@@ -51,6 +52,7 @@ class GraphBootstrap:
         llm: object | None = None,
         skill_store: SkillStore | None = None,
         transcript_conn: sqlite3.Connection | None = None,
+        vault_service: object | None = None,
         _call_recorder: list[str] | None = None,
     ) -> GraphBootstrap:
         # Lazy default: only build a SkillStore when None is explicitly passed
@@ -65,6 +67,7 @@ class GraphBootstrap:
             llm=llm,
             skill_store=skill_store,
             transcript_conn=transcript_conn,
+            vault_service=vault_service,
             _call_recorder=_call_recorder,
         )
         from sagasmith.agents.archivist.node import archivist_node

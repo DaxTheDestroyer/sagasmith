@@ -24,6 +24,7 @@ class SessionState(SchemaModel):
     turn_count: int = Field(ge=0)
     transcript_cursor: str | None
     last_checkpoint_id: str | None
+    session_number: int = Field(ge=1, default=1)
 
 
 class SceneBrief(SchemaModel):
