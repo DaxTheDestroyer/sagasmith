@@ -62,6 +62,10 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
         session_budget = triple.player_profile.budget.per_session_usd
     app.cost_governor = CostGovernor(session_budget_usd=session_budget)
 
+    next_session_number = _next_session_number(service_conn, manifest.campaign_id)
+    app.current_session_id = f"session_{next_session_number:03d}"
+    app.current_session_number = next_session_number
+
     # Phase 4: wire GraphRuntime into the TUI app.
     if build_graph_runtime:
         from sagasmith.graph.bootstrap import GraphBootstrap
@@ -70,7 +74,7 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
 
         dice_service = DiceService(
             campaign_seed=manifest.campaign_id,
-            session_seed="session_001",
+            session_seed=app.current_session_id,
         )
         vault_service = VaultService(
             campaign_id=manifest.campaign_id, player_vault_root=paths.player_vault
@@ -111,6 +115,22 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
     # Load recent transcript for scrollback (TUI-03).
     app.initial_scrollback = _load_scrollback(paths.db)
     return app
+
+
+def _next_session_number(conn, campaign_id: str) -> int:  # type: ignore[no-untyped-def]
+    """Return next numeric session number for a resumed campaign."""
+    rows = conn.execute(
+        "SELECT DISTINCT session_id FROM turn_records WHERE campaign_id = ?",
+        (campaign_id,),
+    ).fetchall()
+    max_num = 0
+    for (session_id,) in rows:
+        if not isinstance(session_id, str):
+            continue
+        prefix, sep, suffix = session_id.rpartition("_")
+        if sep and prefix == "session" and suffix.isdigit():
+            max_num = max(max_num, int(suffix))
+    return max_num + 1 if max_num else 1
 
 
 def _load_scrollback(db_path: Path) -> list[str]:

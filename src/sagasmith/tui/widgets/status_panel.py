@@ -57,6 +57,8 @@ def format_status_snapshot(snapshot: StatusSnapshot) -> str:
         *[f"  {roll}" for roll in (snapshot.last_rolls or ("—",))[:3]],
         *format_combat_status(snapshot.combat_state),
     ]
+    if snapshot.vault_sync_warning:
+        lines.extend(["", f"VAULT SYNC WARNING: {snapshot.vault_sync_warning}"])
     return "\n".join(lines)
 
 

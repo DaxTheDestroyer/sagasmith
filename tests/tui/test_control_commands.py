@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import ClassVar, Literal
 
 import pytest
 
@@ -61,7 +62,7 @@ class _FakeGraph:
 
 class _FakeGraphRuntime:
     graph = _FakeGraph()
-    thread_config: dict[str, object] = {}
+    thread_config: ClassVar[dict[str, object]] = {}
 
 
 @pytest.mark.asyncio
@@ -104,14 +105,13 @@ async def test_recap_command_renders_summary_and_recent_transcript(tmp_path: Pat
     app.bind_service_connection(conn)
     app.graph_runtime = _FakeGraphRuntime()  # type: ignore[assignment]
     repo = TranscriptRepository(conn)
-    for index, (kind, content) in enumerate(
-        [
+    entries: list[tuple[Literal["player_input", "narration_final", "system_note"], str]] = [
             ("player_input", "I look for Mara."),
             ("narration_final", "You find tracks by the dock."),
             ("player_input", "I follow them."),
             ("narration_final", "Mara steps from the fog."),
-        ]
-    ):
+    ]
+    for index, (kind, content) in enumerate(entries):
         repo.append(
             TranscriptEntry(
                 turn_id=f"turn_{index:06d}",

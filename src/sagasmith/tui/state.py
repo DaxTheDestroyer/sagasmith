@@ -20,6 +20,7 @@ class StatusSnapshot:
     clock_hhmm: str | None = None  # "HH:MM"
     last_rolls: tuple[str, ...] = ()  # up to 3 short strings
     combat_state: CombatState | None = None
+    vault_sync_warning: str | None = None
 
     def format_hp(self) -> str:
         if self.hp_current is None or self.hp_max is None:
@@ -38,3 +39,4 @@ class TUIState:
 
     status: StatusSnapshot = field(default_factory=StatusSnapshot)
     scrollback: list[str] = field(default_factory=lambda: [])  # rendered transcript lines
+    vault_sync_warning: str | None = None

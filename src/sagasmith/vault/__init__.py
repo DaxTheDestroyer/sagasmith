@@ -8,8 +8,8 @@ top-level service object injected into agent services.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .page import (
     NPC_PAGE_TYPES,

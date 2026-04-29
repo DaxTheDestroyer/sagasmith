@@ -12,9 +12,11 @@ from sagasmith.cli.onboard_cmd import onboard_command
 from sagasmith.cli.play_cmd import play_command
 from sagasmith.cli.schema_cmd import schema_app
 from sagasmith.cli.smoke_cmd import smoke
+from sagasmith.cli.vault_cmd import vault_app
 
 app = typer.Typer(help="SagaSmith — local-first AI-run solo TTRPG.", no_args_is_help=True)
 app.add_typer(schema_app, name="schema")
+app.add_typer(vault_app, name="vault")
 app.command("smoke")(smoke)
 app.command(name="init")(init_command)
 app.command(name="onboard")(onboard_command)

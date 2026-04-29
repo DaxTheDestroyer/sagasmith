@@ -12,7 +12,7 @@ from textual.message import Message
 
 from sagasmith.app.paths import CampaignPaths
 from sagasmith.schemas.campaign import CampaignManifest
-from sagasmith.tui.state import TUIState
+from sagasmith.tui.state import StatusSnapshot, TUIState
 from sagasmith.tui.widgets.input_line import InputLine
 from sagasmith.tui.widgets.narration import NarrationArea
 from sagasmith.tui.widgets.safety_bar import SafetyBar
@@ -75,6 +75,7 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         # Turn/session tracking (set by runtime or tests before input).
         self.current_turn_id: str | None = None
         self.current_session_id: str = "session_001"
+        self.current_session_number: int = 1
         self._last_synced_graph_turn_id: str | None = None
         self._synced_graph_narration_count = 0
         self._synced_graph_check_result_count = 0
@@ -138,6 +139,7 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             state = self._build_play_state(event.text, current_values or None)
             self.graph_runtime.invoke_turn(state)
             self._sync_mechanics_from_graph()
+            self._sync_vault_warning_from_latest_turn()
 
     def _build_play_state(
         self,
@@ -173,6 +175,7 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
                 "turn_count": 0,
                 "transcript_cursor": None,
                 "last_checkpoint_id": None,
+                "session_number": self.current_session_number,
             },
             "combat_state": existing_combat,
             "pending_player_input": player_input,
@@ -299,6 +302,38 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             hp_max=hp_max,
             last_rolls=last_rolls,
             combat_state=combat_state,
+            vault_sync_warning=self.state.vault_sync_warning,
+        )
+        with suppress(Exception):
+            self.query_one(StatusPanel).snapshot = self.state.status
+
+    def _sync_vault_warning_from_latest_turn(self) -> None:
+        """Surface latest persistent vault sync warning in the status panel."""
+        if self._service_conn is None:
+            return
+        row = self._service_conn.execute(
+            """
+            SELECT sync_warning
+              FROM turn_records
+             WHERE campaign_id = ? AND session_id = ?
+             ORDER BY completed_at DESC, turn_id DESC
+             LIMIT 1
+            """,
+            (self.manifest.campaign_id, self.current_session_id),
+        ).fetchone()
+        warning = row[0] if row and isinstance(row[0], str) and row[0].strip() else None
+        self.state.vault_sync_warning = warning
+        self.state.status = StatusSnapshot(
+            hp_current=self.state.status.hp_current,
+            hp_max=self.state.status.hp_max,
+            conditions=self.state.status.conditions,
+            active_quest=self.state.status.active_quest,
+            location=self.state.status.location,
+            clock_day=self.state.status.clock_day,
+            clock_hhmm=self.state.status.clock_hhmm,
+            last_rolls=self.state.status.last_rolls,
+            combat_state=self.state.status.combat_state,
+            vault_sync_warning=warning,
         )
         with suppress(Exception):
             self.query_one(StatusPanel).snapshot = self.state.status

@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
+from sagasmith.persistence.repositories import TranscriptRepository
 from sagasmith.rules.first_slice import make_first_slice_character
 from sagasmith.schemas.mechanics import CharacterSheet
-from sagasmith.persistence.repositories import TranscriptRepository
 
 if TYPE_CHECKING:
     from sagasmith.tui.app import SagaSmithApp

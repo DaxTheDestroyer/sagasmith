@@ -56,9 +56,28 @@ def _print_status_line(campaign: Path) -> None:
         row = conn.execute(
             "SELECT turn_id FROM turn_records WHERE status='complete' ORDER BY completed_at DESC LIMIT 1"
         ).fetchone()
+        session_row = conn.execute(
+            """
+            SELECT session_id
+              FROM turn_records
+             WHERE campaign_id = ?
+             ORDER BY completed_at DESC, turn_id DESC
+             LIMIT 1
+            """,
+            (manifest.campaign_id,),
+        ).fetchone()
     finally:
         conn.close()
 
     last_turn = row[0] if row else "none"
-    # TODO(Phase 7): session_id will come from a sessions table; MVP keeps session_id=1.
-    typer.echo(f"Campaign: {manifest.campaign_name} \u00b7 Session: 1 \u00b7 Last turn: {last_turn}")
+    session_number = _next_session_number(session_row[0] if session_row else None)
+    typer.echo(f"Campaign: {manifest.campaign_name} \u00b7 Session: {session_number} \u00b7 Last turn: {last_turn}")
+
+
+def _next_session_number(last_session_id: object) -> int:
+    if not isinstance(last_session_id, str):
+        return 1
+    prefix, sep, suffix = last_session_id.rpartition("_")
+    if sep and prefix == "session" and suffix.isdigit():
+        return int(suffix) + 1
+    return 1
