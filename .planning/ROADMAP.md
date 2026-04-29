@@ -156,9 +156,9 @@ Plans:
   5. User can run vault validation, player-vault sync, and derived-index rebuild commands when repair warnings or corruption are detected.
 **Plans**: 6 plans
 Plans:
-- [ ] 07-01-PLAN.md — Vault foundation, atomic writes, entity resolution (VAULT-01, VAULT-02, VAULT-06, PERS-03, AI-11)
-- [ ] 07-02-PLAN.md — Vault-page-upsert & turn-close persistence (VAULT-01, VAULT-02, VAULT-03, VAULT-04, VAULT-06, PERS-03, PERS-05, PERS-06, D-09)
-- [ ] 07-03-PLAN.md — Full memory-packet assembly with FTS5 & NetworkX (VAULT-07, AI-11, PERS-06)
+- [x] 07-01-PLAN.md — Vault foundation, atomic writes, entity resolution (VAULT-01, VAULT-02, VAULT-06, PERS-03, AI-11)
+- [x] 07-02-PLAN.md — Vault-page-upsert & turn-close persistence (VAULT-01, VAULT-02, VAULT-03, VAULT-04, VAULT-06, PERS-03, PERS-05, PERS-06, D-09)
+- [x] 07-03-PLAN.md — Full memory-packet assembly with FTS5 & NetworkX (VAULT-07, AI-11, PERS-06)
 - [ ] 07-04-PLAN.md — Additional skills: visibility-promotion, rolling-summary-update, session-page-authoring, canon-conflict stub (VAULT-03, VAULT-05, VAULT-08, AI-11)
 - [ ] 07-05-PLAN.md — Player-vault sync, CLI repair commands, /recap, quit/resume integration (CLI-04, VAULT-03, VAULT-04, VAULT-05, VAULT-09, VAULT-10, TUI-08, PERS-05)
 - [ ] 07-06-PLAN.md — QA tests and release gate (QA-06, QA-08, QA-09)
@@ -204,5 +204,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 4. Graph Runtime and Agent Skills | 5/5 | Complete | 2026-04-27 |
 | 5. Rules-First PF2e Vertical Slice | 5/5 | Complete | 2026-04-28 |
 | 6. AI GM Story Loop | 4/8 | In progress | - |
-| 7. Memory, Vault, and Resume Differentiator | 0/TBD | Not started | - |
+| 7. Memory, Vault, and Resume Differentiator | 3/6 | In progress | - |
 | 8. Retcon, Repair, and Release Hardening | 0/TBD | Not started | - |

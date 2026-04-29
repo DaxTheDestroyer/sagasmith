@@ -101,7 +101,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AI-08**: Orator streams at least one complete beat of narration for each completed turn.
 - [ ] **AI-09**: Orator respects configured dice UX modes: auto, reveal, and hidden.
 - [ ] **AI-10**: Orator does not contradict resolved mechanical outcomes in generated narration.
-- [ ] **AI-11**: Archivist assembles a token-bounded `MemoryPacket` for Oracle and Orator before scene planning or narration.
+- [x] **AI-11**: Archivist assembles a token-bounded `MemoryPacket` for Oracle and Orator before scene planning or narration.
 - [x] **AI-12**: System records which agent nodes and skills ran during a turn for audit and debugging.
 
 ### Agent Skills
@@ -116,16 +116,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PERS-01**: System stores profiles, settings, transcripts, roll logs, turn records, checkpoints, cost logs, and applied state deltas in SQLite.
 - [x] **PERS-02**: System performs turn-close SQLite writes in a transaction before writing vault files or derived indices.
-- [ ] **PERS-03**: System writes master-vault pages with atomic file replacement and validates YAML frontmatter after write.
+- [x] **PERS-03**: System writes master-vault pages with atomic file replacement and validates YAML frontmatter after write.
 - [x] **PERS-04**: System marks a turn complete only after turn-close persistence succeeds.
 - [ ] **PERS-05**: System surfaces a repair warning when player-vault sync or derived-index updates fail after a completed turn.
 - [ ] **PERS-06**: System can rebuild derived indices from SQLite plus master vault after corruption or deletion.
-- [ ] **VAULT-01**: System creates a master vault in app data and a player vault in the campaign directory.
-- [ ] **VAULT-02**: System writes Obsidian-compatible markdown pages with YAML frontmatter and wikilinks for sessions, NPCs, locations, factions, items, quests, callbacks, lore, index, and log.
+- [x] **VAULT-01**: System creates a master vault in app data and a player vault in the campaign directory.
+- [x] **VAULT-02**: System writes Obsidian-compatible markdown pages with YAML frontmatter and wikilinks for sessions, NPCs, locations, factions, items, quests, callbacks, lore, index, and log.
 - [ ] **VAULT-03**: System enforces `gm_only`, `foreshadowed`, and `player_known` visibility states when projecting the player vault.
 - [ ] **VAULT-04**: System strips GM-only frontmatter fields and `<!-- gm: ... -->` blocks from player-vault projections.
 - [ ] **VAULT-05**: System generates or refreshes player-vault `index.md` and `log.md` after sync.
-- [ ] **VAULT-06**: System resolves incoming named entities by slug and aliases before creating a new vault page.
+- [x] **VAULT-06**: System resolves incoming named entities by slug and aliases before creating a new vault page.
 - [ ] **VAULT-07**: System can assemble memory from exact search, graph neighborhoods, callbacks, summaries, and semantic retrieval interfaces without exceeding the configured token cap.
 - [ ] **VAULT-08**: System detects canon conflicts and surfaces them rather than silently overwriting canonical facts.
 - [ ] **VAULT-09**: User can run `/recap` to receive a summary based on persisted transcript and canonical memory.
@@ -294,20 +294,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-03 | Phase 6 | Pending |
 | QA-05 | Phase 6 | Pending |
 | CLI-04 | Phase 7 | Pending |
-| PERS-03 | Phase 7 | Pending |
+| PERS-03 | Phase 7 | Complete |
 | PERS-05 | Phase 7 | Pending |
 | PERS-06 | Phase 7 | Pending |
-| VAULT-01 | Phase 7 | Pending |
-| VAULT-02 | Phase 7 | Pending |
+| VAULT-01 | Phase 7 | Complete |
+| VAULT-02 | Phase 7 | Complete |
 | VAULT-03 | Phase 7 | Pending |
 | VAULT-04 | Phase 7 | Pending |
 | VAULT-05 | Phase 7 | Pending |
-| VAULT-06 | Phase 7 | Pending |
+| VAULT-06 | Phase 7 | Complete |
 | VAULT-07 | Phase 7 | Pending |
 | VAULT-08 | Phase 7 | Pending |
 | VAULT-09 | Phase 7 | Pending |
 | VAULT-10 | Phase 7 | Pending |
-| AI-11 | Phase 7 | Pending |
+| AI-11 | Phase 7 | Complete |
 | TUI-08 | Phase 7 | Pending |
 | QA-06 | Phase 7 | Pending |
 | QA-01 | Phase 8 | Pending |
