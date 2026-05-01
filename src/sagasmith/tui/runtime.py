@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sagasmith.app.campaign import open_campaign
+from sagasmith.app.campaign_ref import open_campaign_ref
 
 # Phase 7: warm the NetworkX graph cache on startup
 from sagasmith.memory.graph import warm_vault_graph
@@ -46,7 +46,9 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
     apply. For Phase 3 scope this is acceptable; Phase 4 graph runtime will revisit
     connection management when checkpointing runs concurrently with UI.
     """
-    paths, manifest = open_campaign(campaign_root)
+    opened = open_campaign_ref(campaign_root)
+    paths = opened.paths
+    manifest = opened.manifest
     app = SagaSmithApp(paths=paths, manifest=manifest)
 
     # Long-lived connection for service bindings (TUI owns its lifetime).

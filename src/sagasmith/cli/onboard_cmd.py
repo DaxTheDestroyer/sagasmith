@@ -9,7 +9,7 @@ from typing import Annotated, Literal
 
 import typer
 
-from sagasmith.app.campaign import open_campaign
+from sagasmith.app.campaign_ref import open_campaign_ref
 from sagasmith.onboarding.store import OnboardingStore, OnboardingTriple
 from sagasmith.onboarding.wizard import OnboardingWizard
 from sagasmith.persistence.db import open_campaign_db
@@ -128,10 +128,12 @@ def onboard_command(
 ) -> None:
     """Complete or re-run onboarding for a local campaign."""
     try:
-        paths, manifest = open_campaign(campaign)
+        opened = open_campaign_ref(campaign)
     except ValueError as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from None
+    paths = opened.paths
+    manifest = opened.manifest
 
     answers: list[dict[str, object]] = [
         {"genre": _csv(_required_str(genre, option="--genre", prompt="Genres"))},

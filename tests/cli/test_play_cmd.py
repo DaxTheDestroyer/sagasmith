@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from sagasmith.app.campaign import init_campaign
@@ -21,6 +22,19 @@ def test_play_on_fresh_campaign_prints_status_line(tmp_path: Path) -> None:
     result = runner.invoke(app, ["play", "--campaign", str(root), "--headless-status"])
     assert result.exit_code == 0, result.output
     assert re.search(r"Campaign: Rivermouth · Session: 1 · Last turn: none", result.output)
+
+
+def test_play_accepts_campaign_display_name_from_current_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "test-the-brave1"
+    init_campaign(name="Test the Brave1", root=root, provider="fake")
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(app, ["play", "--campaign", "Test the Brave1", "--headless-status"])
+
+    assert result.exit_code == 0, result.output
+    assert "Campaign: Test the Brave1" in result.output
 
 
 def test_play_on_missing_campaign_exits_2(tmp_path: Path) -> None:

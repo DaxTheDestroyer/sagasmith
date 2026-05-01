@@ -8,7 +8,7 @@ from typing import Annotated
 import pydantic
 import typer
 
-from sagasmith.app.campaign import open_campaign
+from sagasmith.app.campaign_ref import open_campaign_ref
 from sagasmith.app.config import SettingsRepository
 from sagasmith.persistence.db import open_campaign_db
 from sagasmith.schemas.campaign import ProviderSettings
@@ -52,10 +52,12 @@ def configure_command(
 ) -> None:
     """Update provider/model settings for an existing campaign. Merges with current values."""
     try:
-        _paths, manifest = open_campaign(campaign)
+        opened = open_campaign_ref(campaign)
     except ValueError as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from None
+    _paths = opened.paths
+    manifest = opened.manifest
 
     parsed_ref = _parse_api_key_ref(api_key_ref)
 

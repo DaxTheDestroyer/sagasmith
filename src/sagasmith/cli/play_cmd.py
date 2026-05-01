@@ -42,14 +42,16 @@ def play_command(
 
 def _print_status_line(campaign: Path) -> None:
     """Print the resume status line and exit. Preserves Plan 03-01 test contract."""
-    from sagasmith.app.campaign import open_campaign
+    from sagasmith.app.campaign_ref import open_campaign_ref
     from sagasmith.persistence.db import open_campaign_db
 
     try:
-        paths, manifest = open_campaign(campaign)
+        opened = open_campaign_ref(campaign)
     except ValueError as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from None
+    paths = opened.paths
+    manifest = opened.manifest
 
     conn = open_campaign_db(paths.db, read_only=True)
     try:

@@ -7,7 +7,7 @@ from typing import Annotated
 
 import typer
 
-from sagasmith.app.campaign import open_campaign
+from sagasmith.app.campaign_ref import open_campaign_ref
 from sagasmith.persistence.db import open_campaign_db
 from sagasmith.vault import VaultService, VaultSyncError
 
@@ -20,7 +20,9 @@ def rebuild_command(
 ) -> None:
     """Rebuild derived vault indices from the master vault."""
     try:
-        paths, manifest = open_campaign(campaign)
+        opened = open_campaign_ref(campaign)
+        paths = opened.paths
+        manifest = opened.manifest
         conn = open_campaign_db(paths.db, read_only=False)
         try:
             service = VaultService(
@@ -42,7 +44,9 @@ def sync_command(
 ) -> None:
     """Force a spoiler-safe player-vault projection from the master vault."""
     try:
-        paths, manifest = open_campaign(campaign)
+        opened = open_campaign_ref(campaign)
+        paths = opened.paths
+        manifest = opened.manifest
         service = VaultService(
             campaign_id=manifest.campaign_id,
             player_vault_root=paths.player_vault,

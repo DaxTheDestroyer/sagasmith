@@ -41,14 +41,15 @@ def demo(
     mode: Annotated[str, typer.Option("--mode")] = "fast",
 ) -> None:
     """Run the no-paid-call smoke suite against a campaign. CLI-05."""
-    from sagasmith.app.campaign import open_campaign
+    from sagasmith.app.campaign_ref import open_campaign_ref
     from sagasmith.evals.harness import run_smoke
 
     try:
-        _paths, manifest = open_campaign(campaign)
+        opened = open_campaign_ref(campaign)
     except ValueError as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=2) from None
+    manifest = opened.manifest
 
     typer.echo(f"Demo mode: campaign={manifest.campaign_name} provider=fake")
     result = run_smoke()
