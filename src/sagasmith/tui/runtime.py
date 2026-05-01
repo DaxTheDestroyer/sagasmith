@@ -129,14 +129,11 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
 
 def _next_session_number(conn, campaign_id: str) -> int:  # type: ignore[no-untyped-def]
     """Return next numeric session number for a resumed campaign."""
-    rows = conn.execute(
-        "SELECT DISTINCT session_id FROM turn_records WHERE campaign_id = ?",
-        (campaign_id,),
-    ).fetchall()
+    from sagasmith.persistence.turn_history import CanonicalTurnHistory
+
+    session_ids = CanonicalTurnHistory(conn).session_ids_for_campaign(campaign_id)
     max_num = 0
-    for (session_id,) in rows:
-        if not isinstance(session_id, str):
-            continue
+    for session_id in session_ids:
         prefix, sep, suffix = session_id.rpartition("_")
         if sep and prefix == "session" and suffix.isdigit():
             max_num = max(max_num, int(suffix))
@@ -153,30 +150,20 @@ def _load_scrollback(db_path: Path, *, campaign_id: str) -> list[str]:
 
     Uses a read-only connection; closes it before returning.
     """
-    lines: list[str] = []
+    from sagasmith.persistence.turn_history import CanonicalTurnHistory
+
     conn = open_campaign_db(db_path, read_only=True)
     try:
-        rows = conn.execute(
-            """
-            SELECT te.kind, te.content
-              FROM transcript_entries AS te
-              JOIN turn_records AS tr ON tr.turn_id = te.turn_id
-             WHERE tr.campaign_id = ?
-               AND tr.status = 'complete'
-             ORDER BY tr.completed_at DESC, te.sequence DESC
-             LIMIT ?
-            """,
-            (campaign_id, SCROLLBACK_LIMIT),
-        ).fetchall()
+        entries = CanonicalTurnHistory(conn).scrollback(campaign_id, limit=SCROLLBACK_LIMIT)
     finally:
         conn.close()
-    # Rows are newest-first; reverse for chronological display.
-    for kind, content in reversed(rows):
-        if kind == "player_input":
-            lines.append(f"> {content}")
-        elif kind == "narration_final":
-            lines.append(content)
+    lines: list[str] = []
+    for entry in entries:
+        if entry.kind == "player_input":
+            lines.append(f"> {entry.content}")
+        elif entry.kind == "narration_final":
+            lines.append(entry.content)
         else:
             # T-03-18: unknown kinds render as system notes wrapped in [...]
-            lines.append(f"[{content}]")
+            lines.append(f"[{entry.content}]")
     return lines

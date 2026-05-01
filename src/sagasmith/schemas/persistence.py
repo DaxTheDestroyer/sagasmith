@@ -25,6 +25,21 @@ class CostLogRecord(SchemaModel):
     timestamp: str
 
 
+class TurnStatus:
+    """Named constants for ``turn_records.status`` values.
+
+    Use these instead of bare string literals so the canonical predicate
+    (``CANONICAL = "complete"``) is defined exactly once.
+    """
+
+    CANONICAL = "complete"
+    NEEDS_VAULT_REPAIR = "needs_vault_repair"
+    NARRATED = "narrated"
+    DISCARDED = "discarded"
+    RETRIED = "retried"
+    RETCONNED = "retconned"
+
+
 class TurnRecord(SchemaModel):
     """Completed-turn record written during turn close.
 

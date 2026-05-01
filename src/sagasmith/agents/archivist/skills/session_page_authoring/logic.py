@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
 
+from sagasmith.persistence.turn_history import CanonicalTurnHistory
 from sagasmith.vault import VaultPage, VaultService
 from sagasmith.vault.page import SessionFrontmatter
 
@@ -20,12 +21,14 @@ def author_session(
     db_conn: sqlite3.Connection,
     vault_service: VaultService,
     *,
+    history: CanonicalTurnHistory | None = None,
     date_in_game: str = "unknown",
 ) -> str:
     """Create or refresh ``sessions/session_NNN.md`` from completed turn records."""
 
     session_id = f"session_{session_number:03d}"
-    turns = _completed_turn_ids(db_conn, campaign_id=campaign_id, session_id=session_id)
+    _history = history if history is not None else CanonicalTurnHistory(db_conn)
+    turns = _history.session_turn_ids(campaign_id, session_id)
     transcript_rows = _transcript_rows(db_conn, turns)
     roll_rows = _roll_rows(db_conn, turns)
     linked_ids = _linked_ids(row[2] for row in transcript_rows)
@@ -52,20 +55,6 @@ def author_session(
     relative_path = Path("sessions") / f"{session_id}.md"
     vault_service.write_page(page, relative_path)
     return relative_path.as_posix()
-
-
-def _completed_turn_ids(
-    conn: sqlite3.Connection, *, campaign_id: str, session_id: str
-) -> list[str]:
-    rows = conn.execute(
-        """
-        SELECT turn_id FROM turn_records
-         WHERE campaign_id = ? AND session_id = ? AND status = 'complete'
-         ORDER BY completed_at, started_at, turn_id
-        """,
-        (campaign_id, session_id),
-    ).fetchall()
-    return [str(row[0]) for row in rows]
 
 
 def _transcript_rows(

@@ -255,7 +255,7 @@ def _mvp_play_simple_combat(context: _MvpSmokeContext) -> str:
 def _mvp_quit(context: _MvpSmokeContext) -> str:
     from sagasmith.persistence.db import open_campaign_db
     from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
-    from sagasmith.schemas.persistence import CheckpointRef, TranscriptEntry, TurnRecord
+    from sagasmith.schemas.persistence import CheckpointRef, TranscriptEntry, TurnRecord, TurnStatus
 
     campaign_id = _require_context_value(context.campaign_id, "campaign_id")
     db_path = _require_context_value(context.db_path, "db_path")
@@ -269,7 +269,7 @@ def _mvp_quit(context: _MvpSmokeContext) -> str:
                     turn_id="mvp_turn_000001",
                     campaign_id=campaign_id,
                     session_id="session_001",
-                    status="complete",
+                    status=TurnStatus.CANONICAL,
                     started_at=now,
                     completed_at=now,
                     schema_version=1,
@@ -560,6 +560,7 @@ def run_smoke() -> SmokeResult:
             StateDeltaRecord,
             TranscriptEntry,
             TurnRecord,
+            TurnStatus,
         )
         from sagasmith.schemas.provider import ProviderLogRecord
 
@@ -572,7 +573,7 @@ def run_smoke() -> SmokeResult:
                         turn_id="smoke_t1",
                         campaign_id="c1",
                         session_id="s1",
-                        status="complete",
+                        status=TurnStatus.CANONICAL,
                         started_at="2026-04-26T12:00:00Z",
                         completed_at="2026-04-26T12:00:00Z",
                         schema_version=1,
@@ -657,7 +658,7 @@ def run_smoke() -> SmokeResult:
                 turn = tr.get("smoke_t1")
                 ok = (
                     turn is not None
-                    and turn.status == "complete"
+                    and turn.status == TurnStatus.CANONICAL
                     and len(TranscriptRepository(conn).list_for_turn("smoke_t1")) == 1
                     and len(RollLogRepository(conn).list_for_turn("smoke_t1")) == 1
                     and len(ProviderLogRepository(conn).list_for_turn("smoke_t1")) == 1

@@ -13,7 +13,8 @@ from sagasmith.persistence.repositories import (
     TurnRecordRepository,
     VaultWriteAuditRepository,
 )
-from sagasmith.schemas.persistence import RetconAuditRecord
+from sagasmith.persistence.turn_history import CanonicalTurnHistory
+from sagasmith.schemas.persistence import RetconAuditRecord, TurnStatus
 
 _RETCON_EFFECTS = (
     "Retcon will perform a state rewind to the prior safe checkpoint, rebuild "
@@ -84,14 +85,14 @@ class RetconService:
                 f"Turn {selected_turn_id} is not part of campaign {self.campaign_id}.",
                 "Repair by selecting an eligible completed turn from the current campaign.",
             )
-        if selected.status != "complete":
+        if selected.status != TurnStatus.CANONICAL:
             raise RetconBlockedError(
                 f"Turn {selected_turn_id} is not complete and cannot be retconned.",
                 "Repair by choosing a completed canonical turn or resolving the incomplete turn first.",
             )
 
-        prior_checkpoint_id = _prior_final_checkpoint(
-            self.conn, self.campaign_id, selected.completed_at
+        prior_checkpoint_id = CanonicalTurnHistory(self.conn).prior_final_checkpoint(
+            self.campaign_id, selected.completed_at
         )
         if prior_checkpoint_id is None:
             raise RetconBlockedError(
@@ -185,26 +186,6 @@ def _concise(value: str, *, max_chars: int = 160) -> str:
     if len(line) <= max_chars:
         return line
     return line[: max_chars - 1].rstrip() + "…"
-
-
-def _prior_final_checkpoint(
-    conn: sqlite3.Connection, campaign_id: str, before_completed_at: str
-) -> str | None:
-    row = conn.execute(
-        """
-        SELECT cr.checkpoint_id
-          FROM checkpoint_refs AS cr
-          JOIN turn_records AS tr ON tr.turn_id = cr.turn_id
-         WHERE tr.campaign_id = ?
-           AND tr.status = 'complete'
-           AND tr.completed_at < ?
-           AND cr.kind = 'final'
-         ORDER BY tr.completed_at DESC, cr.created_at DESC
-         LIMIT 1
-        """,
-        (campaign_id, before_completed_at),
-    ).fetchone()
-    return row[0] if row is not None else None
 
 
 def _count_rows_for_turns(conn: sqlite3.Connection, table: str, turn_ids: list[str]) -> int:

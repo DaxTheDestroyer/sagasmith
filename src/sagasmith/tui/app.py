@@ -329,17 +329,11 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         """Surface latest persistent vault sync warning in the status panel."""
         if self._service_conn is None:
             return
-        row = self._service_conn.execute(
-            """
-            SELECT sync_warning
-             FROM turn_records
-             WHERE campaign_id = ? AND session_id = ? AND status = 'complete'
-             ORDER BY completed_at DESC, turn_id DESC
-             LIMIT 1
-            """,
-            (self.manifest.campaign_id, self.current_session_id),
-        ).fetchone()
-        warning = row[0] if row and isinstance(row[0], str) and row[0].strip() else None
+        from sagasmith.persistence.turn_history import CanonicalTurnHistory
+
+        warning = CanonicalTurnHistory(self._service_conn).latest_sync_warning(
+            self.manifest.campaign_id, self.current_session_id
+        )
         self.state.vault_sync_warning = warning
         self.state.status = StatusSnapshot(
             hp_current=self.state.status.hp_current,

@@ -17,6 +17,7 @@ from sagasmith.schemas.persistence import (
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
+    TurnStatus,
     VaultWriteAuditRecord,
 )
 from sagasmith.schemas.provider import ProviderLogRecord
@@ -83,7 +84,7 @@ class TranscriptRepository:
 
         if limit <= 0:
             return []
-        status_filter = "" if include_retconned else "AND tr.status = 'complete'"
+        status_filter = "" if include_retconned else f"AND tr.status = '{TurnStatus.CANONICAL}'"
         rows = self.conn.execute(
             f"""
             SELECT te.turn_id, te.kind, te.content, te.sequence, te.created_at
@@ -410,12 +411,12 @@ class TurnRecordRepository:
         if limit <= 0:
             return []
         rows = self.conn.execute(
-            """
+            f"""
             SELECT turn_id, campaign_id, session_id, status, started_at, completed_at,
                    schema_version, sync_warning
               FROM turn_records
              WHERE campaign_id = ?
-               AND status = 'complete'
+               AND status = '{TurnStatus.CANONICAL}'
              ORDER BY completed_at DESC
              LIMIT ?
             """,
@@ -427,15 +428,19 @@ class TurnRecordRepository:
         """Return selected completed turn and later completed canonical turns."""
 
         selected = self.get(selected_turn_id)
-        if selected is None or selected.campaign_id != campaign_id or selected.status != "complete":
+        if (
+            selected is None
+            or selected.campaign_id != campaign_id
+            or selected.status != TurnStatus.CANONICAL
+        ):
             return []
         rows = self.conn.execute(
-            """
+            f"""
             SELECT turn_id, campaign_id, session_id, status, started_at, completed_at,
                    schema_version, sync_warning
               FROM turn_records
              WHERE campaign_id = ?
-               AND status = 'complete'
+               AND status = '{TurnStatus.CANONICAL}'
                AND completed_at >= ?
              ORDER BY completed_at ASC
             """,
@@ -450,7 +455,7 @@ class TurnRecordRepository:
             return
         placeholders = ", ".join("?" for _ in turn_ids)
         self.conn.execute(
-            f"UPDATE turn_records SET status = 'retconned' WHERE turn_id IN ({placeholders})",
+            f"UPDATE turn_records SET status = '{TurnStatus.RETCONNED}' WHERE turn_id IN ({placeholders})",
             tuple(turn_ids),
         )
 

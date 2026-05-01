@@ -16,6 +16,7 @@ from sagasmith.schemas.persistence import (
     StateDeltaRecord,
     TranscriptEntry,
     TurnRecord,
+    TurnStatus,
     VaultWriteAuditRecord,
 )
 from sagasmith.schemas.provider import ProviderLogRecord
@@ -153,7 +154,7 @@ def close_turn(
             turn_id=bundle.turn_record.turn_id,
             campaign_id=bundle.turn_record.campaign_id,
             session_id=bundle.turn_record.session_id,
-            status="complete",
+            status=TurnStatus.CANONICAL,
             started_at=bundle.turn_record.started_at,
             completed_at=now,
             schema_version=bundle.turn_record.schema_version,

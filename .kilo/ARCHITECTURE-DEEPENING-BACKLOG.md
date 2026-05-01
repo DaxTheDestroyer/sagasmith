@@ -42,6 +42,11 @@ without touching TUI runtime internals.
 
 ### 2. Canonical Turn History Module
 
+**Status:** Implemented in `src/sagasmith/persistence/turn_history.py`. `TurnStatus`
+constants added to `src/sagasmith/schemas/persistence.py`. All 7 canonical-read
+callsites migrated; two unfiltered-session-count bugs fixed. Tests at
+`tests/persistence/test_turn_history.py`.
+
 **Files:** `src/sagasmith/persistence/repositories.py`,
 `src/sagasmith/cli/play_cmd.py`, `src/sagasmith/tui/runtime.py`,
 `src/sagasmith/tui/app.py`,

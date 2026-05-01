@@ -55,24 +55,15 @@ def _print_status_line(campaign: Path) -> None:
 
     conn = open_campaign_db(paths.db, read_only=True)
     try:
-        row = conn.execute(
-            "SELECT turn_id FROM turn_records WHERE status='complete' ORDER BY completed_at DESC LIMIT 1"
-        ).fetchone()
-        session_row = conn.execute(
-            """
-            SELECT session_id
-              FROM turn_records
-             WHERE campaign_id = ?
-             ORDER BY completed_at DESC, turn_id DESC
-             LIMIT 1
-            """,
-            (manifest.campaign_id,),
-        ).fetchone()
+        from sagasmith.persistence.turn_history import CanonicalTurnHistory
+
+        history = CanonicalTurnHistory(conn)
+        last_turn = history.latest_turn_id(manifest.campaign_id) or "none"
+        latest_session = history.latest_session_id(manifest.campaign_id)
     finally:
         conn.close()
 
-    last_turn = row[0] if row else "none"
-    session_number = _next_session_number(session_row[0] if session_row else None)
+    session_number = _next_session_number(latest_session)
     typer.echo(
         f"Campaign: {manifest.campaign_name} \u00b7 Session: {session_number} \u00b7 Last turn: {last_turn}"
     )
