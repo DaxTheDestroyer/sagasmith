@@ -1,5 +1,10 @@
 # Roadmap: SagaSmith
 
+> **Dev-planning view.** This file tracks the build order and phase structure
+> from the coding-harness perspective.  The product contract and success
+> criteria live in `docs/sagasmith/GAME_SPEC.md`.  When the two disagree, the
+> spec wins — update this file to match.
+
 ## Overview
 
 SagaSmith v1 follows a trust-before-breadth path: establish the local Python package, typed contracts, deterministic services, provider/cost/safety boundaries, and persistence spine before turning on AI gameplay. The roadmap then exposes those foundations through CLI/TUI setup and onboarding, wires LangGraph and Agent Skills, proves a narrow PF2e rules-first slice, adds the AI GM story loop, delivers spoiler-safe persistent memory, and finishes with retcon, repair, and release gates. This preserves the research-recommended build order while keeping every v1 requirement mapped to exactly one phase.

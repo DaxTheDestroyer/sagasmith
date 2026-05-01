@@ -606,12 +606,12 @@ Testing should mirror component boundaries:
 ## Sources
 
 - HIGH confidence — Project requirements: `.planning/PROJECT.md`.
-- HIGH confidence — Product behavior and MVP acceptance: `docs/specs/GAME_SPEC.md`.
-- HIGH confidence — LangGraph/Agent Skills decision and directory binding: `docs/specs/ADR-0001-orchestration-and-skills.md`.
-- HIGH confidence — Runtime state ownership and compact graph state: `docs/specs/STATE_SCHEMA.md`.
-- HIGH confidence — Persistence ordering, checkpoints, rebuild behavior: `docs/specs/PERSISTENCE_SPEC.md`.
-- HIGH confidence — Provider abstraction, streaming, cost, retry, secrets: `docs/specs/LLM_PROVIDER_SPEC.md`.
-- HIGH confidence — Vault source-of-truth, two-vault projection, derived layers: `docs/specs/VAULT_SCHEMA.md`.
-- HIGH confidence — Skill catalogs and service capabilities: `docs/specs/agents/*.md`.
+- HIGH confidence — Product behavior and MVP acceptance: `docs/sagasmith/GAME_SPEC.md`.
+- HIGH confidence — LangGraph/Agent Skills decision and directory binding: `docs/sagasmith/ADR-0001-orchestration-and-skills.md`.
+- HIGH confidence — Runtime state ownership and compact graph state: `docs/sagasmith/STATE_SCHEMA.md`.
+- HIGH confidence — Persistence ordering, checkpoints, rebuild behavior: `docs/sagasmith/PERSISTENCE_SPEC.md`.
+- HIGH confidence — Provider abstraction, streaming, cost, retry, secrets: `docs/sagasmith/LLM_PROVIDER_SPEC.md`.
+- HIGH confidence — Vault source-of-truth, two-vault projection, derived layers: `docs/sagasmith/VAULT_SCHEMA.md`.
+- HIGH confidence — Skill catalogs and service capabilities: `docs/sagasmith/agents/*.md`.
 - HIGH confidence — Context7 LangGraph documentation: streaming with `messages`/`updates`, interrupts with `Command(resume=...)`, checkpoint-backed history/time travel.
 - HIGH confidence — Context7 Textual documentation: workers for async/thread background tasks, streaming UI updates, and safe thread-to-UI updates with `call_from_thread`.

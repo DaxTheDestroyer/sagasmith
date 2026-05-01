@@ -61,8 +61,8 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
     if cost_governor is not None:
         try:
             cost_governor.preflight(
-                provider=_get_provider(state),
-                model=_get_narration_model(state),
+                provider=_get_provider(state, services),
+                model=_get_narration_model(state, services),
                 prompt_tokens=256,  # conservative estimate
                 max_tokens_fallback=1024,
             ).raise_if_blocked()
@@ -90,8 +90,8 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
     dice_ux_mode = _get_dice_ux_mode(state)
 
     llm_client = getattr(services, "llm", None)
-    narration_model = _get_narration_model(state)
-    cheap_model = _get_cheap_model(state)
+    narration_model = _get_narration_model(state, services)
+    cheap_model = _get_cheap_model(state, services)
     turn_id = str(state.get("turn_id", "unknown"))
     campaign_id = str(state.get("campaign_id", ""))
     safety_svc = getattr(services, "safety", None)
@@ -109,7 +109,7 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
         narration_model=narration_model,
         cheap_model=cheap_model,
         cost_governor=cost_governor,
-        provider=_get_provider(state),
+        provider=_get_provider(state, services),
         turn_id=turn_id,
         campaign_id=campaign_id,
         safety_svc=safety_svc,
@@ -131,8 +131,8 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def _get_provider(state: dict[str, Any]) -> str:
-    provider_config = state.get("provider_config")
+def _get_provider(state: dict[str, Any], services: Any | None = None) -> str:
+    provider_config = state.get("provider_config") or getattr(services, "provider_config", None)
     if provider_config is not None:
         if isinstance(provider_config, dict):
             return provider_config.get("provider", "fake")
@@ -140,8 +140,8 @@ def _get_provider(state: dict[str, Any]) -> str:
     return "fake"
 
 
-def _get_narration_model(state: dict[str, Any]) -> str:
-    provider_config = state.get("provider_config")
+def _get_narration_model(state: dict[str, Any], services: Any | None = None) -> str:
+    provider_config = state.get("provider_config") or getattr(services, "provider_config", None)
     if provider_config is not None:
         if isinstance(provider_config, dict):
             return provider_config.get("narration_model", "fake-narration")
@@ -149,8 +149,8 @@ def _get_narration_model(state: dict[str, Any]) -> str:
     return "fake-narration"
 
 
-def _get_cheap_model(state: dict[str, Any]) -> str:
-    provider_config = state.get("provider_config")
+def _get_cheap_model(state: dict[str, Any], services: Any | None = None) -> str:
+    provider_config = state.get("provider_config") or getattr(services, "provider_config", None)
     if provider_config is not None:
         if isinstance(provider_config, dict):
             return provider_config.get("cheap_model", "fake-cheap")

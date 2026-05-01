@@ -1,5 +1,10 @@
 # Requirements: SagaSmith
 
+> **Dev-planning view.** This file tracks requirements from the coding-harness
+> perspective.  The product contract lives in `docs/sagasmith/GAME_SPEC.md` and
+> the accepted ADRs.  When the two disagree, the spec wins — update this file
+> to match.
+
 **Defined:** 2026-04-26
 **Core Value:** A solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
 

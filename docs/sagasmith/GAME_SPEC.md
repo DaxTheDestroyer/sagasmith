@@ -1,6 +1,6 @@
 # SagaSmith - Game Specification
 
-**Status:** Draft. Target file: `docs/specs/GAME_SPEC.md`.
+**Status:** Draft. Target file: `docs/sagasmith/GAME_SPEC.md`.
 **Audience:** Implementers of the game runtime. Companion to the master
 architecture plan.
 **Format:** Implementation spec with acceptance criteria per component.
@@ -15,7 +15,7 @@ is **run** by a cooperating set of AI agents; the **player** brings their own
 LLM credentials (OpenRouter or direct providers).
 
 **Implementation contract:** Provider routing, streaming, retries, secret
-storage, and cost accounting are defined in `docs/specs/LLM_PROVIDER_SPEC.md`.
+storage, and cost accounting are defined in `docs/sagasmith/LLM_PROVIDER_SPEC.md`.
 
 ### 1.2 Player value
 
@@ -84,7 +84,7 @@ them against JSON Schema, and persists them to SQLite before any gameplay
 begins.
 
 **Implementation contract:** Concrete runtime schemas for these records and
-all cross-agent state objects are defined in `docs/specs/STATE_SCHEMA.md`.
+all cross-agent state objects are defined in `docs/sagasmith/STATE_SCHEMA.md`.
 
 ## 3. Agents as product components
 
@@ -182,7 +182,7 @@ behavior and acceptance criteria.
 - **Outputs:** `MemoryPacket` (on read); vault page upserts, SQLite
   transcripts, LanceDB embeddings, summary updates, `CanonConflict` events,
   player vault sync (on write).
-- **Storage architecture:** Two-vault model defined in `docs/specs/VAULT_SCHEMA.md`.
+- **Storage architecture:** Two-vault model defined in `docs/sagasmith/VAULT_SCHEMA.md`.
   - **Master vault** (`~/.ttrpg/vault/`) — full canon including GM-only
     secrets, open callbacks, and unresolved plot threads. Never exposed
     directly to the player.
@@ -222,7 +222,7 @@ behavior and acceptance criteria.
   two times then degrades to a terse fallback.
 - **CostGovernor:** enforces per-session budget; warns at 70% and 90%; hard
   stops at 100% with a narrative "pause for next session."
-  See `docs/specs/LLM_PROVIDER_SPEC.md` for token/cost accounting behavior.
+  See `docs/sagasmith/LLM_PROVIDER_SPEC.md` for token/cost accounting behavior.
 - **DiceService:** seeded, reproducible, auditable; every roll logged with
   seed + inputs + result.
 
@@ -269,7 +269,7 @@ Three modes (from `PlayerProfile.character_mode`):
 validation before first scene.
 
 **Implementation contract:** The first buildable subset of Pathfinder 2e data
-and rules is defined in `docs/specs/PF2E_MVP_SUBSET.md`. If this document and
+and rules is defined in `docs/sagasmith/PF2E_MVP_SUBSET.md`. If this document and
 that subset spec differ, the subset spec controls implementation scope for
 the first playable vertical slice.
 
@@ -403,7 +403,7 @@ invoked mid-scene visibly changes the next two turns' content.
 
 **Implementation contract:** Turn-close ordering, crash behavior, rebuildable
 indices, and checkpoint semantics are defined in
-`docs/specs/PERSISTENCE_SPEC.md`.
+`docs/sagasmith/PERSISTENCE_SPEC.md`.
 
 ## 11. Acceptance criteria (MVP DoD)
 

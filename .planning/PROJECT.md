@@ -57,7 +57,7 @@ A solo player can start, play, quit, and resume an AI-run PF2e campaign where th
 
 The repository contains the Phase 1 application scaffold: a `uv`-managed Python package named `ai-sagasmith`, import package `sagasmith`, Typer CLI entry point, strict quality tooling, Pydantic state contracts, JSON Schema export, and no-paid-call smoke/eval spine. Existing planning decisions name the GitHub repository `sagasmith`, PyPI/project package `ai-sagasmith`, and Python import package `sagasmith`.
 
-The primary product specification lives in `docs/specs/GAME_SPEC.md`. Supporting implementation contracts live in `docs/specs/STATE_SCHEMA.md`, `docs/specs/PF2E_MVP_SUBSET.md`, `docs/specs/PERSISTENCE_SPEC.md`, `docs/specs/LLM_PROVIDER_SPEC.md`, and `docs/specs/VAULT_SCHEMA.md`. Agent capability catalogs live under `docs/specs/agents/`. Deferred ideas and post-MVP expansion paths live in `docs/WISHLIST.md`.
+The primary product specification lives in `docs/sagasmith/GAME_SPEC.md`. Supporting implementation contracts live in `docs/sagasmith/STATE_SCHEMA.md`, `docs/sagasmith/PF2E_MVP_SUBSET.md`, `docs/sagasmith/PERSISTENCE_SPEC.md`, `docs/sagasmith/LLM_PROVIDER_SPEC.md`, and `docs/sagasmith/VAULT_SCHEMA.md`. Agent capability catalogs live under `docs/sagasmith/agents/`. Deferred ideas and post-MVP expansion paths live in `docs/WISHLIST.md`.
 
 The first implementation should prioritize a working vertical slice over full-system completeness: a local app that can configure an LLM provider, persist initial player/campaign records, validate schemas, run deterministic rules, produce streamed narrative, checkpoint turns, and prove memory/safety/cost boundaries on a small campaign fixture.
 

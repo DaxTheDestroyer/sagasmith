@@ -10,6 +10,7 @@ from sagasmith.app.campaign_ref import open_campaign_ref
 from sagasmith.memory.graph import warm_vault_graph
 from sagasmith.onboarding.store import OnboardingStore
 from sagasmith.persistence.db import open_campaign_db
+from sagasmith.providers.runtime import build_provider_runtime
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.safety import SafetyEventService
 from sagasmith.tui.app import SagaSmithApp
@@ -83,11 +84,18 @@ def build_app(campaign_root: Path, *, build_graph_runtime: bool = True) -> SagaS
         )
         # Phase 7: warm the NetworkX graph cache from master vault
         warm_vault_graph(vault_service.master_path)
+        provider_result = build_provider_runtime(service_conn, manifest.campaign_id)
+        if provider_result.error is not None or provider_result.runtime is None:
+            service_conn.close()
+            error = provider_result.error
+            message = error.message if error is not None else "Provider Runtime unavailable."
+            raise ValueError(message)
         bootstrap = GraphBootstrap.from_services(
             dice=dice_service,
             cost=app.cost_governor,
             safety=app.safety_events,
-            llm=None,
+            llm=provider_result.runtime.client,
+            provider_config=provider_result.runtime.config,
             vault_service=vault_service,
         )
         app.graph_runtime = build_persistent_graph(

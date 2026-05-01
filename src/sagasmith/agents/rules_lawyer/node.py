@@ -185,8 +185,20 @@ def _resolve_player_intent(
         scene_context=scene_context,
         llm_client=llm_client,
         cost_governor=getattr(services, "cost", None),
+        model=_get_default_model(services),
+        cheap_model=_get_cheap_model(services),
         turn_id=state.get("turn_id") if isinstance(state.get("turn_id"), str) else None,
     )
+
+
+def _get_default_model(services: Any) -> str:
+    config = getattr(services, "provider_config", None)
+    return getattr(config, "default_model", "fake-default")
+
+
+def _get_cheap_model(services: Any) -> str:
+    config = getattr(services, "provider_config", None)
+    return getattr(config, "cheap_model", "fake-cheap")
 
 
 def _scene_context_from_state(state: dict[str, Any]) -> dict[str, Any]:

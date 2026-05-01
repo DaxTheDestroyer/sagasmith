@@ -63,12 +63,12 @@ Phase 8 does not add new gameplay breadth, new rules systems, GUI/web/mobile fro
 - `.planning/phases/07-memory-vault-and-resume/07-CONTEXT.md` — Vault source-of-truth, derived-layer rebuild, player-vault sync, and Phase 8/post-MVP deferrals.
 
 ### Product and Runtime Specs
-- `docs/specs/GAME_SPEC.md` — Core game loop, turn flow, player-facing command behavior, safety, and local-first RPG contract.
-- `docs/specs/PERSISTENCE_SPEC.md` — Turn-close ordering, checkpoints, repair, rebuild, and atomic write rules.
-- `docs/specs/STATE_SCHEMA.md` — Persisted state, turn/checkpoint/state-delta contracts, and schema-validation expectations.
-- `docs/specs/VAULT_SCHEMA.md` — Master/player vault projection, visibility, GM-only stripping, and rebuild implications.
-- `docs/specs/PF2E_MVP_SUBSET.md` — Skill challenge and simple combat boundaries for the MVP smoke path.
-- `docs/specs/LLM_PROVIDER_SPEC.md` — No-paid-call defaults, provider fake/real boundaries, cost accounting, and secret redaction constraints.
+- `docs/sagasmith/GAME_SPEC.md` — Core game loop, turn flow, player-facing command behavior, safety, and local-first RPG contract.
+- `docs/sagasmith/PERSISTENCE_SPEC.md` — Turn-close ordering, checkpoints, repair, rebuild, and atomic write rules.
+- `docs/sagasmith/STATE_SCHEMA.md` — Persisted state, turn/checkpoint/state-delta contracts, and schema-validation expectations.
+- `docs/sagasmith/VAULT_SCHEMA.md` — Master/player vault projection, visibility, GM-only stripping, and rebuild implications.
+- `docs/sagasmith/PF2E_MVP_SUBSET.md` — Skill challenge and simple combat boundaries for the MVP smoke path.
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md` — No-paid-call defaults, provider fake/real boundaries, cost accounting, and secret redaction constraints.
 
 </canonical_refs>
 

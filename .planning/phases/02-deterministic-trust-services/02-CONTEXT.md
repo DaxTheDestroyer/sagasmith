@@ -56,11 +56,11 @@ Phase 2 delivers deterministic trust services before gameplay: provider and cost
 - `.planning/STATE.md` — current Phase 2 focus and Phase 1 advisory hardening items to fold into planning.
 
 ### Product and Runtime Specs
-- `docs/specs/GAME_SPEC.md` — core product contract for provider, cost, DiceService, turn flow, safety, and local-first boundaries.
-- `docs/specs/LLM_PROVIDER_SPEC.md` — `LLMClient` protocol, request/response/event fields, model config, retry ladder, cost accounting, streaming, and secrets requirements.
-- `docs/specs/PERSISTENCE_SPEC.md` — SQLite-first turn lifecycle, checkpoint behavior, transaction ordering, and later vault/derived-layer boundaries.
-- `docs/specs/PF2E_MVP_SUBSET.md` — deterministic rules source of truth, degree-of-success math, seeded dice replay, and first-slice boundaries.
-- `docs/specs/STATE_SCHEMA.md` — existing schema contracts for `SagaState`, `CostState`, `RollResult`, `CheckResult`, `StateDelta`, and related persisted/LLM-boundary models.
+- `docs/sagasmith/GAME_SPEC.md` — core product contract for provider, cost, DiceService, turn flow, safety, and local-first boundaries.
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md` — `LLMClient` protocol, request/response/event fields, model config, retry ladder, cost accounting, streaming, and secrets requirements.
+- `docs/sagasmith/PERSISTENCE_SPEC.md` — SQLite-first turn lifecycle, checkpoint behavior, transaction ordering, and later vault/derived-layer boundaries.
+- `docs/sagasmith/PF2E_MVP_SUBSET.md` — deterministic rules source of truth, degree-of-success math, seeded dice replay, and first-slice boundaries.
+- `docs/sagasmith/STATE_SCHEMA.md` — existing schema contracts for `SagaState`, `CostState`, `RollResult`, `CheckResult`, `StateDelta`, and related persisted/LLM-boundary models.
 
 ### Phase 1 Continuity
 - `.planning/phases/01-contracts-scaffold-and-eval-spine/01-VERIFICATION.md` — validated Phase 1 artifacts and advisory residual risks for Phase 2 hardening.

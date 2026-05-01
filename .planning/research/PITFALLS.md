@@ -11,13 +11,13 @@ This file is intentionally roadmap-facing: it names what local-first AI TTRPG pr
 Primary SagaSmith sources reviewed:
 
 - `.planning/PROJECT.md`
-- `docs/specs/GAME_SPEC.md`
-- `docs/specs/ADR-0001-orchestration-and-skills.md`
-- `docs/specs/STATE_SCHEMA.md`
-- `docs/specs/PERSISTENCE_SPEC.md`
-- `docs/specs/LLM_PROVIDER_SPEC.md`
-- `docs/specs/VAULT_SCHEMA.md`
-- `docs/specs/PF2E_MVP_SUBSET.md`
+- `docs/sagasmith/GAME_SPEC.md`
+- `docs/sagasmith/ADR-0001-orchestration-and-skills.md`
+- `docs/sagasmith/STATE_SCHEMA.md`
+- `docs/sagasmith/PERSISTENCE_SPEC.md`
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md`
+- `docs/sagasmith/VAULT_SCHEMA.md`
+- `docs/sagasmith/PF2E_MVP_SUBSET.md`
 - `docs/WISHLIST.md`
 
 External verification used:

@@ -46,6 +46,6 @@ design uncertainty that should stay attached to that skill.
 
 ## References
 
-- `docs/specs/ADR-0001-orchestration-and-skills.md`
-- `docs/specs/GAME_SPEC.md`
-- `docs/specs/STATE_SCHEMA.md`
+- `docs/sagasmith/ADR-0001-orchestration-and-skills.md`
+- `docs/sagasmith/GAME_SPEC.md`
+- `docs/sagasmith/STATE_SCHEMA.md`

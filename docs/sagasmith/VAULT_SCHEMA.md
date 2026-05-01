@@ -612,9 +612,9 @@ fan-wiki of the story.
 
 ## 13. Documents cross-referencing this spec
 
-- `docs/specs/GAME_SPEC.md` §3.5 — ArchivistAgent behavior and acceptance
+- `docs/sagasmith/GAME_SPEC.md` §3.5 — ArchivistAgent behavior and acceptance
   criteria (refers to this document for storage architecture detail).
 - `docs/WISHLIST.md` §5.1 — Richer graph queries as a future option if
   NetworkX hits limits; Kuzu named as candidate.
-- `docs/specs/agents/archivist-skills.md` — Archivist capability catalog
+- `docs/sagasmith/agents/archivist-skills.md` — Archivist capability catalog
   references the page types and storage contracts defined here.

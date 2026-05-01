@@ -9,9 +9,9 @@ User can complete first-slice PF2e mechanics with a visible character sheet, dic
 
 ## Canonical Sources
 
-- `docs/specs/PF2E_MVP_SUBSET.md` controls first-slice mechanics scope.
-- `docs/specs/STATE_SCHEMA.md` defines `CharacterSheet`, `CombatState`, `CheckProposal`, `CheckResult`, and `RollResult`.
-- `docs/specs/GAME_SPEC.md` defines Textual TUI dice UX, status panel, and no-LLM-math boundaries.
+- `docs/sagasmith/PF2E_MVP_SUBSET.md` controls first-slice mechanics scope.
+- `docs/sagasmith/STATE_SCHEMA.md` defines `CharacterSheet`, `CombatState`, `CheckProposal`, `CheckResult`, and `RollResult`.
+- `docs/sagasmith/GAME_SPEC.md` defines Textual TUI dice UX, status panel, and no-LLM-math boundaries.
 - `.planning/phases/05-rules-first-pf2e-vertical-slice/05-UI-SPEC.md` defines approved reveal overlay, `/sheet`, status, and combat display contracts.
 
 ## Existing Codebase Interfaces

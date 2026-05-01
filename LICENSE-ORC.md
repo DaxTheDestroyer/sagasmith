@@ -38,7 +38,7 @@ ORC License:
   Specific files in this repository that incorporate Licensed Material
   include (non-exhaustive):
 
-  - `docs/specs/PF2E_MVP_SUBSET.md`
+  - `docs/sagasmith/PF2E_MVP_SUBSET.md`
   - `src/sagasmith/rules/` (rules engine and data tables)
   - any bundled monster, spell, condition, or equipment data files
   - any test fixtures that encode PF2e rules outcomes

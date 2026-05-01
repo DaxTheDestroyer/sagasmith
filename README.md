@@ -137,14 +137,14 @@ src/sagasmith/
 
 Specifications and planning artifacts live alongside the code:
 
-- [docs/specs/GAME_SPEC.md](docs/specs/GAME_SPEC.md) — primary product specification
-- [docs/specs/STATE_SCHEMA.md](docs/specs/STATE_SCHEMA.md) — typed state contracts
-- [docs/specs/PF2E_MVP_SUBSET.md](docs/specs/PF2E_MVP_SUBSET.md) — first-slice PF2e scope
-- [docs/specs/PERSISTENCE_SPEC.md](docs/specs/PERSISTENCE_SPEC.md) — turn-close ordering and SQLite schema
-- [docs/specs/LLM_PROVIDER_SPEC.md](docs/specs/LLM_PROVIDER_SPEC.md) — `LLMClient` contract, retries, redaction
-- [docs/specs/VAULT_SCHEMA.md](docs/specs/VAULT_SCHEMA.md) — two-vault model
-- [docs/specs/ADR-0001-orchestration-and-skills.md](docs/specs/ADR-0001-orchestration-and-skills.md) — LangGraph + Agent Skills decision
-- [docs/specs/agents/](docs/specs/agents/) — per-agent capability catalogs
+- [docs/sagasmith/GAME_SPEC.md](docs/sagasmith/GAME_SPEC.md) — primary product specification
+- [docs/sagasmith/STATE_SCHEMA.md](docs/sagasmith/STATE_SCHEMA.md) — typed state contracts
+- [docs/sagasmith/PF2E_MVP_SUBSET.md](docs/sagasmith/PF2E_MVP_SUBSET.md) — first-slice PF2e scope
+- [docs/sagasmith/PERSISTENCE_SPEC.md](docs/sagasmith/PERSISTENCE_SPEC.md) — turn-close ordering and SQLite schema
+- [docs/sagasmith/LLM_PROVIDER_SPEC.md](docs/sagasmith/LLM_PROVIDER_SPEC.md) — `LLMClient` contract, retries, redaction
+- [docs/sagasmith/VAULT_SCHEMA.md](docs/sagasmith/VAULT_SCHEMA.md) — two-vault model
+- [docs/sagasmith/ADR-0001-orchestration-and-skills.md](docs/sagasmith/ADR-0001-orchestration-and-skills.md) — LangGraph + Agent Skills decision
+- [docs/sagasmith/agents/](docs/sagasmith/agents/) — per-agent capability catalogs
 - [.planning/PROJECT.md](.planning/PROJECT.md) — living project context, constraints, decisions
 - [.planning/ROADMAP.md](.planning/ROADMAP.md) — phase structure and success criteria
 - [.planning/REQUIREMENTS.md](.planning/REQUIREMENTS.md) — v1 requirements with traceability

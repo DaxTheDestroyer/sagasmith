@@ -7,7 +7,7 @@ Accepted — 2026-04-26
 ## Context
 
 SagaSmith is a multi-agent AI-run TTRPG delivered as a single-player, local-first
-Python CLI/TUI application. Per `docs/specs/GAME_SPEC.md` §3, the MVP runtime is
+Python CLI/TUI application. Per `docs/sagasmith/GAME_SPEC.md` §3, the MVP runtime is
 a cooperating set of five agents (Onboarding, Oracle, Rules Lawyer, Orator,
 Archivist) plus supporting services (IntentResolver, SafetyGuard, CostGovernor,
 DiceService). Each agent has deep, specialized domain competence — PF2e rules,
@@ -290,7 +290,7 @@ is months of undifferentiated work. The moment the coordinator grows beyond
 
 - The **skill catalog** (what skills exist per agent, with their descriptions
   and success signals) is captured as one file per agent under
-  `docs/specs/agents/` before implementation. `docs/specs/agents/README.md`
+  `docs/sagasmith/agents/` before implementation. `docs/sagasmith/agents/README.md`
   defines the catalog template and file list.
 - The actual `SKILL.md` files ship in the codebase under the directory
   layout defined above. They are the implementation artifact.
@@ -300,7 +300,7 @@ is months of undifferentiated work. The moment the coordinator grows beyond
 
 ## References
 
-- `docs/specs/GAME_SPEC.md` §1.1, §1.2, §1.3, §3, §4, §8, §9, §10, §11
+- `docs/sagasmith/GAME_SPEC.md` §1.1, §1.2, §1.3, §3, §4, §8, §9, §10, §11
 - `docs/WISHLIST.md` — cross-references for deferred-agent migration path
 - Agent Skills specification: <https://agentskills.io/specification>
 - `.kilo/get-shit-done/references/ai-frameworks.md` — framework comparison

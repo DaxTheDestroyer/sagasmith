@@ -444,7 +444,7 @@ system and community submission pipeline.
 ### 5.1 Richer Graph Queries (Optional Embedded Graph DB)
 
 **Context:** The MVP stores the campaign knowledge graph as an Obsidian-
-compatible markdown vault (see `docs/specs/VAULT_SCHEMA.md`). Topology
+compatible markdown vault (see `docs/sagasmith/VAULT_SCHEMA.md`). Topology
 queries (faction membership, NPC relationship paths, travel graphs) are
 served by an in-memory NetworkX graph derived from the vault's wikilinks
 and frontmatter at startup. This covers every query the Archivist needs
@@ -638,5 +638,5 @@ maturity of dependencies, and project goals.
 ---
 
 *Generated from the initial project design session (2026-04-22) and subsequent
-planning passes. See `docs/specs/GAME_SPEC.md` §1.3 and §3.7 for the formal MVP
+planning passes. See `docs/sagasmith/GAME_SPEC.md` §1.3 and §3.7 for the formal MVP
 scope and stub definitions.*

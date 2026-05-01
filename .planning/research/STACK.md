@@ -9,7 +9,7 @@
 
 Build SagaSmith as a **Python 3.12+ local-first package** managed by **uv**, with **Textual** as the only MVP UI, **Typer** as the command entrypoint, **LangGraph 1.x** as the orchestration runtime, **Pydantic 2.x** as the schema boundary, **SQLite** as the transactional local store and LangGraph checkpoint backend, and **Obsidian-compatible markdown vaults** as the canonical campaign memory source of truth. Use **LanceDB** and **NetworkX** only as rebuildable derived read layers, never as authoritative storage.
 
-Do **not** introduce a hosted API server, FastAPI backend, web UI, cloud sync, heavyweight graph database, or vendor-specific agent SDK in the MVP. Those choices conflict with the accepted local-first/TUI/BYOK decisions in `.planning/PROJECT.md` and `docs/specs/ADR-0001-orchestration-and-skills.md`.
+Do **not** introduce a hosted API server, FastAPI backend, web UI, cloud sync, heavyweight graph database, or vendor-specific agent SDK in the MVP. Those choices conflict with the accepted local-first/TUI/BYOK decisions in `.planning/PROJECT.md` and `docs/sagasmith/ADR-0001-orchestration-and-skills.md`.
 
 The best implementation shape is a small number of explicit deterministic services wrapped by LangGraph nodes:
 
@@ -43,7 +43,7 @@ Use **OpenRouter as the first provider through a first-party `LLMClient` abstrac
 | LLM HTTP client | HTTPX | Current PyPI: `0.28.1`; depend on `httpx>=0.28,<1` | HIGH | HTTPX supports sync/async clients, streaming responses, timeouts, and event hooks for redacted logging. Better control than opaque provider SDK wrappers for SagaSmith's cost/safety/retry contracts. |
 | First LLM provider | OpenRouter REST API | API endpoint `https://openrouter.ai/api/v1/chat/completions`; model IDs configured by user | HIGH | OpenRouter official docs verify OpenAI-compatible chat completions, optional attribution headers, streaming support, and structured-output support in the platform. It matches BYOK and broad model routing. |
 | Direct-provider compatibility | First-party `LLMClient` Protocol | No dependency until provider is implemented | HIGH | Specs require provider-agnostic runtime. Keep provider calls below a stable protocol with `complete()` and `stream()` returning SagaSmith-owned response/event models. |
-| Secrets | keyring + env var references | Current PyPI: `keyring==25.7.0`; depend on `keyring>=25,<26` | HIGH | `docs/specs/LLM_PROVIDER_SPEC.md` requires OS keyring preferred and env var references for development. Never persist plaintext keys in SQLite campaign rows, vaults, checkpoints, or logs. |
+| Secrets | keyring + env var references | Current PyPI: `keyring==25.7.0`; depend on `keyring>=25,<26` | HIGH | `docs/sagasmith/LLM_PROVIDER_SPEC.md` requires OS keyring preferred and env var references for development. Never persist plaintext keys in SQLite campaign rows, vaults, checkpoints, or logs. |
 | App directories | platformdirs | Current PyPI: `4.9.6`; depend on `platformdirs>=4,<5` | HIGH | Needed for predictable app-data paths across Windows/macOS/Linux (`%APPDATA%`, `~/Library/Application Support`, XDG). This matters for master vault, DBs, LanceDB, logs. |
 | Markdown frontmatter | `python-frontmatter` + `ruamel.yaml` for validation/round-tripping | Current PyPI: `python-frontmatter==1.1.0`, `ruamel.yaml==0.19.1` | MEDIUM | Vault pages require YAML frontmatter validation and Obsidian-compatible markdown. Use `ruamel.yaml` when preserving ordering/comments matters; use `python-frontmatter` for simple parse/write if it passes fixture tests. |
 | Token estimation | `tiktoken` plus provider-reported usage | Current PyPI: `0.12.0`; depend on `tiktoken>=0.12,<1` as optional/cost extra | MEDIUM | OpenRouter/provider usage is authoritative when present. Static fallback pricing and token estimation are still needed for pre-call budget checks and providers without cost fields. |
@@ -190,13 +190,13 @@ Use `uv add`/`uv lock` rather than hand-editing once implementation begins, but 
 ## Sources
 
 - `.planning/PROJECT.md` — locked local-first, Textual, LangGraph, OpenRouter, SQLite/vault/LanceDB/NetworkX, uv constraints.
-- `docs/specs/ADR-0001-orchestration-and-skills.md` — accepted LangGraph + Agent Skills decisions and rejected orchestrator alternatives.
-- `docs/specs/GAME_SPEC.md` — product/runtime contracts for agents, TUI, memory, safety, save/resume, MVP scope.
-- `docs/specs/STATE_SCHEMA.md` — Pydantic/JSON Schema and `SagaState` contracts.
-- `docs/specs/PERSISTENCE_SPEC.md` — SQLite, checkpoint, vault, rebuild, transaction ordering contracts.
-- `docs/specs/LLM_PROVIDER_SPEC.md` — OpenRouter-first BYOK provider abstraction, streaming, structured JSON, retries, secrets, cost.
-- `docs/specs/VAULT_SCHEMA.md` — Obsidian-compatible two-vault memory and derived index contracts.
-- `docs/specs/PF2E_MVP_SUBSET.md` — deterministic PF2e subset and rules-data constraints.
+- `docs/sagasmith/ADR-0001-orchestration-and-skills.md` — accepted LangGraph + Agent Skills decisions and rejected orchestrator alternatives.
+- `docs/sagasmith/GAME_SPEC.md` — product/runtime contracts for agents, TUI, memory, safety, save/resume, MVP scope.
+- `docs/sagasmith/STATE_SCHEMA.md` — Pydantic/JSON Schema and `SagaState` contracts.
+- `docs/sagasmith/PERSISTENCE_SPEC.md` — SQLite, checkpoint, vault, rebuild, transaction ordering contracts.
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md` — OpenRouter-first BYOK provider abstraction, streaming, structured JSON, retries, secrets, cost.
+- `docs/sagasmith/VAULT_SCHEMA.md` — Obsidian-compatible two-vault memory and derived index contracts.
+- `docs/sagasmith/PF2E_MVP_SUBSET.md` — deterministic PF2e subset and rules-data constraints.
 - Context7: LangGraph Python docs (`/websites/langchain_oss_python_langgraph`) — checkpointing, `SqliteSaver`, streaming modes, `interrupt()`.
 - Context7: Textual docs (`/textualize/textual`) — command palette and async app testing with `run_test()`/pilot.
 - Context7: Pydantic docs (`/pydantic/pydantic`) — v2 strict validation, JSON validation, `TypeAdapter`.

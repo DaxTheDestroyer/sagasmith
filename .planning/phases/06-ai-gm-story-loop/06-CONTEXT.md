@@ -71,17 +71,17 @@ Phase 6 does not implement: full Archivist memory assembly (AI-11, Phase 7), vau
 - `.planning/PROJECT.md` — Trust-before-breadth principle, LLM-agents-propose / deterministic-services-validate split, out-of-scope boundaries.
 
 ### Product and Runtime Specs
-- `docs/specs/GAME_SPEC.md` §3.2 — OracleAgent behavior contract: SceneBrief fields, hook generation, re-planning, callback tracking, AI-02 prohibition.
-- `docs/specs/GAME_SPEC.md` §3.3 — OratorAgent behavior contract: dice UX modes, prose constraints, streaming target, AI-07/08/09/10.
-- `docs/specs/GAME_SPEC.md` §3.4 — RulesLawyerAgent behavior contract: intent-to-proposal, deterministic resolution.
-- `docs/specs/GAME_SPEC.md` §3.6 — SafetyGuard two-phase contract: pre-gate + post-gate, two-rewrite limit, fallback.
-- `docs/specs/GAME_SPEC.md` §4 — Turn flow observable behavior.
-- `docs/specs/LLM_PROVIDER_SPEC.md` — Retry ladder (§7), streaming contract (§6), secrets (§8), cheap_model config (§4).
-- `docs/specs/STATE_SCHEMA.md` — SceneBrief, MemoryPacket, CheckProposal, CheckResult, StateDelta, SagaState schemas.
+- `docs/sagasmith/GAME_SPEC.md` §3.2 — OracleAgent behavior contract: SceneBrief fields, hook generation, re-planning, callback tracking, AI-02 prohibition.
+- `docs/sagasmith/GAME_SPEC.md` §3.3 — OratorAgent behavior contract: dice UX modes, prose constraints, streaming target, AI-07/08/09/10.
+- `docs/sagasmith/GAME_SPEC.md` §3.4 — RulesLawyerAgent behavior contract: intent-to-proposal, deterministic resolution.
+- `docs/sagasmith/GAME_SPEC.md` §3.6 — SafetyGuard two-phase contract: pre-gate + post-gate, two-rewrite limit, fallback.
+- `docs/sagasmith/GAME_SPEC.md` §4 — Turn flow observable behavior.
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md` — Retry ladder (§7), streaming contract (§6), secrets (§8), cheap_model config (§4).
+- `docs/sagasmith/STATE_SCHEMA.md` — SceneBrief, MemoryPacket, CheckProposal, CheckResult, StateDelta, SagaState schemas.
 
 ### Agent Skills Catalogs
-- `docs/specs/agents/oracle-skills.md` — world-bible-generation (§2.1), campaign-seed-generation (§2.2), scene-brief-composition (§2.3), player-choice-branching (§2.4), inline-npc-creation (§2.7), content-policy-routing (§2.9), first-slice required skills (§3).
-- `docs/specs/agents/services-capabilities.md` — safety-pre-gate (§2.2), safety-post-gate (§2.3), intent-resolution (§2.1), cost-governor (§2.4), llm-call-logging (§2.10).
+- `docs/sagasmith/agents/oracle-skills.md` — world-bible-generation (§2.1), campaign-seed-generation (§2.2), scene-brief-composition (§2.3), player-choice-branching (§2.4), inline-npc-creation (§2.7), content-policy-routing (§2.9), first-slice required skills (§3).
+- `docs/sagasmith/agents/services-capabilities.md` — safety-pre-gate (§2.2), safety-post-gate (§2.3), intent-resolution (§2.1), cost-governor (§2.4), llm-call-logging (§2.10).
 
 ### SKILL.md Implementation Files
 - `src/sagasmith/agents/oracle/skills/scene-brief-composition/SKILL.md`

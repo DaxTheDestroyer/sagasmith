@@ -2,9 +2,20 @@
 
 ## Project Context
 
-SagaSmith is a local-first, single-player, AI-run tabletop RPG delivered as a Python CLI/TUI application. The MVP validates a solo Pathfinder 2e campaign loop where AI agents plan and narrate while deterministic services own rules, dice, persistence, safety, cost, secrets, and vault writes.
+SagaSmith is a local-first, single-player, AI-run PF2e tabletop RPG (Python CLI/TUI).
+For full product/runtime context, see `docs/sagasmith/SAGASMITH_CONTEXT.md`.
 
-Core value: a solo player can start, play, quit, and resume an AI-run PF2e campaign where the story adapts to their choices while rules, memory, safety, cost, and persistence remain trustworthy.
+## Hard Context Separation
+
+See `LAYOUT.md` for a visual map of the two harnesses.
+
+- Root `CONTEXT.md` is coding-harness routing only. It is not SagaSmith product/runtime context.
+- `CONTEXT-MAP.md` documents where each context lives, but this `AGENTS.md` section is the workspace rule agents must obey.
+- SagaSmith product/runtime context belongs in `docs/sagasmith/SAGASMITH_CONTEXT.md` and accepted SagaSmith specs/ADRs.
+- Coding-harness notes, Kilo/GSD workflow decisions, skill outputs, and architecture-review backlog belong in `.kilo/`, root harness docs, or planning artifacts unless the user explicitly promotes them into a SagaSmith spec or ADR.
+- SagaSmith runtime agents and game code must not read root `CONTEXT.md`, `CONTEXT-MAP.md`, `.kilo/`, `.kilocode/`, or `.planning/` as campaign, game-world, player-facing, or in-world context.
+- Coding-harness agents may inspect SagaSmith specs and code to do implementation work, but must not treat harness files as SagaSmith runtime truth.
+- The boundary is enforced by `tests/architecture/test_harness_separation.py`.
 
 ## Planning Artifacts
 
@@ -18,14 +29,15 @@ Read these before implementation work:
 
 Canonical product specs:
 
-- `docs/specs/GAME_SPEC.md` - product and gameplay contract.
-- `docs/specs/ADR-0001-orchestration-and-skills.md` - LangGraph and Agent Skills decision.
-- `docs/specs/STATE_SCHEMA.md` - runtime state model contract.
-- `docs/specs/PF2E_MVP_SUBSET.md` - first-slice rules scope.
-- `docs/specs/PERSISTENCE_SPEC.md` - turn-close, checkpoints, and repair contract.
-- `docs/specs/LLM_PROVIDER_SPEC.md` - provider, secrets, streaming, retry, and cost contract.
-- `docs/specs/VAULT_SCHEMA.md` - master/player vault memory contract.
-- `docs/specs/agents/` - planned agent capability catalogs.
+- `docs/sagasmith/SAGASMITH_CONTEXT.md` - SagaSmith-owned product/runtime context and domain vocabulary.
+- `docs/sagasmith/GAME_SPEC.md` - product and gameplay contract.
+- `docs/sagasmith/ADR-0001-orchestration-and-skills.md` - LangGraph and Agent Skills decision.
+- `docs/sagasmith/STATE_SCHEMA.md` - runtime state model contract.
+- `docs/sagasmith/PF2E_MVP_SUBSET.md` - first-slice rules scope.
+- `docs/sagasmith/PERSISTENCE_SPEC.md` - turn-close, checkpoints, and repair contract.
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md` - provider, secrets, streaming, retry, and cost contract.
+- `docs/sagasmith/VAULT_SCHEMA.md` - master/player vault memory contract.
+- `docs/sagasmith/agents/` - planned agent capability catalogs.
 - `docs/WISHLIST.md` - deferred and explicitly post-MVP features.
 
 ## Current Roadmap
@@ -61,6 +73,7 @@ Use `/gsd-plan-phase 1` to begin execution planning.
 - Before implementing a phase, run `/gsd-plan-phase <phase>`.
 - Treat `.planning/REQUIREMENTS.md` IDs as the traceability source for implementation and verification.
 - Update `.planning/STATE.md` only through GSD phase transitions or explicit planning workflow updates.
+- Keep coding-harness context separate from SagaSmith product/runtime context: root `CONTEXT.md` is harness routing only; SagaSmith context belongs in `docs/sagasmith/SAGASMITH_CONTEXT.md`.
 - Preserve existing user changes. Do not revert unrelated work.
 
 ## Quality Gates

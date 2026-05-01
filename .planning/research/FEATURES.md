@@ -330,7 +330,7 @@ Spellcasting / levels 1-3 expansion
 
 ## Sources
 
-- SagaSmith project/spec sources read locally: `.planning/PROJECT.md`, `docs/specs/GAME_SPEC.md`, `docs/specs/PF2E_MVP_SUBSET.md`, `docs/specs/PERSISTENCE_SPEC.md`, `docs/specs/LLM_PROVIDER_SPEC.md`, `docs/specs/VAULT_SCHEMA.md`, `docs/WISHLIST.md`.
+- SagaSmith project/spec sources read locally: `.planning/PROJECT.md`, `docs/sagasmith/GAME_SPEC.md`, `docs/sagasmith/PF2E_MVP_SUBSET.md`, `docs/sagasmith/PERSISTENCE_SPEC.md`, `docs/sagasmith/LLM_PROVIDER_SPEC.md`, `docs/sagasmith/VAULT_SCHEMA.md`, `docs/WISHLIST.md`.
 - Friends & Fables official about page, retrieved 2026-04-26: https://fables.gg/about — HIGH confidence for AI GM, worldbuilding, stat/note tracking, accessibility positioning.
 - AI Dungeon Guidebook advanced feature index, retrieved 2026-04-26: https://help.aidungeon.com/advanced — HIGH confidence for memory, story cards, scenarios, scripting, publishing, ratings feature categories.
 - AI Dungeon official safety docs, retrieved 2026-04-26: https://help.aidungeon.com/faq/managing-content-safety-in-ai-dungeon — HIGH confidence for player-controlled AI safety levels and rationale.

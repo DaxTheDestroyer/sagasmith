@@ -60,6 +60,8 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
                 content_policy=state["content_policy"],
                 house_rules=state["house_rules"],
                 llm_client=cast(LLMClient, services.llm),
+                model=_get_default_model(services),
+                cheap_model=_get_cheap_model(services),
                 turn_id=state.get("turn_id"),
                 cost_governor=services.cost,
             )
@@ -72,6 +74,8 @@ def oracle_node(state: dict[str, Any], services: AgentServices) -> dict[str, Any
                 world_bible=WorldBible.model_validate(world_bible_payload),
                 player_profile=state["player_profile"],
                 llm_client=cast(LLMClient, services.llm),
+                model=_get_default_model(services),
+                cheap_model=_get_cheap_model(services),
                 turn_id=state.get("turn_id"),
                 cost_governor=services.cost,
             )
@@ -239,6 +243,8 @@ def _compose_or_fallback_scene_brief(
         prior_scene_brief=current_brief,
         scene_intent=scene_intent,
         llm_client=cast(LLMClient, services.llm),
+        model=_get_default_model(services),
+        cheap_model=_get_cheap_model(services),
         turn_id=state.get("turn_id"),
         cost_governor=services.cost,
     )
@@ -295,6 +301,16 @@ def _set_skill_if_available(activation: Any, services: AgentServices, skill_name
     store = services.skill_store
     if store is not None and store.find(name=skill_name, agent_scope="oracle") is not None:
         activation.set_skill(skill_name)
+
+
+def _get_default_model(services: AgentServices) -> str:
+    config = services.provider_config
+    return config.default_model if config is not None else "fake-default"
+
+
+def _get_cheap_model(services: AgentServices) -> str:
+    config = services.provider_config
+    return config.cheap_model if config is not None else "fake-cheap"
 
 
 def _log_safety_event_to_service(

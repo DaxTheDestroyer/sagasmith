@@ -266,14 +266,14 @@ Phases with standard patterns where extra research can usually be skipped:
 
 ### Primary (HIGH confidence)
 - `.planning/PROJECT.md` — project constraints and local-first product direction.
-- `docs/specs/GAME_SPEC.md` — runtime/product behavior, MVP acceptance, agents, safety, save/resume.
-- `docs/specs/ADR-0001-orchestration-and-skills.md` — LangGraph and first-party Agent Skills decision.
-- `docs/specs/STATE_SCHEMA.md` — Pydantic/JSON Schema and compact `SagaState` contracts.
-- `docs/specs/PERSISTENCE_SPEC.md` — SQLite/checkpoint/vault ordering, repair, rebuild semantics.
-- `docs/specs/LLM_PROVIDER_SPEC.md` — BYOK provider abstraction, OpenRouter-first, streaming, structured JSON, retries, secrets, cost.
-- `docs/specs/VAULT_SCHEMA.md` — Obsidian two-vault model, visibility, derived indices.
-- `docs/specs/PF2E_MVP_SUBSET.md` — deterministic PF2e first-slice scope.
-- `docs/specs/agents/*.md` — agent roles, skills, and service capability boundaries.
+- `docs/sagasmith/GAME_SPEC.md` — runtime/product behavior, MVP acceptance, agents, safety, save/resume.
+- `docs/sagasmith/ADR-0001-orchestration-and-skills.md` — LangGraph and first-party Agent Skills decision.
+- `docs/sagasmith/STATE_SCHEMA.md` — Pydantic/JSON Schema and compact `SagaState` contracts.
+- `docs/sagasmith/PERSISTENCE_SPEC.md` — SQLite/checkpoint/vault ordering, repair, rebuild semantics.
+- `docs/sagasmith/LLM_PROVIDER_SPEC.md` — BYOK provider abstraction, OpenRouter-first, streaming, structured JSON, retries, secrets, cost.
+- `docs/sagasmith/VAULT_SCHEMA.md` — Obsidian two-vault model, visibility, derived indices.
+- `docs/sagasmith/PF2E_MVP_SUBSET.md` — deterministic PF2e first-slice scope.
+- `docs/sagasmith/agents/*.md` — agent roles, skills, and service capability boundaries.
 - `docs/WISHLIST.md` — explicitly deferred/post-MVP capabilities.
 
 ### Documentation and official sources (HIGH to MEDIUM-HIGH confidence)

@@ -28,7 +28,7 @@ and this project will adhere to [Semantic Versioning](https://semver.org/spec/v2
 
 #### Changed
 - **Development Workflow Simplified**
-  - Removed `docs/specs/HARNESS_SPEC.md`.
+  - Removed `docs/sagasmith/HARNESS_SPEC.md`.
   - Replaced the custom hybrid harness direction with the decision to use upstream GSD directly in Kilo.
   - Project-specific process work will focus on SagaSmith specs, milestones, ADRs, tests, evals, and CI rather than porting or maintaining harness assets.
   - Rationale: GSD already supports Kilo, so recreating a Superpowers/GSD/Paul hybrid harness would add maintenance cost before the game runtime exists.
@@ -46,7 +46,7 @@ and this project will adhere to [Semantic Versioning](https://semver.org/spec/v2
 - **Agent Naming: Architect → Oracle**
   - Renamed `ArchitectAgent` to `OracleAgent` throughout specifications
   - The Oracle agent serves as the GM (world-building, campaign seeding, scene planning, callback tracking, encounter design)
-  - Updated all references in `docs/specs/GAME_SPEC.md`:
+  - Updated all references in `docs/sagasmith/GAME_SPEC.md`:
     - Section 3.2: Agent definition and responsibilities
     - Section 3.7: Deferred agents interactions
     - Section 5.1: Character creation flow

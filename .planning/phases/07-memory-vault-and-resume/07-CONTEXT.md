@@ -92,16 +92,16 @@ retcon confirmation/rollback (Phase 8), LLM-based entity extraction from narrati
   vault-as-source-of-truth constraint.
 
 ### Vault and Persistence Specs
-- `docs/specs/VAULT_SCHEMA.md` — Page type schemas (§5), filename/slug conventions (§4),
+- `docs/sagasmith/VAULT_SCHEMA.md` — Page type schemas (§5), filename/slug conventions (§4),
   visibility states (§6), GM-only stripping rules (§7), entity resolution algorithm (§8),
   derived read layers (§9), two-vault sync contract (§2.3), `index.md` / `log.md` spec (§5.8/5.9).
-- `docs/specs/PERSISTENCE_SPEC.md` — Write ordering (§4), atomic vault writes (§6),
+- `docs/sagasmith/PERSISTENCE_SPEC.md` — Write ordering (§4), atomic vault writes (§6),
   checkpoint rules (§5), rebuild commands (§7).
-- `docs/specs/GAME_SPEC.md` §3.5 — ArchivistAgent behavior contract: entity resolution, canon
+- `docs/sagasmith/GAME_SPEC.md` §3.5 — ArchivistAgent behavior contract: entity resolution, canon
   guarding, vault write ownership boundaries.
 
 ### Agent Skills Catalog
-- `docs/specs/agents/archivist-skills.md` — All 11 Archivist skill definitions. Phase 7 ships:
+- `docs/sagasmith/agents/archivist-skills.md` — All 11 Archivist skill definitions. Phase 7 ships:
   §2.1 (memory-packet-assembly), §2.3 (entity-resolution), §2.4 (vault-page-upsert),
   §2.5 (visibility-promotion), §2.6 (canon-conflict-detection, stub), §2.7 (turn-close-persistence),
   §2.8 (rolling-summary-update), §2.9 (session-page-authoring), §2.10 (player-vault-sync).
