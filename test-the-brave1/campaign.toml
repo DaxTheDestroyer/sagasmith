@@ -1,0 +1,7 @@
+manifest_version = 1
+campaign_id = "test-the-brave1-fd72a54f"
+campaign_name = "Test the brave1"
+campaign_slug = "test-the-brave1"
+created_at = "2026-05-01T01:31:49.963262+00:00"
+sagasmith_version = "0.0.1"
+schema_version = 8

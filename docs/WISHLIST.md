@@ -1,6 +1,6 @@
 # SagaSmith — Post-MVP Wishlist
 
-**Status:** Backlog | **Last updated:** 2026-04-24 (VillainAgent added)
+**Status:** Backlog | **Last updated:** 2026-04-30 (situational modifier skill added)
 
 **What this is:** A reference document of features that were intentionally deferred
 from the MVP (minimum viable product) during the initial design and planning of
@@ -220,7 +220,44 @@ is persisted as `"theater_of_mind"` but no other value is valid.
 
 ---
 
-### 2.2 PF2e Character Levels 4+
+### 2.2 Dynamic Situational Modifier Assignment
+
+**What it is:** A RulesLawyer skill that assigns deterministic situational
+modifiers, DC adjustments, or circumstance flags from structured scene context.
+Oracle may describe the relevant situation — slick stone, poor visibility,
+favorable leverage, noisy cover, time pressure, inferior tools — but the
+RulesLawyer skill owns conversion into legal PF2e mechanics.
+
+**Why it matters:** Static checks are too flat for expressive play. A player
+should feel the mechanical impact of clever preparation, bad footing, darkness,
+cover, improvised tools, assistance, or risky timing without letting an LLM
+invent arbitrary math.
+
+**MVP state:** First-slice rules use fixed DCs, sheet-derived modifiers, and a
+small number of hard-coded combat adjustments such as cover. `SceneBrief`
+supports mechanical trigger requests, but LLM-authored math is not trusted as a
+rules source.
+
+**What full implementation looks like:**
+- Oracle emits structured situational tags or evidence, not raw bonuses
+- RulesLawyer loads a `situational-modifier-assignment` skill with a bounded
+  table of allowed adjustments
+- The deterministic service maps tags to legal PF2e circumstance/status/item
+  modifiers or DC adjustments, including stacking rules
+- Every applied adjustment is logged in the `CheckProposal` / roll audit trail
+  with source evidence and rule reference
+- Conflicting or unsupported modifier requests are rejected or downgraded to
+  narration-only color
+- Tests cover common situations such as cover, darkness, unstable footing,
+  poor tools, assistance, preparation, and time pressure
+
+**Complexity:** Medium. The core mechanic is bounded, but it needs careful
+rules data, stacking behavior, auditability, and regression tests so dynamic
+difficulty improves play without weakening deterministic trust.
+
+---
+
+### 2.3 PF2e Character Levels 4+
 
 **MVP state:** PF2e rules engine covers levels 1–3 only. This gates:
 - Class feats beyond level 2
@@ -241,7 +278,7 @@ schema + `Protocol` interface), but the data volume is large.
 
 ---
 
-### 2.3 Additional Rule Systems
+### 2.4 Additional Rule Systems
 
 **Original concept:** The Rules Lawyer + engine is designed behind a `Protocol`
 interface so that the game is not locked to Pathfinder 2e. The player could
@@ -262,7 +299,7 @@ suite, and balance calibration.
 
 ---
 
-### 2.4 Open / Custom Rule System Builder
+### 2.5 Open / Custom Rule System Builder
 
 **Long-term vision:** A declarative rule system format (YAML/JSON schema) that
 allows players or the community to define their own TTRPG mechanics. The engine
@@ -483,6 +520,45 @@ and emotion rendering.
 
 ---
 
+### 5.4 Per-Agent Model Overrides
+
+**What it is:** Optional model assignments for individual agents, layered on
+top of the existing three campaign-level model roles:
+
+- `default_model` for structured/planning calls
+- `narration_model` for player-facing Orator narration
+- `cheap_model` for classifiers, repair, safety, and fallback work
+
+When a per-agent model is configured, it overrides the model that agent would
+normally receive from one of those three role assignments. If no per-agent
+override exists, the agent continues to use the appropriate role model.
+
+**Why it matters:** Different agents benefit from different model strengths.
+Oracle may need stronger planning and JSON reliability, Orator may need better
+prose or lower streaming latency, RulesLawyer may need strict instruction
+following for intent classification, and Archivist may prioritize low-cost
+summarization and extraction. Per-agent overrides let advanced users tune
+quality, latency, and cost without losing the simple three-slot configuration
+for normal play.
+
+**What full implementation looks like:**
+- Campaign settings support optional keys such as `oracle_model`,
+  `rules_lawyer_model`, `orator_model`, and `archivist_model`
+- The runtime resolves model choice in order: per-agent override first, then
+  the appropriate role model (`default_model`, `narration_model`, or
+  `cheap_model`)
+- CLI and settings UI expose the overrides without requiring them during setup
+- Provider logs and cost accounting record the actual resolved model used for
+  each call
+- Tests prove overrides do not affect secret handling, budget enforcement, or
+  deterministic rules boundaries
+
+**Complexity:** Low-Medium. The data model and CLI changes are straightforward,
+but the runtime needs a single model-resolution path so agent-specific tuning
+does not become scattered across nodes and skills.
+
+---
+
 ## 6. Long-Term Vision
 
 These are not deferred from the MVP so much as aspirational directions the
@@ -549,6 +625,7 @@ maturity of dependencies, and project goals.
 | PuppeteerAgent | Oracle inline NPC generation; Archivist entity tracking |
 | VillainAgent | None; Oracle plans antagonists inline, curated bestiary for encounters |
 | Tactical combat | `PlayerProfile.combat_style` field (always `"theater_of_mind"`) |
+| Dynamic situational modifiers | RulesLawyer owns modifiers/DCs; `SceneBrief.mechanical_triggers` can request mechanics |
 | GUI frontend | None; TUI is the sole interface |
 | Multiplayer | None; solo player assumed throughout |
 | Other rule systems | `RulesEngine` `Protocol` abstraction (only PF2e impl) |
@@ -556,6 +633,7 @@ maturity of dependencies, and project goals.
 | Voice I/O | None; text-only input/output |
 | Richer graph queries | `CanonStore` adapter boundary; Kuzu named as candidate; vault stays source of truth |
 | Director mode | None; Oracle is always in control |
+| Per-agent model overrides | `ProviderSettings` already has `default_model`, `narration_model`, and `cheap_model` |
 
 ---
 
