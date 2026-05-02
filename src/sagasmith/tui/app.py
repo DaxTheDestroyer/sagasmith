@@ -17,6 +17,7 @@ from sagasmith.tui.widgets.input_line import InputLine
 from sagasmith.tui.widgets.narration import NarrationArea
 from sagasmith.tui.widgets.safety_bar import SafetyBar
 from sagasmith.tui.widgets.status_panel import StatusPanel
+from sagasmith.turn_start import TurnStartContext, build_turn_start
 
 if TYPE_CHECKING:
     from sagasmith.graph.runtime import GraphRuntime
@@ -133,13 +134,22 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
             if snapshot.next == ("orator",):
                 self.graph_runtime.graph.invoke(None, self.graph_runtime.thread_config)
                 snapshot = self.graph_runtime.graph.get_state(self.graph_runtime.thread_config)
-            if snapshot.values:
-                self.current_turn_id = _next_turn_id(
-                    str(snapshot.values.get("turn_id") or self.current_turn_id or "turn_000000")
-                )
             current_values = dict(getattr(snapshot, "values", {}) or {})
-            state = self._build_play_state(event.text, current_values or None)
-            self.graph_runtime.invoke_turn(state)
+            context = TurnStartContext(
+                campaign_id=self.manifest.campaign_id,
+                session_id=self.current_session_id,
+                session_number=self.current_session_number,
+                current_turn_id=self.current_turn_id,
+                session_budget_usd=(
+                    self.cost_governor.state.session_budget_usd
+                    if self.cost_governor is not None
+                    else 0.0
+                ),
+                snapshot_values=current_values or None,
+            )
+            result = build_turn_start(context, event.text)
+            self.graph_runtime.invoke_turn(result.state)
+            self.current_turn_id = result.next_turn_id
             self._sync_mechanics_from_graph()
             self._sync_vault_warning_from_latest_turn()
 
@@ -148,61 +158,19 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         player_input: str,
         current_state: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        """Minimal play-phase state for stub graph nodes."""
-        from sagasmith.rules.first_slice import make_first_slice_character
-
-        budget = 0.0
-        if self.cost_governor is not None:
-            budget = self.cost_governor.state.session_budget_usd
-        existing_sheet = None if current_state is None else current_state.get("character_sheet")
-        existing_combat = None if current_state is None else current_state.get("combat_state")
-        existing_checks = [] if current_state is None else current_state.get("check_results", [])
-        existing_deltas = [] if current_state is None else current_state.get("state_deltas", [])
-        existing_narration = (
-            [] if current_state is None else current_state.get("pending_narration", [])
+        context = TurnStartContext(
+            campaign_id=self.manifest.campaign_id,
+            session_id=self.current_session_id,
+            session_number=self.current_session_number,
+            current_turn_id=self.current_turn_id,
+            session_budget_usd=(
+                self.cost_governor.state.session_budget_usd
+                if self.cost_governor is not None
+                else 0.0
+            ),
+            snapshot_values=current_state,
         )
-        phase = "combat" if existing_combat is not None else "play"
-        return {
-            "campaign_id": self.manifest.campaign_id,
-            "session_id": self.current_session_id,
-            "turn_id": self.current_turn_id or "turn_000001",
-            "phase": phase,
-            "player_profile": None,
-            "content_policy": None,
-            "house_rules": None,
-            "character_sheet": existing_sheet
-            if existing_sheet is not None
-            else make_first_slice_character().model_dump(),
-            "session_state": {
-                "current_scene_id": None,
-                "current_location_id": None,
-                "active_quest_ids": [],
-                "in_game_clock": {"day": 1, "hour": 12, "minute": 0},
-                "turn_count": 0,
-                "transcript_cursor": None,
-                "last_checkpoint_id": None,
-                "session_number": self.current_session_number,
-            },
-            "combat_state": existing_combat,
-            "pending_player_input": player_input,
-            "memory_packet": None,
-            "scene_brief": None,
-            "check_results": existing_checks,
-            "state_deltas": existing_deltas,
-            "pending_conflicts": [],
-            "pending_narration": existing_narration,
-            "safety_events": [],
-            "cost_state": {
-                "session_budget_usd": budget,
-                "spent_usd_estimate": 0.0,
-                "tokens_prompt": 0,
-                "tokens_completion": 0,
-                "unknown_cost_call_count": 0,
-                "warnings_sent": [],
-                "hard_stopped": False,
-            },
-            "last_interrupt": None,
-        }
+        return build_turn_start(context, player_input).state  # type: ignore[return-value]
 
     def on_command_invoked(self, event: CommandInvoked) -> None:
         if self.commands is None:
@@ -374,10 +342,3 @@ class SagaSmithApp(App):  # type: ignore[type-arg]
         if self._service_conn is not None:
             self._service_conn.close()
             self._service_conn = None
-
-
-def _next_turn_id(turn_id: str) -> str:
-    prefix, sep, suffix = turn_id.rpartition("_")
-    if sep and suffix.isdigit():
-        return f"{prefix}_{int(suffix) + 1:0{len(suffix)}d}"
-    return f"{turn_id}_next"

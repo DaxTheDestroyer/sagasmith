@@ -70,6 +70,10 @@ especially completed vs. retconned turn behavior.
 
 ### 3. Turn Start Module
 
+**Status:** Implemented in `src/sagasmith/turn_start/builder.py`. `_build_play_state`
+shim retained as a one-line delegate pending Step B deletion. Tests at
+`tests/turn_start/test_builder.py`.
+
 **Files:** `src/sagasmith/tui/app.py`,
 `src/sagasmith/graph/runtime.py`,
 `src/sagasmith/schemas/saga_state.py`,
