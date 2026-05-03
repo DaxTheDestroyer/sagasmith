@@ -126,6 +126,12 @@ with in-memory/fake vault Adapters and then keep node tests thin.
 
 ### 5. Retcon Repair Module
 
+**Status:** Implemented in `src/sagasmith/retcon_repair/repair.py`.
+`GraphRuntime.confirm_retcon` retained as a ~15-line Adapter shim.
+Duplicate FTS5+graph rebuild bug fixed. `RetconRepairError` (with `stage`
+attribute) distinguishes post-commit repair failures from pre-commit
+`RetconBlockedError` vetoes. Tests at `tests/retcon_repair/test_repair.py`.
+
 **Files:** `src/sagasmith/graph/runtime.py`,
 `src/sagasmith/persistence/retcon.py`, `src/sagasmith/vault/__init__.py`,
 `src/sagasmith/memory/fts5.py`, `src/sagasmith/memory/graph.py`

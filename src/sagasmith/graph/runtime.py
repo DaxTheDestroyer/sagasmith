@@ -313,36 +313,16 @@ class GraphRuntime:
         reason: str = "player_retcon",
     ):
         """Confirm a retcon, rewind to the prior checkpoint, and rebuild derived layers."""
-        from sagasmith.memory.fts5 import FTS5Index
-        from sagasmith.memory.graph import reset_vault_graph_cache, warm_vault_graph
-        from sagasmith.persistence.retcon import RetconBlockedError, RetconService
+        from sagasmith.persistence.retcon import RetconService
+        from sagasmith.retcon_repair import repair_from_canonical
 
         service = RetconService(self.db_conn, campaign_id=self.campaign_id)
-        result = service.confirm(
-            selected_turn_id,
-            confirmation_token,
-            reason=reason,
+        result = service.confirm(selected_turn_id, confirmation_token, reason=reason)
+        self._rewind_to_checkpoint(result.prior_checkpoint_id)
+        repair_from_canonical(
+            db_conn=self.db_conn,
+            vault_service=getattr(self.bootstrap.services, "vault_service", None),
         )
-        try:
-            self._rewind_to_checkpoint(result.prior_checkpoint_id)
-            vault_service = getattr(self.bootstrap.services, "vault_service", None)
-            if vault_service is not None:
-                master_path = vault_service.master_path
-                FTS5Index(self.db_conn).rebuild_all(master_path)
-                reset_vault_graph_cache()
-                warm_vault_graph(master_path)
-                rebuild_indices = getattr(vault_service, "rebuild_indices", None)
-                if callable(rebuild_indices):
-                    rebuild_indices(self.db_conn)
-                vault_service.sync()
-        except Exception as exc:
-            raise RetconBlockedError(
-                "Retcon status was committed but rollback repair did not fully complete.",
-                (
-                    "Repair by running vault rebuild/sync and checkpoint repair before continuing. "
-                    f"Original error: {exc}"
-                ),
-            ) from exc
         return result
 
     def _rewind_to_checkpoint(
