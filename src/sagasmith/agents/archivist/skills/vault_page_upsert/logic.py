@@ -17,20 +17,8 @@ from sagasmith.vault.page import (
     QuestFrontmatter,
     SessionFrontmatter,
 )
+from sagasmith.vault.page_types import TYPE_MAP
 from sagasmith.vault.resolver import slugify
-
-# Mapping from type string to frontmatter class, prefix, and subfolder
-_TYPE_MAP: dict[str, tuple[type[BaseVaultFrontmatter], str, str]] = {
-    "npc": (NpcFrontmatter, "npc_", "npcs"),
-    "pc": (NpcFrontmatter, "pc_", "pcs"),
-    "location": (LocationFrontmatter, "loc_", "locations"),
-    "faction": (FactionFrontmatter, "fac_", "factions"),
-    "item": (ItemFrontmatter, "item_", "items"),
-    "quest": (QuestFrontmatter, "quest_", "quests"),
-    "callback": (CallbackFrontmatter, "cb_", "callbacks"),
-    "session": (SessionFrontmatter, "session_", "sessions"),
-    "lore": (LoreFrontmatter, "lore_", "lore"),
-}
 
 
 @dataclass(frozen=True)
@@ -85,7 +73,7 @@ def vault_page_upsert(
     if not isinstance(entity_type, str):
         raise ValueError("entity_draft must contain a string 'type'")
 
-    type_info = _TYPE_MAP.get(entity_type)
+    type_info = TYPE_MAP.get(entity_type)
     if type_info is None:
         raise ValueError(f"Unsupported entity type: {entity_type!r}")
 
@@ -95,7 +83,6 @@ def vault_page_upsert(
     slug = slugify(name)
     vault_service.ensure_master_path()
     target_dir = vault_service.master_path / subfolder
-    target_dir.mkdir(parents=True, exist_ok=True)
 
     # Determine if this is an update (explicit id matching an existing file)
     existing_id = entity_draft.get("id")

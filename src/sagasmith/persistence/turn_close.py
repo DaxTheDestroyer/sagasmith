@@ -22,7 +22,7 @@ from sagasmith.schemas.persistence import (
 from sagasmith.schemas.provider import ProviderLogRecord
 from sagasmith.services.errors import TrustServiceError
 from sagasmith.vault import VaultPage, VaultService
-from sagasmith.vault.page import BaseVaultFrontmatter
+from sagasmith.vault.page_types import TYPE_MAP, subfolder_for
 
 from .repositories import (
     CheckpointRefRepository,
@@ -35,19 +35,7 @@ from .repositories import (
     VaultWriteAuditRepository,
 )
 
-# Mapping from vault page type to subfolder (matches resolver _TYPE_PREFIX)
 logger = logging.getLogger(__name__)
-_TYPE_MAP: dict[str, tuple[type[BaseVaultFrontmatter] | None, str]] = {
-    "npc": (None, "npcs"),
-    "pc": (None, "pcs"),
-    "location": (None, "locations"),
-    "faction": (None, "factions"),
-    "item": (None, "items"),
-    "quest": (None, "quests"),
-    "callback": (None, "callbacks"),
-    "session": (None, "sessions"),
-    "lore": (None, "lore"),
-}
 
 
 @dataclass(frozen=True)
@@ -262,8 +250,6 @@ def _relative_path_for_page(page: VaultPage) -> Path:
         "rolling_summary",
     }:
         return Path("meta") / f"{page_id}.md"
-    type_info = _TYPE_MAP.get(page_type)
-    if type_info is None:
+    if TYPE_MAP.get(page_type) is None:
         raise ValueError(f"Unknown vault page type: {page_type}")
-    _, subfolder = type_info
-    return Path(subfolder) / f"{page_id}.md"
+    return Path(subfolder_for(page_type)) / f"{page_id}.md"

@@ -24,6 +24,7 @@ from sagasmith.agents.archivist.transcript_context import (
 )
 from sagasmith.schemas.common import MemoryEntityRef, estimate_tokens
 from sagasmith.schemas.narrative import MemoryPacket
+from sagasmith.vault.page_types import subfolder_for
 
 DEFAULT_MEMORY_TOKEN_CAP = 2048
 RECENT_TRANSCRIPT_LIMIT = 8
@@ -235,7 +236,7 @@ def _page_to_entity_ref(page: object, *, kind: str) -> MemoryEntityRef:
 
     if isinstance(page, VaultPage):
         fm = page.frontmatter
-        vault_path = f"{_type_to_subfolder(fm.type)}/{fm.id}.md"
+        vault_path = f"{subfolder_for(fm.type)}/{fm.id}.md"
         return MemoryEntityRef(
             entity_id=fm.id,
             kind=kind,
@@ -250,20 +251,6 @@ def _page_to_entity_ref(page: object, *, kind: str) -> MemoryEntityRef:
         vault_path=None,
         provisional=True,
     )
-
-
-def _type_to_subfolder(page_type: str) -> str:
-    mapping = {
-        "npc": "npcs",
-        "location": "locations",
-        "faction": "factions",
-        "item": "items",
-        "quest": "quests",
-        "callback": "callbacks",
-        "session": "sessions",
-        "lore": "lore",
-    }
-    return mapping.get(page_type, "lore")
 
 
 # ---------------------------------------------------------------------------
