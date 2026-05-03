@@ -96,6 +96,10 @@ seeding through the Turn Start Interface instead of Textual UI paths.
 
 ### 4. Archivist Turn Plan Module
 
+**Status:** Implemented in `src/sagasmith/turn_plan/builder.py`. `archivist_node`
+retained as a ~70-line LangGraph Adapter shim. Entity-type map consolidated into
+`src/sagasmith/vault/page_types.py`. Tests at `tests/turn_plan/test_builder.py`.
+
 **Files:** `src/sagasmith/agents/archivist/node.py`,
 `src/sagasmith/persistence/turn_close.py`,
 `src/sagasmith/agents/archivist/skills/memory_packet_assembly/logic.py`,
