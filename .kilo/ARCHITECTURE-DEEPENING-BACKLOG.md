@@ -153,9 +153,16 @@ target canonical-source repair directly instead of driving graph runtime.
 
 ### 6. Session Page Authoring Module
 
+**Status:** Implemented. `CanonicalTurnHistory.session_page_source()` owns
+canonical source-row selection. `draft_session_page()` now returns a `VaultPage`
+draft without SQLite or vault write Adapters. `apply_vault_writes()` applies and
+audits session page writes through the same turn-close vault-write Seam. Tests
+cover source rows, drafting, audited writes, and quit/resume integration.
+
 **Files:**
 `src/sagasmith/agents/archivist/skills/session_page_authoring/logic.py`,
-`src/sagasmith/graph/runtime.py`, `src/sagasmith/persistence/turn_close.py`
+`src/sagasmith/graph/runtime.py`, `src/sagasmith/persistence/turn_close.py`,
+`src/sagasmith/persistence/turn_history.py`
 
 **Problem:** Session page authoring reads SQLite directly, filters canonical
 turns locally, formats a vault page, writes directly to the vault, and returns

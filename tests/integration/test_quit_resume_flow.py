@@ -30,7 +30,7 @@ from sagasmith.graph.bootstrap import GraphBootstrap, default_skill_store
 from sagasmith.graph.interrupts import InterruptKind
 from sagasmith.graph.runtime import build_persistent_graph
 from sagasmith.persistence.db import open_campaign_db
-from sagasmith.persistence.repositories import TurnRecordRepository
+from sagasmith.persistence.repositories import TurnRecordRepository, VaultWriteAuditRepository
 from sagasmith.providers import DeterministicFakeClient
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.dice import DiceService
@@ -197,6 +197,8 @@ def test_full_quit_resume_cycle(tmp_path: Path) -> None:
         # Verify session page authored in master vault
         session_page = service.master_path / "sessions" / "session_001.md"
         assert session_page.exists(), "Session page not authored"
+        session_audit = VaultWriteAuditRepository(conn).list_for_turn(state3["turn_id"])
+        assert any(record.vault_path == "sessions/session_001.md" for record in session_audit)
         # No sync warning in turn_record
         cur = conn.execute(
             "SELECT sync_warning FROM turn_records WHERE turn_id = ?", (state3["turn_id"],)
@@ -272,9 +274,9 @@ def test_full_quit_resume_cycle(tmp_path: Path) -> None:
 
         # Ensure entities from earlier session (e.g., npc_mira_warden) are present
         entity_ids = [e["entity_id"] for e in mp["entities"]]
-        assert any("mira_warden" in eid for eid in entity_ids), (
-            f"Expected entity 'mira_warden' not in memory entities: {entity_ids}"
-        )
+        assert any(
+            "mira_warden" in eid for eid in entity_ids
+        ), f"Expected entity 'mira_warden' not in memory entities: {entity_ids}"
 
         # Token cap respect (default 2048)
         from sagasmith.schemas.common import estimate_tokens

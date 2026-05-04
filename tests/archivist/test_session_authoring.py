@@ -3,22 +3,9 @@
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
 
-import pytest
-
-from sagasmith.agents.archivist.skills.session_page_authoring.logic import author_session
-from sagasmith.vault import VaultService
-
-
-@pytest.fixture
-def vault_service(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> VaultService:
-    import sagasmith.vault.paths as vp
-
-    monkeypatch.setattr(vp, "DEFAULT_MASTER_OPTS", tmp_path / ".ttrpg" / "vault")
-    service = VaultService(campaign_id="test_campaign", player_vault_root=tmp_path / "player")
-    service.ensure_master_path()
-    return service
+from sagasmith.agents.archivist.skills.session_page_authoring.logic import draft_session_page
+from sagasmith.persistence.turn_history import CanonicalTurnHistory
 
 
 def _conn() -> sqlite3.Connection:
@@ -47,18 +34,15 @@ def _conn() -> sqlite3.Connection:
     return conn
 
 
-def test_author_session_writes_frontmatter_beats_and_roll_table(
-    vault_service: VaultService,
-) -> None:
-    path = author_session(
+def test_draft_session_page_builds_frontmatter_beats_and_roll_table() -> None:
+    page = draft_session_page(
         session_number=1,
         campaign_id="test_campaign",
-        db_conn=_conn(),
-        vault_service=vault_service,
+        history=CanonicalTurnHistory(_conn()),
     )
 
-    assert path == "sessions/session_001.md"
-    text = (vault_service.master_path / path).read_text(encoding="utf-8")
+    assert page.frontmatter.id == "session_001"
+    text = page.as_markdown()
     assert "id: session_001" in text
     assert "type: session" in text
     assert "visibility: player_known" in text

@@ -9,6 +9,30 @@ from sagasmith.schemas.persistence import TranscriptEntry, TurnStatus
 
 
 @dataclass(frozen=True)
+class SessionTranscriptRow:
+    turn_id: str
+    kind: str
+    content: str
+    sequence: int
+
+
+@dataclass(frozen=True)
+class SessionRollRow:
+    roll_id: str
+    die: str
+    natural: int
+    modifier: int
+    total: int
+    dc: int | None
+
+
+@dataclass(frozen=True)
+class SessionPageSource:
+    transcript_rows: tuple[SessionTranscriptRow, ...]
+    roll_rows: tuple[SessionRollRow, ...]
+
+
+@dataclass(frozen=True)
 class CanonicalTurnHistory:
     conn: sqlite3.Connection
 
@@ -61,6 +85,60 @@ class CanonicalTurnHistory:
             (campaign_id, session_id),
         ).fetchall()
         return [str(row[0]) for row in rows]
+
+    def session_page_source(
+        self,
+        campaign_id: str,
+        session_id: str,
+        *,
+        include_retconned: bool = False,
+    ) -> SessionPageSource:
+        """Return ordered source rows for an end-of-session vault page."""
+        status_filter = "" if include_retconned else f"AND tr.status = '{TurnStatus.CANONICAL}'"
+        transcript_rows = self.conn.execute(
+            f"""
+            SELECT te.turn_id, te.kind, te.content, te.sequence
+              FROM transcript_entries AS te
+              JOIN turn_records AS tr ON tr.turn_id = te.turn_id
+             WHERE tr.campaign_id = ? AND tr.session_id = ?
+               {status_filter}
+             ORDER BY tr.completed_at, tr.started_at, tr.turn_id, te.sequence
+            """,
+            (campaign_id, session_id),
+        ).fetchall()
+        roll_rows = self.conn.execute(
+            f"""
+            SELECT rl.roll_id, rl.die, rl.natural, rl.modifier, rl.total, rl.dc
+              FROM roll_logs AS rl
+              JOIN turn_records AS tr ON tr.turn_id = rl.turn_id
+             WHERE tr.campaign_id = ? AND tr.session_id = ?
+               {status_filter}
+             ORDER BY tr.completed_at, tr.started_at, tr.turn_id, rl.timestamp, rl.roll_id
+            """,
+            (campaign_id, session_id),
+        ).fetchall()
+        return SessionPageSource(
+            transcript_rows=tuple(
+                SessionTranscriptRow(
+                    turn_id=str(row[0]),
+                    kind=str(row[1]),
+                    content=str(row[2]),
+                    sequence=int(row[3]),
+                )
+                for row in transcript_rows
+            ),
+            roll_rows=tuple(
+                SessionRollRow(
+                    roll_id=str(row[0]),
+                    die=str(row[1]),
+                    natural=int(row[2]),
+                    modifier=int(row[3]),
+                    total=int(row[4]),
+                    dc=int(row[5]) if row[5] is not None else None,
+                )
+                for row in roll_rows
+            ),
+        )
 
     def session_ids_for_campaign(
         self, campaign_id: str, *, include_retconned: bool = False

@@ -40,3 +40,10 @@ and narration/check-result carryover.
 The pure Archivist workflow for one turn-close preparation pass. It decides
 which memory packet, rolling summary, canon conflicts, visibility promotions,
 and vault page writes should be returned to the graph runtime for persistence.
+
+### Session Page Authoring
+
+The deterministic drafting of an end-of-session vault page from Canonical Turn
+History. It owns session frontmatter, summary/body formatting, beat extraction,
+roll-table formatting, and wikilink-derived session metadata; audited vault
+writes remain owned by persistence.

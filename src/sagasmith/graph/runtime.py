@@ -215,6 +215,7 @@ class GraphRuntime:
                 db_conn=self.db_conn,
                 campaign_id=self.campaign_id,
                 session_id=turn_record.session_id,
+                completed_record=completed_record,
                 final_state=final_state,
                 vault_service=vault_service,
             )
@@ -433,25 +434,26 @@ def _author_session_after_close(
     db_conn: sqlite3.Connection,
     campaign_id: str,
     session_id: str,
+    completed_record: TurnRecord,
     final_state: dict[str, Any],
     vault_service: Any,
 ) -> None:
-    from sagasmith.agents.archivist.skills.session_page_authoring.logic import author_session
+    from sagasmith.agents.archivist.skills.session_page_authoring.logic import draft_session_page
+    from sagasmith.persistence.turn_close import apply_vault_writes
+    from sagasmith.persistence.turn_history import CanonicalTurnHistory
 
     session_number = _session_number_from_id(session_id)
     if session_number is None:
         return
     date_in_game = str(final_state.get("game_clock", "unknown"))
-    author_session(
+    page = draft_session_page(
         session_number=session_number,
         campaign_id=campaign_id,
-        db_conn=db_conn,
-        vault_service=vault_service,
+        history=CanonicalTurnHistory(db_conn),
         date_in_game=date_in_game,
+        date_real=datetime.now(UTC).date().isoformat(),
     )
-    vault_service.resolver.refresh()
-    vault_service.rebuild_indices(db_conn)
-    vault_service.sync()
+    apply_vault_writes(db_conn, completed_record, [page], vault_service)
 
 
 def _session_number_from_id(session_id: str) -> int | None:

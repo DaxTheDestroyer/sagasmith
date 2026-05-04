@@ -188,6 +188,46 @@ def test_session_turn_ids_returns_empty_for_unknown_session() -> None:
     assert CanonicalTurnHistory(conn).session_turn_ids("camp-1", "session_999") == []
 
 
+def test_session_page_source_returns_ordered_canonical_rows() -> None:
+    conn = _make_conn()
+    _insert(
+        conn,
+        _turn("t1", session_id="session_001", completed_at="2026-04-01T10:00:00Z"),
+        _turn("t2", session_id="session_001", completed_at="2026-04-01T10:30:00Z"),
+        _turn(
+            "t3",
+            session_id="session_001",
+            status=TurnStatus.RETCONNED,
+            completed_at="2026-04-01T11:00:00Z",
+        ),
+    )
+    conn.execute(
+        "INSERT INTO transcript_entries VALUES (NULL, 't2', 'narration_final', 'second', 0, 'now')"
+    )
+    conn.execute(
+        "INSERT INTO transcript_entries VALUES (NULL, 't1', 'player_input', 'first', 0, 'now')"
+    )
+    conn.execute(
+        "INSERT INTO transcript_entries VALUES (NULL, 't3', 'narration_final', 'retconned', 0, 'now')"
+    )
+    conn.execute("INSERT INTO roll_logs VALUES ('r2', 't2', 'seed', 'd20', 8, -1, 7, NULL, 'now')")
+    conn.execute("INSERT INTO roll_logs VALUES ('r1', 't1', 'seed', 'd20', 12, 4, 16, 14, 'now')")
+    conn.execute("INSERT INTO roll_logs VALUES ('r3', 't3', 'seed', 'd20', 1, 0, 1, 10, 'now')")
+
+    source = CanonicalTurnHistory(conn).session_page_source("camp-1", "session_001")
+
+    assert [row.content for row in source.transcript_rows] == ["first", "second"]
+    assert [row.roll_id for row in source.roll_rows] == ["r1", "r2"]
+    assert source.roll_rows[1].dc is None
+
+
+def test_session_page_source_returns_empty_for_unknown_session() -> None:
+    conn = _make_conn()
+    source = CanonicalTurnHistory(conn).session_page_source("camp-1", "session_999")
+    assert source.transcript_rows == ()
+    assert source.roll_rows == ()
+
+
 # ---------------------------------------------------------------------------
 # session_ids_for_campaign (covers runtime.py:132 bug)
 # ---------------------------------------------------------------------------

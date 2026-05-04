@@ -114,8 +114,6 @@ def close_turn(
     cost_repo = CostLogRepository(conn)
     checkpoint_repo = CheckpointRefRepository(conn)
     turn_repo = TurnRecordRepository(conn)
-    vault_write_audit_repo = VaultWriteAuditRepository(conn)
-
     try:
         _assert_no_secret_shaped_payloads(bundle)
 
@@ -156,51 +154,62 @@ def close_turn(
 
     # Post-commit: vault writes (outside SQLite transaction)
     if vault_service is not None and bundle.vault_pages:
-        try:
-            for page in bundle.vault_pages:
-                rel_path = _relative_path_for_page(page)
-                vault_service.write_page(page, rel_path, is_master=True)
-                vault_write_audit_repo.append(
-                    VaultWriteAuditRecord(
-                        turn_id=bundle.turn_record.turn_id,
-                        vault_path=rel_path.as_posix(),
-                        operation="write_page",
-                        recorded_at=datetime.now(UTC).isoformat(),
-                    )
-                )
-            vault_service.resolver.refresh()
-            conn.commit()
-        except Exception as exc:
-            # Mark turn as needing vault repair
-            turn_repo.upsert(
-                TurnRecord(
-                    turn_id=bundle.turn_record.turn_id,
-                    campaign_id=bundle.turn_record.campaign_id,
-                    session_id=bundle.turn_record.session_id,
-                    status="needs_vault_repair",
-                    started_at=bundle.turn_record.started_at,
-                    completed_at=now,
-                    schema_version=bundle.turn_record.schema_version,
-                )
-            )
-            conn.commit()
-            raise TrustServiceError(f"vault write failed after SQLite commit: {exc}") from exc
-
-        # Derived indices update (FTS5 + NetworkX graph)
-        _update_derived_indices(conn, vault_service, bundle.vault_pages)
-
-        # Player-vault sync
-        try:
-            vault_service.sync()
-        except Exception as exc:
-            # Set persistent sync warning, but do NOT flip status
-            conn.execute(
-                "UPDATE turn_records SET sync_warning = ? WHERE turn_id = ?",
-                (str(exc), bundle.turn_record.turn_id),
-            )
-            conn.commit()
+        apply_vault_writes(conn, completed_record, bundle.vault_pages, vault_service)
 
     return completed_record
+
+
+def apply_vault_writes(
+    conn: sqlite3.Connection,
+    turn_record: TurnRecord,
+    pages: list[VaultPage],
+    vault_service: VaultService,
+) -> None:
+    """Write master-vault pages and audit them through the turn-close Seam."""
+    if not pages:
+        return
+
+    turn_repo = TurnRecordRepository(conn)
+    vault_write_audit_repo = VaultWriteAuditRepository(conn)
+    try:
+        for page in pages:
+            rel_path = _relative_path_for_page(page)
+            vault_service.write_page(page, rel_path, is_master=True)
+            vault_write_audit_repo.append(
+                VaultWriteAuditRecord(
+                    turn_id=turn_record.turn_id,
+                    vault_path=rel_path.as_posix(),
+                    operation="write_page",
+                    recorded_at=datetime.now(UTC).isoformat(),
+                )
+            )
+        vault_service.resolver.refresh()
+        conn.commit()
+    except Exception as exc:
+        turn_repo.upsert(
+            TurnRecord(
+                turn_id=turn_record.turn_id,
+                campaign_id=turn_record.campaign_id,
+                session_id=turn_record.session_id,
+                status=TurnStatus.NEEDS_VAULT_REPAIR,
+                started_at=turn_record.started_at,
+                completed_at=turn_record.completed_at,
+                schema_version=turn_record.schema_version,
+            )
+        )
+        conn.commit()
+        raise TrustServiceError(f"vault write failed after SQLite commit: {exc}") from exc
+
+    _update_derived_indices(conn, vault_service, pages)
+
+    try:
+        vault_service.sync()
+    except Exception as exc:
+        conn.execute(
+            "UPDATE turn_records SET sync_warning = ? WHERE turn_id = ?",
+            (str(exc), turn_record.turn_id),
+        )
+        conn.commit()
 
 
 def _update_derived_indices(

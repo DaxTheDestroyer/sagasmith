@@ -10,11 +10,11 @@ from sagasmith.memory.fts5 import FTS5Index
 from sagasmith.persistence.db import campaign_db
 from sagasmith.persistence.migrations import apply_migrations
 from sagasmith.persistence.repositories import TurnRecordRepository, VaultWriteAuditRepository
-from sagasmith.persistence.turn_close import TurnCloseBundle, close_turn
+from sagasmith.persistence.turn_close import TurnCloseBundle, apply_vault_writes, close_turn
 from sagasmith.schemas.persistence import TranscriptEntry, TurnRecord
 from sagasmith.services.errors import TrustServiceError
 from sagasmith.vault import VaultPage, VaultService
-from sagasmith.vault.page import LoreFrontmatter
+from sagasmith.vault.page import LoreFrontmatter, SessionFrontmatter
 
 
 def _db(tmp_path: Path) -> Path:
@@ -335,3 +335,46 @@ def test_close_turn_does_not_index_gm_only_pages(tmp_path: Path) -> None:
         close_turn(conn, bundle, vault_service=vault_service)
 
         assert FTS5Index(conn).query("blackmail") == []
+
+
+def test_apply_vault_writes_audits_session_page(tmp_path: Path) -> None:
+    path = _db(tmp_path)
+    with campaign_db(path) as conn:
+        apply_migrations(conn)
+        vault_service = VaultService(
+            campaign_id="c1",
+            player_vault_root=tmp_path / "player_vault",
+        )
+        vault_service.ensure_master_path()
+        vault_service.ensure_player_vault()
+        turn = TurnRecord(
+            turn_id="t1",
+            campaign_id="c1",
+            session_id="session_001",
+            status="complete",
+            started_at="2026-04-26T12:00:00Z",
+            completed_at="2026-04-26T12:00:00Z",
+            schema_version=1,
+        )
+        TurnRecordRepository(conn).upsert(turn)
+        page = VaultPage(
+            SessionFrontmatter(
+                id="session_001",
+                type="session",
+                name="Session 1",
+                aliases=["Session 1"],
+                visibility="player_known",
+                first_encountered="session_001",
+                number=1,
+                date_real="2026-04-26",
+                date_in_game="unknown",
+            ),
+            body="## Summary\n\nA first session.",
+        )
+
+        apply_vault_writes(conn, turn, [page], vault_service)
+
+        assert (vault_service.master_path / "sessions" / "session_001.md").exists()
+        assert (vault_service.player_vault_root / "sessions" / "session_001.md").exists()
+        audit = VaultWriteAuditRepository(conn).list_for_turn("t1")
+        assert [record.vault_path for record in audit] == ["sessions/session_001.md"]
