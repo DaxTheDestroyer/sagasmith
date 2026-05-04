@@ -214,9 +214,9 @@ async def test_budget_command_without_governor_says_no_session(tmp_path: Path) -
         BudgetCommand().handle(app, ())
         logged = app.query_one(NarrationArea).logged_lines[:]
 
-    assert any("no session governor" in line for line in logged), (
-        f"Expected no session governor msg; got: {logged}"
-    )
+    assert any(
+        "no session governor" in line for line in logged
+    ), f"Expected no session governor msg; got: {logged}"
 
 
 @pytest.mark.asyncio

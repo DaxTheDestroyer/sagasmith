@@ -75,7 +75,7 @@ class TestPreGateVerdictRouting:
         policy = make_valid_content_policy()
         gate = SafetyPreGate(policy)
         verdict = gate.check(fixture.text)
-        assert isinstance(verdict, (Blocked, Rerouted))
+        assert isinstance(verdict, Blocked | Rerouted)
 
     @pytest.mark.parametrize(
         "fixture",
@@ -86,7 +86,7 @@ class TestPreGateVerdictRouting:
         policy = make_valid_content_policy()
         gate = SafetyPreGate(policy)
         verdict = gate.check(fixture.text)
-        assert isinstance(verdict, (Rerouted, Allowed))
+        assert isinstance(verdict, Rerouted | Allowed)
 
 
 # ---------------------------------------------------------------------------

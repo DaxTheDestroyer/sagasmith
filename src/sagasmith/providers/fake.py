@@ -42,7 +42,7 @@ class DeterministicFakeClient:
             )
             return
         yield from events
-        if events and not isinstance(events[-1], (CompletedEvent, FailedEvent)):
+        if events and not isinstance(events[-1], CompletedEvent | FailedEvent):
             yield FailedEvent(
                 kind="failed",
                 failure_kind="other",

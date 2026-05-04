@@ -71,6 +71,6 @@ def test_every_boundary_model_round_trips():
         assert_round_trip(instance)
         round_tripped += 1
 
-    assert round_tripped >= 8, (
-        f"expected at least 8 round-trips, got {round_tripped}; skipped={skipped}"
-    )
+    assert (
+        round_tripped >= 8
+    ), f"expected at least 8 round-trips, got {round_tripped}; skipped={skipped}"

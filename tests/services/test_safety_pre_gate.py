@@ -92,7 +92,7 @@ class TestBlocked:
             )
         )
         verdict = gate.check("child corpse")
-        assert isinstance(verdict, (Blocked, Rerouted))
+        assert isinstance(verdict, Blocked | Rerouted)
 
 
 # ---------------------------------------------------------------------------
@@ -150,7 +150,7 @@ class TestPatternCompilation:
         )
         # "sexual assault" is a synonym of graphic_sexual_content
         verdict = gate.check("The NPC threatens sexual assault.")
-        assert isinstance(verdict, (Blocked, Rerouted))
+        assert isinstance(verdict, Blocked | Rerouted)
 
     def test_case_insensitive_matching(self, default_policy: ContentPolicy) -> None:
         gate = SafetyPreGate(default_policy)
@@ -169,7 +169,7 @@ class TestPatternCompilation:
         policy2 = ContentPolicy(hard_limits=["term_b"], soft_limits={}, preferences=[])
         gate1 = SafetyPreGate(policy1)
         gate2 = SafetyPreGate(policy2)
-        assert isinstance(gate1.check("term_a"), (Blocked, Rerouted))
+        assert isinstance(gate1.check("term_a"), Blocked | Rerouted)
         assert isinstance(gate1.check("term_b"), Allowed)
-        assert isinstance(gate2.check("term_b"), (Blocked, Rerouted))
+        assert isinstance(gate2.check("term_b"), Blocked | Rerouted)
         assert isinstance(gate2.check("term_a"), Allowed)

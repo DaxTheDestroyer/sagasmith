@@ -109,9 +109,9 @@ class TestPreGateHardLimits:
     def test_hard_limit_blocked_or_rerouted(self, fixture: ViolationFixture) -> None:
         gate = SafetyPreGate(_DEFAULT_POLICY)
         verdict = gate.check(fixture.text)
-        assert isinstance(verdict, (Blocked, Rerouted)), (
-            f"Expected Blocked or Rerouted for {fixture.label}, got {type(verdict).__name__}"
-        )
+        assert isinstance(
+            verdict, Blocked | Rerouted
+        ), f"Expected Blocked or Rerouted for {fixture.label}, got {type(verdict).__name__}"
 
     def test_hard_limit_only_names_policy_blocks(self) -> None:
         gate = SafetyPreGate(_DEFAULT_POLICY)
@@ -136,9 +136,9 @@ class TestPreGateSoftLimits:
     def test_soft_limit_rerouted_or_allowed_with_warning(self, fixture: ViolationFixture) -> None:
         gate = SafetyPreGate(_DEFAULT_POLICY)
         verdict = gate.check(fixture.text)
-        assert isinstance(verdict, (Rerouted, Allowed)), (
-            f"Expected Rerouted or Allowed for {fixture.label}, got {type(verdict).__name__}"
-        )
+        assert isinstance(
+            verdict, Rerouted | Allowed
+        ), f"Expected Rerouted or Allowed for {fixture.label}, got {type(verdict).__name__}"
         if isinstance(verdict, Rerouted):
             # Redacted text should not contain the original term
             for term in fixture.matching_terms:
@@ -177,9 +177,9 @@ class TestPreGateBoundary:
     def test_safe_content_allowed(self, fixture: ViolationFixture) -> None:
         gate = SafetyPreGate(_DEFAULT_POLICY)
         verdict = gate.check(fixture.text)
-        assert isinstance(verdict, Allowed), (
-            f"Expected Allowed for {fixture.label}, got {type(verdict).__name__}"
-        )
+        assert isinstance(
+            verdict, Allowed
+        ), f"Expected Allowed for {fixture.label}, got {type(verdict).__name__}"
 
     def test_no_policy_allows_everything(self) -> None:
         gate = SafetyPreGate(None)
@@ -206,7 +206,7 @@ class TestPreGateMultilingual:
         if fixture.expected_kind == "safe":
             assert isinstance(verdict, Allowed)
         elif fixture.expected_kind == "soft":
-            assert isinstance(verdict, (Rerouted, Allowed))
+            assert isinstance(verdict, Rerouted | Allowed)
 
 
 # ---------------------------------------------------------------------------
@@ -297,9 +297,9 @@ class TestPostGateInlineHardLimits:
     def test_inline_hard_limit_blocks(self, fixture: ViolationFixture) -> None:
         gate = SafetyPostGate(llm_client=None, cheap_model="unused")
         verdict = gate.scan(fixture.text, _DEFAULT_POLICY)
-        assert isinstance(verdict, BlockFallback), (
-            f"Expected BlockFallback for {fixture.label}, got {type(verdict).__name__}"
-        )
+        assert isinstance(
+            verdict, BlockFallback
+        ), f"Expected BlockFallback for {fixture.label}, got {type(verdict).__name__}"
 
     def test_graphic_violence_blocks_when_configured_as_hard_limit(self) -> None:
         """graphic_violence is a soft limit in _DEFAULT_POLICY but hard in _HARD_VIOLENCE_POLICY."""
@@ -326,7 +326,7 @@ class TestSafetyIntegration:
             if fixture.expected_kind == "hard":
                 verdict = gate.check(fixture.text)
                 # Must be blocked or rerouted — never Allowed for hard limits
-                assert isinstance(verdict, (Blocked, Rerouted))
+                assert isinstance(verdict, Blocked | Rerouted)
                 # If blocked, no prose should be generated
                 if isinstance(verdict, Blocked):
                     # In real flow, Oracle would post SAFETY_BLOCK and halt
@@ -369,5 +369,5 @@ class TestSkillPreGateCompatibility:
                 service_gate = SafetyPreGate(_DEFAULT_POLICY)
                 service_result = service_gate.check(fixture.text)
                 # Both should block or reroute — never allow
-                assert isinstance(skill_result, (SkillBlocked, SkillRerouted))
-                assert isinstance(service_result, (Blocked, Rerouted))
+                assert isinstance(skill_result, SkillBlocked | SkillRerouted)
+                assert isinstance(service_result, Blocked | Rerouted)

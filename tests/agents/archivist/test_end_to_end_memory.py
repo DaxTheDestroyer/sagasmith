@@ -139,9 +139,9 @@ def test_memory_packet_fts5_graph_and_token_cap(tmp_path: Path) -> None:
     assert "loc_rivermouth" in entity_ids, "Expected Rivermouth entity missing"
 
     # 2. FTS5 retrieval notes should indicate matches
-    assert any(note.startswith("fts5:") for note in packet.retrieval_notes), (
-        "FTS5 retrieval not used"
-    )
+    assert any(
+        note.startswith("fts5:") for note in packet.retrieval_notes
+    ), "FTS5 retrieval not used"
 
     # 3. Graph neighbor retrieval should also appear (because we resolved entity, neighbors may appear)
     # Not guaranteed if graph neighbors empty, but likely triggers. We'll just check notes list is non-empty

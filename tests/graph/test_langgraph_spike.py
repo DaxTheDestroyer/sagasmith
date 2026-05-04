@@ -72,9 +72,9 @@ def test_checkpoint_id_accessible():
     snapshot = graph.get_state(config)
     snapshot_config = cast(dict[str, Any], snapshot.config)
     cp_id = snapshot_config["configurable"].get("checkpoint_id")
-    assert cp_id is not None and isinstance(cp_id, str) and len(cp_id) > 0, (
-        f"LangGraph snapshot.config missing checkpoint_id: {snapshot.config!r}"
-    )
+    assert (
+        cp_id is not None and isinstance(cp_id, str) and len(cp_id) > 0
+    ), f"LangGraph snapshot.config missing checkpoint_id: {snapshot.config!r}"
 
 
 def test_none_resume_advances():

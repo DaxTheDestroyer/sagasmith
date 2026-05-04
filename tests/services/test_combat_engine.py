@@ -184,8 +184,9 @@ def test_start_encounter_ties_break_by_perception_modifier_then_actor_id() -> No
 
     state, _ = _engine_with_dice(dice).start_encounter(sheet, (enemy_b, enemy_a))
 
+    enemy_alpha_id = enemy_a.id
     assert [entry.combatant_id for entry in state.initiative_order] == [
-        enemy_alpha_id := enemy_a.id,
+        enemy_alpha_id,
         enemy_b.id,
         sheet.id,
     ]

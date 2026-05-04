@@ -253,7 +253,7 @@ def _sanitize_llm_candidate(
 ) -> IntentCandidate | None:
     action = item.get("action")
     confidence = item.get("confidence")
-    if not isinstance(action, str) or not isinstance(confidence, (int, float)):
+    if not isinstance(action, str) or not isinstance(confidence, int | float):
         return None
     reason = item.get("reason") if isinstance(item.get("reason"), str) else "llm-classified intent"
     if action == "skill_check":

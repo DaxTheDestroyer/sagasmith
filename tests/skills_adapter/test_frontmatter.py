@@ -167,9 +167,9 @@ class TestPyprojectPackaging:
             for v in (row if isinstance(row, list) else [row])
         )
 
-        assert has_include or has_force or has_setuptools, (
-            f"pyproject.toml must declare SKILL.md inclusion in build config; found wheel={wheel}"
-        )
+        assert (
+            has_include or has_force or has_setuptools
+        ), f"pyproject.toml must declare SKILL.md inclusion in build config; found wheel={wheel}"
 
 
 class TestLightweightImport:

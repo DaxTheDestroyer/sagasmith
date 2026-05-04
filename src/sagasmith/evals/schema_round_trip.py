@@ -37,8 +37,8 @@ def assert_fixture_rejects(path: Path, expected_substring: str) -> None:
     try:
         validate_persisted_state(data)
     except PersistedStateError as exc:
-        assert expected_substring in str(exc), (
-            f"Expected {expected_substring!r} in rejection message; got {exc!s}"
-        )
+        assert expected_substring in str(
+            exc
+        ), f"Expected {expected_substring!r} in rejection message; got {exc!s}"
         return
     raise AssertionError(f"Fixture {path.name} should have been rejected but validated")

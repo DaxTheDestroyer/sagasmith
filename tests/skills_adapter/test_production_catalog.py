@@ -103,9 +103,9 @@ class TestProductionScan:
             for rec in records:
                 expected = _EXPECTED_SURFACE.get(rec.name)
                 assert expected is not None, f"no spec entry for {rec.name}"
-                assert rec.implementation_surface == expected, (
-                    f"{rec.name}: expected {expected}, got {rec.implementation_surface}"
-                )
+                assert (
+                    rec.implementation_surface == expected
+                ), f"{rec.name}: expected {expected}, got {rec.implementation_surface}"
 
     def test_bootstrap_loud_on_error(self, tmp_path: Path):
         """Test 5: _default_skill_store raises on production scan errors."""
@@ -134,9 +134,9 @@ class TestProductionScan:
         store.scan()
         for _scope, records in store.skills.items():
             for rec in records:
-                assert len(rec.description) <= 256, (
-                    f"{rec.name} description is {len(rec.description)} chars"
-                )
+                assert (
+                    len(rec.description) <= 256
+                ), f"{rec.name} description is {len(rec.description)} chars"
 
     def test_lazy_bootstrap_import(self):
         """Test 8: importing bootstrap does not trigger skill scan."""
