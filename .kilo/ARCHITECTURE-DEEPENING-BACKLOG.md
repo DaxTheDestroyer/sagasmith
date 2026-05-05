@@ -208,6 +208,8 @@ planning outcomes without graph activation scaffolding.
 
 ### 8. Safety Guard Module
 
+**Status:** Implemented in `src/sagasmith/safety_guard/guard.py`. Legacy Adapters retained in `services/safety_pre_gate.py`, `services/safety_post_gate.py`, `services/safety_inline_matcher.py`, and Oracle skill `agents/oracle/skills/content_policy_routing/logic.py`. Orator and Scene Planning call sites migrated. New tests at `tests/safety_guard/test_guard.py`. All 900 tests pass; ruff and pyright clean.
+
 **Files:** `src/sagasmith/services/safety_pre_gate.py`,
 `src/sagasmith/services/safety_post_gate.py`,
 `src/sagasmith/agents/oracle/skills/content_policy_routing/logic.py`,
@@ -226,6 +228,11 @@ policy Interface instead of multiple partial scanners. Tests can run hard-limit,
 soft-limit, streaming, and rewrite cases through the same Seam.
 
 ### 9. Rules Turn Resolution Module
+
+**Status:** Implemented in `src/sagasmith/rules_turn_resolution/builder.py`.
+`rules_lawyer_node` retained as a thin LangGraph Adapter shim. Tests at
+`tests/rules_turn_resolution/test_builder.py` exercise the Rules Turn Resolution
+Interface directly.
 
 **Files:** `src/sagasmith/agents/rules_lawyer/node.py`,
 `src/sagasmith/services/intent_resolution.py`,

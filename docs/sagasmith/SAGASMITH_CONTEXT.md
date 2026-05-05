@@ -65,3 +65,9 @@ The deterministic and bounded-hybrid safety pass for one play turn. It owns
 pre-generation scene-intent routing, inline streaming hard-limit scan,
 post-generation prose scan, player-visible safety event construction, and
 retry/fallback policy for unsafe narration.
+
+### Rules Turn Resolution
+
+The deterministic Rules Lawyer workflow for one player rules turn. It owns
+player-intent classification, first-slice defaults, PF2e check/combat execution,
+rules error shaping, combat phase transitions, and narration audit messages.
