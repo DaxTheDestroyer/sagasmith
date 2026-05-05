@@ -22,8 +22,6 @@ from sagasmith.services.intent_resolution import (
     resolve_intents,
 )
 from sagasmith.services.rules_engine import RulesEngine
-from sagasmith.skills_adapter import load_skill
-from sagasmith.skills_adapter.errors import SkillNotFoundError, UnauthorizedSkillError
 
 _LEGACY_PERCEPTION_TRIGGER_RE = re.compile(r"^roll\s+perception$")
 
@@ -42,7 +40,7 @@ class RulesTurnContext:
     cost: Any
     llm: Any | None = None
     provider_config: Any | None = None
-    skill_store: Any | None = None
+    skill_execution: Any | None = None
 
 
 @dataclass(frozen=True)
@@ -67,37 +65,39 @@ def resolve_rules_turn(context: RulesTurnContext) -> RulesTurnResult:
     character_sheet = _character_sheet_from_state(state)
     check_results = list(state.get("check_results", []))
     pending_narration = list(state.get("pending_narration", []))
-    skills_activated: list[str] = []
+    skill_execution = context.skill_execution
 
     try:
         if _LEGACY_PERCEPTION_TRIGGER_RE.match(normalized):
-            _activate_skill(context, skills_activated, "skill-check-resolution")
-            return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
+            _activate_skill(skill_execution, "skill-check-resolution")
+            return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
 
         if _looks_like_failed_mechanical_input(normalized):
             deterministic = deterministic_intents(
                 normalized, scene_context=_scene_context_from_state(state)
             )
             if not deterministic:
-                return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
+                return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
 
         candidates = _resolve_player_intent(raw_input, normalized, state, context)
         if not candidates or candidates[0].action == "none":
             if candidates and candidates[0].source == "budget_fallback":
                 return _result(
                     _rules_error(check_results, "I didn't catch that — try `/check athletics 15`."),
-                    skills_activated,
+                    skill_execution,
                 )
             if _looks_like_failed_mechanical_input(normalized):
-                return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
-            return RulesTurnResult(state_updates={}, skills_activated=tuple(skills_activated))
+                return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
+            return RulesTurnResult(
+                state_updates={}, skills_activated=_activated_names(skill_execution)
+            )
 
         primary = candidates[0]
 
         if primary.action == "skill_check":
             if primary.stat is None or primary.dc is None:
-                return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
-            _activate_skill(context, skills_activated, "skill-check-resolution")
+                return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
+            _activate_skill(skill_execution, "skill-check-resolution")
             check_result = rules_engine.resolve_check(
                 character_sheet,
                 stat=primary.stat,
@@ -106,11 +106,11 @@ def resolve_rules_turn(context: RulesTurnContext) -> RulesTurnResult:
                 roll_index=len(check_results),
             )
             return _result(
-                {"check_results": [*check_results, check_result.model_dump()]}, skills_activated
+                {"check_results": [*check_results, check_result.model_dump()]}, skill_execution
             )
 
         if primary.action == "start_combat":
-            _activate_skill(context, skills_activated, "combat-resolution")
+            _activate_skill(skill_execution, "combat-resolution")
             combat_state, initiative_results = combat_engine.start_encounter(
                 character_sheet,
                 make_first_slice_enemies(),
@@ -125,14 +125,14 @@ def resolve_rules_turn(context: RulesTurnContext) -> RulesTurnResult:
                     ],
                     "phase": "combat",
                 },
-                skills_activated,
+                skill_execution,
             )
 
         if primary.action == "strike":
-            _activate_skill(context, skills_activated, "combat-resolution")
+            _activate_skill(skill_execution, "combat-resolution")
             combat_state = _combat_state_from_state(state)
             if primary.target_id is None or primary.attack_id is None:
-                return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
+                return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
             updated_state, check_result, damage_roll = combat_engine.resolve_strike(
                 combat_state,
                 character_sheet.id,
@@ -149,30 +149,30 @@ def resolve_rules_turn(context: RulesTurnContext) -> RulesTurnResult:
                     [*check_results, check_result.model_dump()],
                     pending_narration,
                 ),
-                skills_activated,
+                skill_execution,
             )
 
         if primary.action == "move":
-            _activate_skill(context, skills_activated, "combat-resolution")
+            _activate_skill(skill_execution, "combat-resolution")
             combat_state = _combat_state_from_state(state)
             if primary.position is None:
-                return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
+                return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
             updated_state = combat_engine.move(combat_state, character_sheet.id, primary.position)  # type: ignore[arg-type]
             return _result(
                 _combat_update(combat_engine, updated_state, check_results, pending_narration),
-                skills_activated,
+                skill_execution,
             )
 
         if primary.action == "end_turn":
-            _activate_skill(context, skills_activated, "combat-resolution")
+            _activate_skill(skill_execution, "combat-resolution")
             combat_state = _combat_state_from_state(state)
             updated_state = combat_engine.end_turn(combat_state)
             return _result(
                 _combat_update(combat_engine, updated_state, check_results, pending_narration),
-                skills_activated,
+                skill_execution,
             )
 
-        return _result(_rules_error(check_results, _HELP_MESSAGE), skills_activated)
+        return _result(_rules_error(check_results, _HELP_MESSAGE), skill_execution)
     except ValueError as exc:
         return _result(
             _rules_error(
@@ -182,25 +182,25 @@ def resolve_rules_turn(context: RulesTurnContext) -> RulesTurnResult:
                     "or `strike enemy_weak_melee with longsword`."
                 ),
             ),
-            skills_activated,
+            skill_execution,
         )
 
 
-def _result(updates: Mapping[str, Any], skills_activated: list[str]) -> RulesTurnResult:
-    return RulesTurnResult(state_updates=updates, skills_activated=tuple(skills_activated))
+def _result(updates: Mapping[str, Any], skill_execution: Any | None) -> RulesTurnResult:
+    return RulesTurnResult(
+        state_updates=updates, skills_activated=_activated_names(skill_execution)
+    )
 
 
-def _activate_skill(
-    context: RulesTurnContext, skills_activated: list[str], skill_name: str
-) -> None:
-    store = context.skill_store
-    if store is not None:
-        try:
-            load_skill(store, skill_name, agent_name="rules_lawyer")
-        except (SkillNotFoundError, UnauthorizedSkillError):
-            return
-    if skill_name not in skills_activated:
-        skills_activated.append(skill_name)
+def _activate_skill(skill_execution: Any | None, skill_name: str) -> None:
+    if skill_execution is not None:
+        skill_execution.activate(skill_name)
+
+
+def _activated_names(skill_execution: Any | None) -> tuple[str, ...]:
+    if skill_execution is None:
+        return ()
+    return tuple(skill_execution.activated_names)
 
 
 def _resolve_player_intent(

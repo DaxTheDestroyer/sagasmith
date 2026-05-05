@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from sagasmith.graph.activation_log import get_current_activation
 from sagasmith.graph.interrupts import InterruptEnvelope, InterruptKind
 
 
@@ -27,17 +26,12 @@ def oracle_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             llm=getattr(services, "llm", None),
             cost=getattr(services, "cost", None),
             safety=getattr(services, "safety", None),
-            skill_store=getattr(services, "skill_store", None),
+            skill_execution=services.skills_for("oracle"),
             transcript_conn=getattr(services, "transcript_conn", None),
             vault_service=getattr(services, "vault_service", None),
             provider_config=getattr(services, "provider_config", None),
         )
     )
-
-    activation = get_current_activation()
-    if activation is not None:
-        for skill in plan.skills_activated:
-            activation.set_skill(skill)
 
     delta: dict[str, Any] = dict(plan.state_updates)
 

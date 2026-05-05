@@ -19,6 +19,7 @@ from sagasmith.schemas.mechanics import CombatState
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.dice import DiceService
 from sagasmith.services.errors import BudgetStopError
+from sagasmith.skills_adapter import AgentSkillExecution
 
 
 class ExplodingLLM:
@@ -62,7 +63,7 @@ def _resolve(
             dice=dice,
             cost=cost,
             llm=llm,
-            skill_store=skill_store,
+            skill_execution=AgentSkillExecution("rules_lawyer", skill_store),
         )
     )
 
@@ -79,7 +80,7 @@ def test_no_pending_player_input_returns_empty_updates(
 def test_explicit_skill_check_appends_one_result_and_skill(
     dice: DiceService, cost: CostGovernor
 ) -> None:
-    result = _resolve(_state("roll athletics dc 15"), dice, cost)
+    result = _resolve(_state("roll athletics dc 15"), dice, cost, skill_store=default_skill_store())
 
     assert len(result.state_updates["check_results"]) == 1
     assert result.state_updates["check_results"][0]["proposal_id"].startswith("check_athletics_")
@@ -140,7 +141,7 @@ def test_budget_fallback_returns_explicit_check_hint(dice: DiceService, cost: Co
 def test_start_combat_creates_state_initiative_phase_and_skill(
     dice: DiceService, cost: CostGovernor
 ) -> None:
-    result = _resolve(_state("start combat"), dice, cost)
+    result = _resolve(_state("start combat"), dice, cost, skill_store=default_skill_store())
 
     combat_state = result.state_updates["combat_state"]
     assert combat_state["encounter_id"] == "enc_first_slice"

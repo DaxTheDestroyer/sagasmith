@@ -8,18 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from sagasmith.graph.activation_log import get_current_activation
 from sagasmith.vault import VaultPage
-
-_ARCHIVIST_SKILLS = (
-    "entity-resolution",
-    "vault-page-upsert",
-    "visibility-promotion",
-    "rolling-summary-update",
-    "session-page-authoring",
-    "canon-conflict-detection",
-    "memory-packet-assembly",
-)
 
 
 def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
@@ -29,7 +18,6 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
 
     if getattr(services, "_call_recorder", None) is not None:
         services._call_recorder.append("archivist")
-    _log_skill_activations(services)
 
     plan = build_turn_plan(
         TurnPlanContext(
@@ -37,6 +25,7 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             vault_service=getattr(services, "vault_service", None),
             transcript_conn=getattr(services, "transcript_conn", None),
             llm=getattr(services, "llm", None),
+            skill_execution=services.skills_for("archivist"),
         )
     )
 
@@ -61,15 +50,3 @@ def archivist_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
         # Phase 7 archivist will persist to transcript_entries before clearing.
         "pending_narration": list(plan.pending_narration),
     }
-
-
-def _log_skill_activations(services: Any) -> None:
-    activation = get_current_activation()
-    if activation is None:
-        return
-    store = services.skill_store if hasattr(services, "skill_store") else None
-    if store is None:
-        return
-    for name in _ARCHIVIST_SKILLS:
-        if store.find(name=name, agent_scope="archivist") is not None:
-            activation.set_skill(name)

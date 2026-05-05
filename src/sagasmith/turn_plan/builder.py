@@ -35,6 +35,7 @@ class TurnPlanContext:
     vault_service: VaultService | None
     transcript_conn: sqlite3.Connection | None
     llm: LLMClient | None
+    skill_execution: Any | None = None
 
 
 @dataclass(frozen=True)
@@ -47,6 +48,7 @@ class TurnPlan:
     memory_packet: MemoryPacket
     pending_vault_writes: tuple[VaultPage, ...]
     pending_narration: Sequence[str]
+    skills_activated: tuple[str, ...]
 
 
 def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
@@ -123,7 +125,7 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
             if not normalized or normalized in queued_names:
                 continue
             queued_names.add(normalized)
-            resolved = _resolve_known_entity(vault_service, entity_name)
+            resolved = _resolve_known_entity(vault_service, entity_name, context.skill_execution)
             if resolved is not None:
                 promoted = _promote_existing_page(
                     page=resolved,
@@ -132,6 +134,7 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
                         "player_input": state.get("pending_player_input"),
                         "pending_narration": state.get("pending_narration", []),
                     },
+                    skill_execution=context.skill_execution,
                 )
                 if promoted is not None:
                     pending_writes.append(promoted)
@@ -147,7 +150,10 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
             if entity_name.startswith("npc_"):
                 draft["id"] = entity_name
             try:
-                result = vault_page_upsert(
+                result = _run_skill(
+                    context.skill_execution,
+                    "vault-page-upsert",
+                    vault_page_upsert,
                     vault_service=vault_service,
                     entity_draft=draft,
                     visibility="player_known",
@@ -161,6 +167,7 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
         state=state,
         llm=context.llm,
         scene_brief=scene_brief,
+        skill_execution=context.skill_execution,
     )
 
     # Rolling summary meta page
@@ -182,15 +189,25 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
         "pending_narration": state.get("pending_narration", []),
     }
     if pending_writes:
-        pending_writes = _promote_pending_pages(pending_writes, context=promotion_context)
+        pending_writes = _promote_pending_pages(
+            pending_writes,
+            context=promotion_context,
+            skill_execution=context.skill_execution,
+        )
 
     player_input = state.get("pending_player_input")
-    pending_conflicts = detect_conflicts(
+    pending_conflicts = _run_skill(
+        context.skill_execution,
+        "canon-conflict-detection",
+        detect_conflicts,
         player_input if isinstance(player_input, str) else "",
         pending_writes,
     )
 
-    memory_packet = assemble_memory_packet(
+    memory_packet = _run_skill(
+        context.skill_execution,
+        "memory-packet-assembly",
+        assemble_memory_packet,
         {**state, "rolling_summary": rolling_summary},
         conn=context.transcript_conn,
         vault_service=vault_service,
@@ -203,6 +220,7 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
         memory_packet=memory_packet,
         pending_vault_writes=tuple(pending_writes),
         pending_narration=list(state.get("pending_narration", [])),
+        skills_activated=_activated_names(context.skill_execution),
     )
 
 
@@ -211,19 +229,39 @@ def build_turn_plan(context: TurnPlanContext) -> TurnPlan:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_known_entity(vault_service: VaultService, entity_name: str) -> VaultPage | None:
+def _resolve_known_entity(
+    vault_service: VaultService, entity_name: str, skill_execution: Any | None
+) -> VaultPage | None:
     for entity_type in ("npc", "location", "faction", "item", "quest", "callback", "lore"):
-        page, status = resolve_entity(entity_name, entity_type, vault_service.resolver)
+        page, status = _run_skill(
+            skill_execution,
+            "entity-resolution",
+            resolve_entity,
+            entity_name,
+            entity_type,
+            vault_service.resolver,
+        )
         if status == "matched":
             return page
-    page, status = resolve_entity(entity_name, None, vault_service.resolver)
+    page, status = _run_skill(
+        skill_execution,
+        "entity-resolution",
+        resolve_entity,
+        entity_name,
+        None,
+        vault_service.resolver,
+    )
     return page if status == "matched" else None
 
 
-def _promote_pending_pages(pages: list[VaultPage], *, context: dict[str, Any]) -> list[VaultPage]:
+def _promote_pending_pages(
+    pages: list[VaultPage], *, context: dict[str, Any], skill_execution: Any | None
+) -> list[VaultPage]:
     promoted: list[VaultPage] = []
     for page in pages:
-        new_visibility = promote_visibility(page, context)
+        new_visibility = _run_skill(
+            skill_execution, "visibility-promotion", promote_visibility, page, context
+        )
         if new_visibility != page.frontmatter.visibility:
             promoted.append(
                 VaultPage(
@@ -236,9 +274,13 @@ def _promote_pending_pages(pages: list[VaultPage], *, context: dict[str, Any]) -
     return promoted
 
 
-def _promote_existing_page(*, page: VaultPage, context: dict[str, Any]) -> VaultPage | None:
+def _promote_existing_page(
+    *, page: VaultPage, context: dict[str, Any], skill_execution: Any | None
+) -> VaultPage | None:
     """Return a visibility-promoted copy or None if no change needed."""
-    new_visibility = promote_visibility(page, context)
+    new_visibility = _run_skill(
+        skill_execution, "visibility-promotion", promote_visibility, page, context
+    )
     if new_visibility == page.frontmatter.visibility:
         return None
     return VaultPage(page.frontmatter.model_copy(update={"visibility": new_visibility}), page.body)
@@ -249,6 +291,7 @@ def _maybe_update_rolling_summary(
     state: Mapping[str, Any],
     llm: LLMClient | None,
     scene_brief: dict[str, Any],
+    skill_execution: Any | None,
 ) -> Any:
     old_summary = state.get("rolling_summary")
     needs_initial = not isinstance(old_summary, str) or not old_summary.strip()
@@ -259,13 +302,30 @@ def _maybe_update_rolling_summary(
     snippets = _summary_snippets(state)
     if not snippets and not scene_brief:
         return old_summary
-    return update_summary(
+    return _run_skill(
+        skill_execution,
+        "rolling-summary-update",
+        update_summary,
         old_summary=old_summary if isinstance(old_summary, str) else None,
         new_transcript_snippets=snippets,
         scene_brief=scene_brief,
         llm_client=llm,
         token_cap=800,
     )
+
+
+def _run_skill(  # type: ignore[no-untyped-def]
+    skill_execution: Any | None, skill_name: str, implementation, *args, **kwargs
+):
+    if skill_execution is None:
+        return implementation(*args, **kwargs)
+    return skill_execution.run(skill_name, implementation, *args, **kwargs)
+
+
+def _activated_names(skill_execution: Any | None) -> tuple[str, ...]:
+    if skill_execution is None:
+        return ()
+    return tuple(skill_execution.activated_names)
 
 
 def _is_scene_boundary(*, state: Mapping[str, Any], scene_brief: dict[str, Any]) -> bool:

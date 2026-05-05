@@ -16,7 +16,6 @@ from typing import Any
 from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet,
 )
-from sagasmith.graph.activation_log import get_current_activation
 from sagasmith.schemas.mechanics import CheckResult
 from sagasmith.schemas.narrative import MemoryPacket, SceneBrief
 from sagasmith.schemas.player import ContentPolicy, PlayerProfile
@@ -48,10 +47,6 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
             vault_service=vault_service,
         )
         updates["memory_packet"] = memory_packet.model_dump()
-
-    activation = get_current_activation()
-    if activation is not None:
-        activation.set_skill("scene-rendering")
 
     if state.get("scene_brief") is None:
         return updates
@@ -98,7 +93,9 @@ def orator_node(state: dict[str, Any], services: Any) -> dict[str, Any]:
 
     from sagasmith.agents.orator.skills.scene_rendering.logic import render_scene
 
-    result = render_scene(
+    result = services.skills_for("orator").run(
+        "scene-rendering",
+        render_scene,
         scene_brief=scene_brief,
         check_results=check_results,
         memory_packet=memory_packet,

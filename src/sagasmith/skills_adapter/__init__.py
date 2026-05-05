@@ -21,12 +21,14 @@ from sagasmith.skills_adapter.errors import (
     SkillValidationError,
     UnauthorizedSkillError,
 )
+from sagasmith.skills_adapter.execution import AgentSkillExecution
 from sagasmith.skills_adapter.frontmatter import SUPPORTED_SUBSET, parse_frontmatter
 from sagasmith.skills_adapter.loader import LoadedSkill, load_skill
 from sagasmith.skills_adapter.store import SkillRecord, SkillStore
 
 __all__ = [
     "SUPPORTED_SUBSET",
+    "AgentSkillExecution",
     "FrontmatterError",
     "LoadedSkill",
     "SkillAdapterError",

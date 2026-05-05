@@ -253,6 +253,14 @@ exercise rules-turn results directly instead of graph-node dictionaries.
 
 ### 10. Agent Skills Execution Module
 
+**Status:** Implemented in `src/sagasmith/skills_adapter/execution.py`.
+`AgentServices.skills_for()` binds nodes and deepened Modules to one
+Agent Skills Execution Interface. Agent nodes no longer touch graph activation
+context directly; Scene Planning, Rules Turn Resolution, Turn Plan, Orator, and
+Onboarding now use the same skill-runtime Seam. Tests at
+`tests/skills_adapter/test_execution.py` and
+`tests/architecture/test_agent_skills_execution.py`.
+
 **Files:** `src/sagasmith/skills_adapter/store.py`,
 `src/sagasmith/skills_adapter/loader.py`, `src/sagasmith/graph/bootstrap.py`,
 `src/sagasmith/agents/*/node.py`

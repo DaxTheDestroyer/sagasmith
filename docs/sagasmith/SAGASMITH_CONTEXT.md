@@ -71,3 +71,10 @@ retry/fallback policy for unsafe narration.
 The deterministic Rules Lawyer workflow for one player rules turn. It owns
 player-intent classification, first-slice defaults, PF2e check/combat execution,
 rules error shaping, combat phase transitions, and narration audit messages.
+
+### Agent Skills Execution
+
+The runtime path for one SagaSmith agent turn that binds Agent Skills discovery,
+authorization, instruction loading, activation recording, and Python
+Implementation invocation. It keeps LangGraph nodes as Adapters while giving
+agent Modules a single skill-runtime Interface.

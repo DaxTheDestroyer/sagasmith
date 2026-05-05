@@ -29,6 +29,7 @@ from sagasmith.scene_planning import ScenePlanContext, plan_scene
 from sagasmith.schemas.narrative import SceneBrief
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.errors import BudgetStopError
+from sagasmith.skills_adapter import AgentSkillExecution
 from sagasmith.vault import VaultService
 
 # ---------------------------------------------------------------------------
@@ -79,7 +80,7 @@ def _ctx(
         llm=llm,
         cost=cost if cost is not None else CostGovernor(session_budget_usd=1.0),
         safety=safety,
-        skill_store=skill_store,
+        skill_execution=AgentSkillExecution("oracle", skill_store),
         transcript_conn=transcript_conn,
         vault_service=vault_service,
         provider_config=provider_config,
@@ -221,7 +222,7 @@ def test_campaign_context_generated_when_missing(vault: VaultService) -> None:
             llm=client,
             cost=CostGovernor(session_budget_usd=5.0),
             safety=None,
-            skill_store=store,
+            skill_execution=AgentSkillExecution("oracle", store),
             transcript_conn=None,
             vault_service=vault,
             provider_config=None,
@@ -251,7 +252,7 @@ def test_campaign_context_skipped_when_already_present() -> None:
             llm=_scene_brief_client(),
             cost=CostGovernor(session_budget_usd=1.0),
             safety=None,
-            skill_store=store,
+            skill_execution=AgentSkillExecution("oracle", store),
             transcript_conn=None,
             vault_service=None,
             provider_config=None,

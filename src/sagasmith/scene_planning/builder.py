@@ -39,7 +39,7 @@ class ScenePlanContext:
     llm: LLMClient | None
     cost: Any
     safety: Any
-    skill_store: Any
+    skill_execution: Any
     transcript_conn: sqlite3.Connection | None
     vault_service: VaultService | None
     provider_config: ProviderConfig | None
@@ -72,15 +72,14 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
     """
     state = context.state
     updates: dict[str, Any] = {}
-    skills_activated: list[str] = []
     pre_gate_events: list[SafetyEvent] = []
 
     if _should_generate_campaign_context(state, context):
-        if _skill_registered(context.skill_store, "world-bible-generation"):
-            skills_activated.append("world-bible-generation")
         world_bible_payload = state.get("world_bible")
         if world_bible_payload is None:
-            world_bible = generate_world_bible(
+            world_bible = context.skill_execution.run(
+                "world-bible-generation",
+                generate_world_bible,
                 player_profile=state["player_profile"],
                 content_policy=state["content_policy"],
                 house_rules=state["house_rules"],
@@ -93,10 +92,10 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
             world_bible_payload = world_bible.model_dump()
             updates["world_bible"] = world_bible_payload
 
-        if _skill_registered(context.skill_store, "campaign-seed-generation"):
-            skills_activated.append("campaign-seed-generation")
         if state.get("campaign_seed") is None:
-            campaign_seed = generate_campaign_seed(
+            campaign_seed = context.skill_execution.run(
+                "campaign-seed-generation",
+                generate_campaign_seed,
                 world_bible=WorldBible.model_validate(world_bible_payload),
                 player_profile=state["player_profile"],
                 llm_client=cast(LLMClient, context.llm),
@@ -132,13 +131,10 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
 
     if should_replan:
         if branch.bypass_detected:
-            if _skill_registered(context.skill_store, "player-choice-branching"):
-                skills_activated.append("player-choice-branching")
+            context.skill_execution.activate("player-choice-branching")
             updates["oracle_bypass_detected"] = True
-        if not _generated_campaign_context(updates) and _skill_registered(
-            context.skill_store, "content-policy-routing"
-        ):
-            skills_activated.append("content-policy-routing")
+        if not _generated_campaign_context(updates):
+            context.skill_execution.activate("content-policy-routing")
         scene_intent = _scene_intent_from_state(
             state, current_brief, branch.revised_intent, state.get("content_policy")
         )
@@ -158,7 +154,7 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
                     reason=route.reason or "blocked by content policy",
                 ),
                 pre_gate_events=(block_event,),
-                skills_activated=tuple(skills_activated),
+                skills_activated=context.skill_execution.activated_names,
             )
         if isinstance(route, IntentRerouted):
             _log_safety_event_to_service(
@@ -178,10 +174,8 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
                 )
             )
 
-        if not _generated_campaign_context(updates) and _skill_registered(
-            context.skill_store, "scene-brief-composition"
-        ):
-            skills_activated.append("scene-brief-composition")
+        if not _generated_campaign_context(updates):
+            context.skill_execution.activate("scene-brief-composition")
         try:
             updates["scene_brief"] = _compose_or_fallback_scene_brief(
                 state=state,
@@ -196,7 +190,7 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
                 state_updates=updates,
                 interrupt=InterruptIntent(kind="budget_stop", reason=str(exc)),
                 pre_gate_events=tuple(pre_gate_events),
-                skills_activated=tuple(skills_activated),
+                skills_activated=context.skill_execution.activated_names,
             )
         updates["resolved_beat_ids"] = []
         updates["oracle_bypass_detected"] = False
@@ -205,7 +199,7 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
         state_updates=updates,
         interrupt=None,
         pre_gate_events=tuple(pre_gate_events),
-        skills_activated=tuple(skills_activated),
+        skills_activated=context.skill_execution.activated_names,
     )
 
 
@@ -363,12 +357,6 @@ def _log_safety_event_to_service(
     except Exception:
         with contextlib.suppress(Exception):
             safety_svc.conn.rollback()
-
-
-def _skill_registered(skill_store: Any, skill_name: str) -> bool:
-    if skill_store is None:
-        return False
-    return skill_store.find(name=skill_name, agent_scope="oracle") is not None
 
 
 def _default_model(context: ScenePlanContext) -> str:

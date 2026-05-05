@@ -14,6 +14,7 @@ from sagasmith.services.dice import DiceService
 if TYPE_CHECKING:
     from sagasmith.schemas.provider import ProviderConfig
     from sagasmith.services.safety import SafetyEventService
+    from sagasmith.skills_adapter.execution import AgentSkillExecution
     from sagasmith.skills_adapter.store import SkillStore
 
 
@@ -32,6 +33,13 @@ class AgentServices:
     # test-only hook: if non-None, nodes append their name to this list on entry.
     # Used by graph tests to verify execution order without polluting production code.
     _call_recorder: list[str] | None = None
+
+    def skills_for(self, agent_name: str) -> AgentSkillExecution:
+        """Return the Agent Skills Execution Interface for one agent."""
+
+        from sagasmith.skills_adapter import AgentSkillExecution
+
+        return AgentSkillExecution(agent_name=agent_name, store=self.skill_store)
 
 
 @dataclass(frozen=True)
