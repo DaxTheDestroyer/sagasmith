@@ -23,6 +23,13 @@ from sagasmith.agents.orator.mechanics_consistency import (
 )
 from sagasmith.prompts.orator.scene_rendering import build_user_prompt
 from sagasmith.providers.client import LLMClient
+from sagasmith.safety_guard import (
+    DEFAULT_FALLBACK_NARRATION,
+    DEFAULT_MAX_REWRITES,
+    GeneratedFallback,
+    GeneratedRewrite,
+    SafetyGuard,
+)
 from sagasmith.schemas.mechanics import CheckResult
 from sagasmith.schemas.narrative import MemoryPacket, SceneBrief
 from sagasmith.schemas.player import ContentPolicy, PlayerProfile
@@ -33,19 +40,12 @@ from sagasmith.schemas.provider import (
     Message,
     TokenEvent,
 )
-from sagasmith.schemas.safety_cost import SafetyEvent
 from sagasmith.services.cost import CostGovernor
 from sagasmith.services.errors import BudgetStopError
-from sagasmith.services.safety_inline_matcher import SafetyInlineMatcher
-from sagasmith.services.safety_post_gate import (
-    BlockFallback,
-    Rewrite,
-    SafetyPostGate,
-)
 
 # Constants
-_FALLBACK_NARRATION = "The scene shifts. A new detail draws your attention."
-_MAX_REWRITES = 2
+_FALLBACK_NARRATION = DEFAULT_FALLBACK_NARRATION
+_MAX_REWRITES = DEFAULT_MAX_REWRITES
 _PLAYBACK_TOKENS_PER_SEC = 45  # middle of 30-60 range
 _STREAM_CHECK_INTERVAL = 50  # check inline matcher every N chars
 _SYSTEM_TIMEOUT_SECONDS = 30
@@ -107,9 +107,14 @@ def render_scene(
             used_fallback=True,
         )
 
-    # Prepare safety services
-    inline_matcher = SafetyInlineMatcher(content_policy)
-    post_gate = SafetyPostGate(llm_client=llm_client, cheap_model=cheap_model)
+    # Prepare safety guard
+    safety_guard = SafetyGuard(
+        content_policy,
+        llm_client=llm_client,
+        cheap_model=cheap_model,
+        max_rewrites=_MAX_REWRITES,
+        fallback_narration=_FALLBACK_NARRATION,
+    )
 
     # Rewrite ladder: initial attempt + up to _MAX_REWRITES rewrites
     safety_events: list[dict[str, Any]] = []
@@ -126,10 +131,10 @@ def render_scene(
                 ).raise_if_blocked()
             except BudgetStopError:
                 return RenderResult(
-                    narration_lines=[_FALLBACK_NARRATION],
+                    narration_lines=[safety_guard.fallback_narration],
                     resolved_beat_ids=[],
                     safety_events=_make_safety_events(
-                        safety_events, turn_id, "fallback", "budget_stop"
+                        safety_guard, safety_events, turn_id, "fallback", "budget_stop"
                     ),
                     used_fallback=True,
                 )
@@ -149,23 +154,27 @@ def render_scene(
 
         # Stream into buffer
         buffer: list[str] = []
+        last_safety_scan_chars = 0
         cancelled = False
         try:
             for event in llm_client.stream(request):
                 if isinstance(event, TokenEvent):
                     buffer.append(event.text)
                     # Check inline hard-limit matcher periodically
-                    if len(buffer) % _STREAM_CHECK_INTERVAL == 0:
-                        combined = "".join(buffer)
-                        hit = inline_matcher.match(combined)
+                    combined = "".join(buffer)
+                    if len(combined) - last_safety_scan_chars >= _STREAM_CHECK_INTERVAL:
+                        last_safety_scan_chars = len(combined)
+                        hit = safety_guard.check_stream(combined)
                         if hit is not None:
                             cancelled = True
                             safety_events.append(
                                 _make_event(
+                                    safety_guard,
                                     turn_id,
                                     "fallback",
                                     hit.term,
                                     f"inline hard-limit match: {hit.matched_text}",
+                                    len(safety_events),
                                 )
                             )
                             break
@@ -174,9 +183,10 @@ def render_scene(
                 elif isinstance(event, FailedEvent):
                     # Stream failed — fall through to fallback
                     return RenderResult(
-                        narration_lines=[_FALLBACK_NARRATION],
+                        narration_lines=[safety_guard.fallback_narration],
                         resolved_beat_ids=[],
                         safety_events=_make_safety_events(
+                            safety_guard,
                             safety_events,
                             turn_id,
                             "fallback",
@@ -186,55 +196,75 @@ def render_scene(
                     )
         except Exception:
             return RenderResult(
-                narration_lines=[_FALLBACK_NARRATION],
+                narration_lines=[safety_guard.fallback_narration],
                 resolved_beat_ids=[],
                 safety_events=_make_safety_events(
-                    safety_events, turn_id, "fallback", "stream_exception"
+                    safety_guard, safety_events, turn_id, "fallback", "stream_exception"
                 ),
                 used_fallback=True,
             )
 
         if cancelled:
             # Inline matcher hit — try rewrite
-            continue
+            decision = safety_guard.retry_or_fallback(attempt, "inline hard-limit match")
+            if decision.should_retry:
+                continue
+            _log_safety_event(
+                safety_svc, campaign_id, turn_id, "fallback", decision.reason or "blocked"
+            )
+            return RenderResult(
+                narration_lines=[safety_guard.fallback_narration],
+                resolved_beat_ids=[],
+                safety_events=_make_safety_events(
+                    safety_guard, safety_events, turn_id, "fallback", "inline_exhausted"
+                ),
+                used_fallback=True,
+            )
 
         narration = "".join(buffer).strip()
         if not narration:
-            narration = _FALLBACK_NARRATION
+            narration = safety_guard.fallback_narration
 
         # Run post-gate classifier
-        post_verdict = post_gate.scan(narration, content_policy)
-        if isinstance(post_verdict, BlockFallback):
+        post_verdict = safety_guard.scan_generated_prose(narration)
+        if isinstance(post_verdict, GeneratedFallback):
             safety_events.append(
                 _make_event(
+                    safety_guard,
                     turn_id,
                     "fallback",
                     post_verdict.violated_term or "unknown",
                     post_verdict.reason or "blocked",
+                    len(safety_events),
                 )
             )
-            if attempt < _MAX_REWRITES:
+            retry_decision = safety_guard.retry_or_fallback(
+                attempt, post_verdict.reason or "blocked"
+            )
+            if retry_decision.should_retry:
                 continue
             # Exhausted — use fallback
             _log_safety_event(
                 safety_svc, campaign_id, turn_id, "fallback", post_verdict.reason or "blocked"
             )
             return RenderResult(
-                narration_lines=[_FALLBACK_NARRATION],
+                narration_lines=[safety_guard.fallback_narration],
                 resolved_beat_ids=[],
                 safety_events=_make_safety_events(
-                    safety_events, turn_id, "fallback", "post_gate_exhausted"
+                    safety_guard, safety_events, turn_id, "fallback", "post_gate_exhausted"
                 ),
                 used_fallback=True,
             )
 
-        if isinstance(post_verdict, Rewrite):
+        if isinstance(post_verdict, GeneratedRewrite):
             safety_events.append(
                 _make_event(
+                    safety_guard,
                     turn_id,
                     "post_gate_rewrite",
                     post_verdict.violated_term or "unknown",
                     post_verdict.reason or "rewrite",
+                    len(safety_events),
                 )
             )
             _log_safety_event(
@@ -244,14 +274,17 @@ def render_scene(
                 "post_gate_rewrite",
                 post_verdict.reason or "rewrite",
             )
-            if attempt < _MAX_REWRITES:
+            retry_decision = safety_guard.retry_or_fallback(
+                attempt, post_verdict.reason or "rewrite"
+            )
+            if retry_decision.should_retry:
                 continue
             # Exhausted — use fallback
             return RenderResult(
-                narration_lines=[_FALLBACK_NARRATION],
+                narration_lines=[safety_guard.fallback_narration],
                 resolved_beat_ids=[],
                 safety_events=_make_safety_events(
-                    safety_events, turn_id, "fallback", "rewrite_exhausted"
+                    safety_guard, safety_events, turn_id, "fallback", "rewrite_exhausted"
                 ),
                 used_fallback=True,
             )
@@ -262,20 +295,23 @@ def render_scene(
             if not audit.ok:
                 safety_events.append(
                     _make_event(
+                        safety_guard,
                         turn_id,
                         "post_gate_rewrite",
                         "mechanical_consistency",
                         f"audit violations: {'; '.join(audit.violations)}",
+                        len(safety_events),
                     )
                 )
-                if attempt < _MAX_REWRITES:
+                retry_decision = safety_guard.retry_or_fallback(attempt, "mechanics_audit_failed")
+                if retry_decision.should_retry:
                     continue
                 # Exhausted — use fallback
                 return RenderResult(
-                    narration_lines=[_FALLBACK_NARRATION],
+                    narration_lines=[safety_guard.fallback_narration],
                     resolved_beat_ids=[],
                     safety_events=_make_safety_events(
-                        safety_events, turn_id, "fallback", "mechanics_exhausted"
+                        safety_guard, safety_events, turn_id, "fallback", "mechanics_exhausted"
                     ),
                     used_fallback=True,
                 )
@@ -291,10 +327,10 @@ def render_scene(
 
     # Should not reach here, but safety fallback
     return RenderResult(
-        narration_lines=[_FALLBACK_NARRATION],
+        narration_lines=[safety_guard.fallback_narration],
         resolved_beat_ids=[],
         safety_events=_make_safety_events(
-            safety_events, turn_id, "fallback", "rewrite_loop_exhausted"
+            safety_guard, safety_events, turn_id, "fallback", "rewrite_loop_exhausted"
         ),
         used_fallback=True,
     )
@@ -349,29 +385,33 @@ def _detect_resolved_beats(narration: str, brief: SceneBrief) -> list[str]:
 
 
 def _make_event(
+    safety_guard: SafetyGuard,
     turn_id: str,
     kind: str,
     policy_ref: str | None,
     reason: str,
+    sequence: int,
 ) -> dict[str, Any]:
     """Create a SafetyEvent dict."""
-    return SafetyEvent(
-        id=f"safety_{turn_id}_render_{kind}",
-        turn_id=turn_id,
-        kind=kind,  # type: ignore[arg-type]
-        policy_ref=policy_ref,
-        action_taken=reason[:200],
+    return safety_guard.make_event(
+        turn_id,
+        kind,
+        policy_ref,
+        reason,
+        source="render",
+        sequence=sequence,
     ).model_dump()
 
 
 def _make_safety_events(
+    safety_guard: SafetyGuard,
     existing: list[dict[str, Any]],
     turn_id: str,
     kind: str,
     reason: str,
 ) -> list[dict[str, Any]]:
     """Append a safety event to the list and return it."""
-    return [*existing, _make_event(turn_id, kind, None, reason)]
+    return [*existing, _make_event(safety_guard, turn_id, kind, None, reason, len(existing))]
 
 
 def _log_safety_event(

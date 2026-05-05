@@ -18,15 +18,11 @@ from sagasmith.agents.archivist.skills.memory_packet_assembly.logic import (
     assemble_memory_packet_stub,
 )
 from sagasmith.agents.oracle.skills.campaign_seed_generation.logic import generate_campaign_seed
-from sagasmith.agents.oracle.skills.content_policy_routing.logic import (
-    Blocked,
-    Rerouted,
-    safety_pre_gate,
-)
 from sagasmith.agents.oracle.skills.player_choice_branching.logic import analyze_player_choice
 from sagasmith.agents.oracle.skills.scene_brief_composition.logic import compose_scene_brief
 from sagasmith.agents.oracle.skills.world_bible_generation.logic import generate_world_bible
 from sagasmith.providers import LLMClient
+from sagasmith.safety_guard import IntentBlocked, IntentRerouted, SafetyGuard
 from sagasmith.schemas.narrative import SceneBrief
 from sagasmith.schemas.provider import ProviderConfig
 from sagasmith.schemas.safety_cost import SafetyEvent
@@ -146,13 +142,14 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
         scene_intent = _scene_intent_from_state(
             state, current_brief, branch.revised_intent, state.get("content_policy")
         )
-        route = safety_pre_gate(scene_intent, state.get("content_policy"))
-        if isinstance(route, Blocked):
+        safety_guard = SafetyGuard(state.get("content_policy"))
+        route = safety_guard.route_intent(scene_intent)
+        if isinstance(route, IntentBlocked):
             _log_safety_event_to_service(
                 context.safety, state, "pre_gate_block", route.policy_ref, route.reason or "blocked"
             )
             block_event = _build_safety_event(
-                state, route.policy_ref, "pre_gate_block", route.reason or "blocked"
+                safety_guard, state, route.policy_ref, "pre_gate_block", route.reason or "blocked"
             )
             return ScenePlan(
                 state_updates=updates,
@@ -163,7 +160,7 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
                 pre_gate_events=(block_event,),
                 skills_activated=tuple(skills_activated),
             )
-        if isinstance(route, Rerouted):
+        if isinstance(route, IntentRerouted):
             _log_safety_event_to_service(
                 context.safety,
                 state,
@@ -173,7 +170,11 @@ def plan_scene(context: ScenePlanContext) -> ScenePlan:
             )
             pre_gate_events.append(
                 _build_safety_event(
-                    state, route.policy_ref, "pre_gate_reroute", route.reason or "rerouted"
+                    safety_guard,
+                    state,
+                    route.policy_ref,
+                    "pre_gate_reroute",
+                    route.reason or "rerouted",
                 )
             )
 
@@ -318,14 +319,18 @@ def _fallback_scene_brief(scene_intent: str, content_warnings: list[str]) -> Sce
 
 
 def _build_safety_event(
-    state: Mapping[str, Any], policy_ref: str | None, kind: str, action: str
+    safety_guard: SafetyGuard,
+    state: Mapping[str, Any],
+    policy_ref: str | None,
+    kind: str,
+    action: str,
 ) -> SafetyEvent:
-    return SafetyEvent(
-        id=f"safety_{state.get('turn_id', 'turn')}_{kind}",
-        turn_id=str(state.get("turn_id") or "unknown"),
-        kind=kind,  # type: ignore[arg-type]
-        policy_ref=policy_ref,
-        action_taken=action[:200],
+    return safety_guard.make_event(
+        str(state.get("turn_id") or "unknown"),
+        kind,
+        policy_ref,
+        action,
+        source="pre_gate",
     )
 
 

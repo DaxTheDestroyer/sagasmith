@@ -58,3 +58,10 @@ carrying state updates, an optional interrupt intent, pre-gate safety events,
 and the list of skills activated. The LangGraph Adapter shim owns wrapping the
 interrupt intent into an `InterruptEnvelope` and appending safety events to
 graph state.
+
+### Safety Guard
+
+The deterministic and bounded-hybrid safety pass for one play turn. It owns
+pre-generation scene-intent routing, inline streaming hard-limit scan,
+post-generation prose scan, player-visible safety event construction, and
+retry/fallback policy for unsafe narration.

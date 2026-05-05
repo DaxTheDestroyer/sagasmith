@@ -127,14 +127,18 @@ class TestRenderScene:
 
     def test_hard_limit_inline_matcher_cancels_stream(self) -> None:
         """Inline hard-limit matcher cancels the stream on hit."""
+        unsafe_text = (
+            "The narration spends a long moment describing the room before "
+            "graphic sexual content appears."
+        )
         client = DeterministicFakeClient(
             scripted_streams={
                 "orator.scene-rendering": [
-                    TokenEvent(kind="token", text="The scene contains graphic sexual content."),
+                    TokenEvent(kind="token", text=unsafe_text),
                     CompletedEvent(
                         kind="completed",
                         response=LLMResponse(
-                            text="The scene contains graphic sexual content.",
+                            text=unsafe_text,
                             usage=TokenUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
                             finish_reason="stop",
                         ),
@@ -157,6 +161,7 @@ class TestRenderScene:
         # Should use fallback after inline matcher hit
         assert result.used_fallback is True
         assert len(result.safety_events) > 0
+        assert any("inline hard-limit match" in e["action_taken"] for e in result.safety_events)
 
     def test_post_gate_rewrite_triggers_rewrite(self) -> None:
         """Post-gate rewrite triggers a rewrite attempt."""
