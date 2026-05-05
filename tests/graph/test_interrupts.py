@@ -242,7 +242,9 @@ def test_invoke_turn_translates_budget_stop_error():
     assert pending["kind"] == "budget_stop"
     assert "budget exhausted" in pending["payload"]["reason"]
 
-    # Verify the original oracle node code does NOT reference BudgetStopError
+    # Verify the oracle Adapter shim does NOT catch BudgetStopError itself — that is
+    # the Scene Planning Module's responsibility. The shim legitimately uses InterruptKind
+    # to build the envelope from the Module's plain InterruptIntent result.
     import inspect
 
     oracle_obj = cast(Any, original_oracle)
@@ -250,7 +252,6 @@ def test_invoke_turn_translates_budget_stop_error():
         oracle_obj.func if hasattr(oracle_obj, "func") else oracle_obj
     )
     assert "BudgetStopError" not in oracle_source
-    assert "InterruptKind" not in oracle_source
 
 
 # ---------------------------------------------------------------------------

@@ -47,3 +47,14 @@ The deterministic drafting of an end-of-session vault page from Canonical Turn
 History. It owns session frontmatter, summary/body formatting, beat extraction,
 roll-table formatting, and wikilink-derived session metadata; audited vault
 writes remain owned by persistence.
+
+### Scene Planning
+
+The Oracle's planning decision for one play turn. It coordinates campaign-context
+generation (world bible + campaign seed), memory packet assembly, player-choice
+bypass detection, safety pre-gate routing, fallback and LLM-backed scene-brief
+composition, and budget-stop detection into one value: a plain `ScenePlan`
+carrying state updates, an optional interrupt intent, pre-gate safety events,
+and the list of skills activated. The LangGraph Adapter shim owns wrapping the
+interrupt intent into an `InterruptEnvelope` and appending safety events to
+graph state.

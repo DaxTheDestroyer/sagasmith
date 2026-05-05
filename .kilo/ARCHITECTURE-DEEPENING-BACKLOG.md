@@ -180,6 +180,14 @@ writing.
 
 ### 7. Oracle Scene Planning Module
 
+**Status:** Implemented in `src/sagasmith/scene_planning/builder.py`.
+`oracle_node` retained as a ~50-line LangGraph Adapter shim. Tests at
+`tests/scene_planning/test_builder.py`. The pre-existing source-grep invariant
+in `tests/graph/test_interrupts.py` (BudgetStopError absent from node source)
+now holds honestly. Safety pre-gate duplication between
+`agents/oracle/skills/content_policy_routing` and `services/safety_pre_gate.py`
+deferred to backlog item #8.
+
 **Files:** `src/sagasmith/agents/oracle/node.py`,
 `src/sagasmith/agents/oracle/skills/scene_brief_composition/logic.py`,
 `src/sagasmith/agents/oracle/skills/content_policy_routing/logic.py`,
